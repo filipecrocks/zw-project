@@ -235,6 +235,10 @@
     box-shadow:0 6px 22px rgba(255,157,46,.35); border:none }
   .linklike{ display:block; margin:14px auto 0; background:none; border:none; color:var(--ki);
     font-size:13px; cursor:pointer; text-decoration:underline; width:auto; padding:4px }
+  .pwrap{ position:relative }
+  .pwrap input{ padding-right:78px }
+  .pwtoggle{ position:absolute; right:6px; top:50%; transform:translateY(-50%); width:auto;
+    background:none; border:none; color:var(--ki); font-size:12px; cursor:pointer; padding:6px 8px; text-decoration:underline }
   .features{ display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-top:24px }
   .feat{ background:#0c0f17; border:1px solid var(--line); border-radius:12px; padding:13px 14px }
   .feat-k{ display:block; font-weight:800; color:var(--gold); font-size:12px; text-transform:uppercase; letter-spacing:.6px; margin-bottom:4px }
@@ -325,7 +329,10 @@
         <label style="margin-top:12px">E-mail</label>
         <input id="auEmail" type="email" autocomplete="email" placeholder="voce@email.com" />
         <label style="margin-top:12px">Senha</label>
-        <input id="auPass" type="password" autocomplete="current-password" placeholder="mínimo 6 caracteres" />
+        <div class="pwrap">
+          <input id="auPass" type="password" autocomplete="current-password" placeholder="mínimo 6 caracteres" />
+          <button type="button" id="btnShowPass" class="pwtoggle">mostrar</button>
+        </div>
         <div id="authMsg" class="hint" style="min-height:18px;margin-top:8px"></div>
         <button id="btnAuthGo" style="width:100%">Criar conta</button>
         <div class="row" style="margin-top:10px">
@@ -345,7 +352,10 @@
         </div>
         <button id="btnZW" style="width:100%;margin-top:10px;background:linear-gradient(135deg,#4ec3ff,#7c5cff);color:#04121f">Entrar na Sala ZW (todo mundo aqui)</button>
         <div class="hint" id="netStatus">No tutorial você treina contra um boneco. Pra jogar com os amigos agora, todos entram na <b>Sala ZW</b>.</div>
-        <button id="btnPlayBack" class="linklike">← voltar</button>
+        <div class="row" style="margin-top:6px;justify-content:center">
+          <button id="btnPlayBack" class="linklike" style="margin:0">← voltar</button>
+          <button id="btnPlayLogout" class="linklike hidden" style="margin:0;color:var(--hp-low)">Sair da conta</button>
+        </div>
       </div>
 
       <!-- PERFIL / PROGRESSÃO -->
@@ -1363,6 +1373,7 @@ async function doAuth(){
 function enterPlay(){
   entryShow("playView");
   const f=$("#nick"); if(f){ if(profile?.nick) f.value=profile.nick; else if(ME.nick) f.value=ME.nick; }
+  toggleHidden("#btnPlayLogout", !(session&&session.user));
   const who=$("#playWho");
   if(who) who.innerHTML = session?.user
     ? `Logado como <b style="color:var(--gold)">${esc(profile?.nick||"?")}</b> — suas vitórias contam no ranking.`
@@ -1486,6 +1497,8 @@ async function toggleRank(){
   on("btnAuthSwap", ()=>openAuthUI(authMode==="signup"?"login":"signup"));
   on("btnAuthBack", ()=>entryShow("landingView"));
   on("btnPlayBack", ()=>entryShow("landingView"));
+  on("btnPlayLogout", logout);
+  const sp=$("#btnShowPass"); if(sp) sp.onclick=()=>{ const p=$("#auPass"); if(!p) return; const show=p.type==="password"; p.type=show?"text":"password"; sp.textContent=show?"ocultar":"mostrar"; p.focus(); };
   on("btnRank", toggleRank);
   on("btnProfile", openProfile);
   on("btnProfileBack", ()=>entryShow("landingView"));
