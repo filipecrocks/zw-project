@@ -112,6 +112,8 @@
   .ibtn.save.on{ background:linear-gradient(135deg,#bfe6ff,var(--ki)); }
   .ebtn{ display:inline-block; margin-top:8px; margin-left:6px; background:transparent; border:1px dashed rgba(255,206,77,.5); color:var(--gold); border-radius:8px; padding:4px 10px; font-size:12px; font-weight:700; cursor:pointer; font-family:var(--body) }
   .ebtn:hover{ background:rgba(255,206,77,.1) }
+  .plist{ margin-top:4px }
+  .pchip{ display:inline-block; font-size:12.5px; color:var(--gold); background:rgba(255,206,77,.08); border:1px solid rgba(255,206,77,.4); border-radius:99px; padding:4px 11px; margin:4px 5px 0 0; font-weight:600 }
   #editModal textarea{ width:100%; min-height:150px; background:var(--panel2); border:1px solid var(--line); border-radius:10px; color:var(--txt); padding:12px; font-family:var(--body); font-size:15px; resize:vertical }
 
   .quizbox{ border:1px solid var(--line); border-radius:16px; background:var(--panel); padding:22px }
@@ -291,7 +293,7 @@ async function loadData(){
       api("badges?select=*&order=sort.asc").catch(()=>[]),
     ]);
     SERIES=se.map(s=>({id:s.id,name:s.name,year:s.year,eps:s.eps,ac:s.accent||"#ffce4d",blurb:s.blurb}));
-    CHARS=ch.map(c=>({id:c.id,n:c.name,race:c.race,pw:c.power,series:Array.isArray(c.series)?c.series:[],bio:c.bio}));
+    CHARS=ch.map(c=>({id:c.id,n:c.name,race:c.race,pw:c.power,powers:Array.isArray(c.powers)?c.powers:[],series:Array.isArray(c.series)?c.series:[],bio:c.bio}));
     EPISODES=ep.map(e=>({id:e.id,series_id:e.series_id,saga:e.saga,n:e.number,t:e.title,s:e.summary}));
     SAGAS=sg.map(s=>({id:s.id,s:s.series_id,n:s.name,d:s.description}));
     TECHS=te.map(t=>({id:t.id,tr:!!t.is_transform,n:t.name,d:t.description,arena:t.arena_note||""}));
@@ -351,7 +353,10 @@ function setCharFilter(r){charFilter=r;render();}
 function viewPersonagem(id){
   const c=CHARS.find(x=>x.id===id); if(!c) return viewPersonagens();
   trackRead("character",id);
-  return `<span class="back" onclick="location.hash='#/personagens'">← Personagens</span><div class="card"><div class="charrow" style="align-items:flex-start">${orb(c)}<div><h2 style="margin:0 0 4px;font-family:var(--display);letter-spacing:.5px">${esc(c.n)}</h2><div class="meta">${RACE_LABEL[c.race]||c.race||""}</div><div style="margin-top:6px">${(c.series||[]).map(sid=>{const s=SERIES.find(x=>x.id===sid);return s?`<span class="chip">${esc(s.name)}</span>`:"";}).join("")}</div></div></div><p style="margin-top:14px;color:#d6dcea">${esc(c.bio)}</p>${editBtn("characters",c.id,"bio")}<div class="meta" style="margin-top:10px">Poder (referência lúdica)</div><div class="powerbar"><i style="width:${c.pw||0}%"></i></div>${editBtn("characters",c.id,"power")}${interactBar("character",c.id)}</div>${arenaMid()}`;
+  return `<span class="back" onclick="location.hash='#/personagens'">← Personagens</span><div class="card"><div class="charrow" style="align-items:flex-start">${orb(c)}<div><h2 style="margin:0 0 4px;font-family:var(--display);letter-spacing:.5px">${esc(c.n)}</h2><div class="meta">${RACE_LABEL[c.race]||c.race||""}</div><div style="margin-top:6px">${(c.series||[]).map(sid=>{const s=SERIES.find(x=>x.id===sid);return s?`<span class="chip">${esc(s.name)}</span>`:"";}).join("")}</div></div></div><p style="margin-top:14px;color:#d6dcea">${esc(c.bio)}</p>${editBtn("characters",c.id,"bio")}
+  <div class="section-title" style="font-size:18px;margin-top:18px">Poderes e técnicas</div>
+  <div class="plist">${(c.powers||[]).map(p=>`<span class="pchip">${esc(p)}</span>`).join("")||`<span class="lead">Sem poderes cadastrados ainda.</span>`}</div>${editBtn("characters",c.id,"powers")}
+  <div class="meta" style="margin-top:14px">Nível de poder (referência lúdica): <b style="color:var(--gold)">${c.pw||0}</b></div><div class="powerbar"><i style="width:${c.pw||0}%"></i></div>${editBtn("characters",c.id,"power")}${interactBar("character",c.id)}</div>${arenaMid()}`;
 }
 function viewSagas(){ return `<div class="section-title">Sagas &amp; Arcos</div><p class="lead">As grandes sagas do universo Dragon Ball, do Pilaf ao Torneio do Poder.</p><div class="grid g2">${SAGAS.map(s=>{const se=SERIES.find(x=>x.id===s.s);return `<div class="card" style="--ac:${se?se.ac:'#ffce4d'}"><div class="accent"></div><div class="meta">${se?esc(se.name):''}</div><h3>${esc(s.n)}</h3><p>${esc(s.d)}</p>${editBtn("sagas",s.id,"description")}${interactBar("saga",s.id)}</div>`;}).join("")}</div>${arenaMid()}`; }
 function viewTecnicas(){ return `<div class="section-title">Técnicas &amp; Transformações</div><p class="lead">As técnicas que definem o universo — e que inspiram a <b>ZW Arena</b>.</p><div class="grid g2">${TECHS.map(t=>`<div class="card" style="--ac:${t.tr?'#ffce4d':'#4ec3ff'}"><div class="accent"></div><div class="meta">${t.tr?'Transformação':'Técnica'}</div><h3>${esc(t.n)}</h3><p>${esc(t.d)}</p>${editBtn("techniques",t.id,"description")}${t.arena?`<span class="tagline">${esc(t.arena)}</span>`:""}${interactBar("technique",t.id)}</div>`).join("")}</div>${arenaMid()}`; }
@@ -496,7 +501,8 @@ async function checkAdmin(){ try{ const {data}=await (await sb()).rpc("is_zw_adm
 const EDITMAP={
   "series|blurb":{arr:()=>SERIES,f:"blurb",t:"text",label:"Blurb da série"},
   "characters|bio":{arr:()=>CHARS,f:"bio",t:"text",label:"Bio do personagem"},
-  "characters|power":{arr:()=>CHARS,f:"pw",t:"num",label:"Poder do personagem (0–100)"},
+  "characters|power":{arr:()=>CHARS,f:"pw",t:"num",label:"Nível de poder (0–100)"},
+  "characters|powers":{arr:()=>CHARS,f:"powers",t:"list",label:"Poderes e técnicas (um por linha)"},
   "episodes|summary":{arr:()=>EPISODES,f:"s",t:"text",label:"Resumo do episódio"},
   "sagas|description":{arr:()=>SAGAS,f:"d",t:"text",label:"Descrição da saga"},
   "techniques|description":{arr:()=>TECHS,f:"d",t:"text",label:"Texto da técnica"},
@@ -508,13 +514,15 @@ function openEdit(table,id,dbfield){
   const m=EDITMAP[table+"|"+dbfield]; if(!m) return;
   const row=m.arr().find(x=>String(x.id)===String(id)); if(!row) return;
   EDIT_CTX={table,id,dbfield,key:table+"|"+dbfield};
-  $("#emLabel").textContent=m.label; $("#emText").value=row[m.f]==null?"":String(row[m.f]); $("#emErr").textContent="";
+  $("#emLabel").textContent=m.label; $("#emText").value=m.t==="list"?(Array.isArray(row[m.f])?row[m.f].join("\n"):""):(row[m.f]==null?"":String(row[m.f])); $("#emErr").textContent="";
   $("#editModal").classList.add("open"); $("#emText").focus();
 }
 function closeEdit(){ $("#editModal").classList.remove("open"); }
 async function saveEdit(){
   if(!EDIT_CTX) return; const {table,id,dbfield,key}=EDIT_CTX, m=EDITMAP[key];
-  let val=$("#emText").value; if(m.t==="num") val=Math.max(0,Math.min(100,parseInt(val,10)||0));
+  let val=$("#emText").value;
+  if(m.t==="num") val=Math.max(0,Math.min(100,parseInt(val,10)||0));
+  else if(m.t==="list") val=val.split("\n").map(x=>x.trim()).filter(Boolean);
   const err=$("#emErr"); err.style.color="var(--muted)"; err.textContent="Salvando…";
   try{
     const {error}=await (await sb()).from(table).update({[dbfield]:val}).eq("id",id);
