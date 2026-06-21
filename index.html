@@ -16,6 +16,16 @@
     --r:14px;
   }
   *{box-sizing:border-box}
+  .topbanner{ position:sticky; top:0; z-index:60; overflow:hidden; white-space:nowrap;
+    background:linear-gradient(90deg,var(--gold-2),var(--gold),var(--gold-2));
+    border-bottom:1px solid rgba(0,0,0,.3); box-shadow:0 2px 16px rgba(255,157,46,.35) }
+  .topbanner .marquee{ display:inline-block; padding:7px 0; will-change:transform; animation:marq 22s linear infinite }
+  .topbanner .marquee span{ color:#2a1800; font-weight:900; font-size:13px; letter-spacing:1.5px;
+    font-family:"Anton",Impact,sans-serif }
+  @keyframes marq{ from{transform:translateX(0)} to{transform:translateX(-50%)} }
+  .verline{ text-align:center; color:var(--muted); font-size:11px; letter-spacing:2px;
+    text-transform:uppercase; padding:6px 0 0 }
+  @media (prefers-reduced-motion: reduce){ .topbanner .marquee{ animation:none } }
   html,body{margin:0;height:100%}
   body{
     background:
@@ -70,6 +80,16 @@
   .battlebody{display:grid;grid-template-columns:1fr 1.15fr;gap:14px;margin-top:14px;align-items:start}
   .collabel{font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:6px}
   .battlebody .log{height:420px}
+  .taunts{display:flex;flex-wrap:wrap;gap:6px}
+  .taunts button{flex:0 0 auto;width:auto;padding:6px 10px;font-size:12px;font-weight:700;
+    background:#0c0f17;border:1px solid var(--line);color:var(--txt);border-radius:999px;cursor:pointer}
+  .taunts button:hover{border-color:var(--gold-2);color:var(--gold)}
+  .chatinput{display:flex;gap:8px;margin-top:8px}
+  .chatinput input{flex:1}
+  #log p.chat{color:#cfe6ff;border-left:2px solid var(--ki);padding-left:8px;margin:4px 0}
+  #log p.chat b{color:var(--ki)}
+  #log p.chat.mine{border-left-color:var(--gold);color:#ffe9b8}
+  #log p.chat.mine b{color:var(--gold)}
   @media(max-width:760px){
     .battlebody{grid-template-columns:1fr}
     .battlebody .interact{order:1}
@@ -226,6 +246,13 @@
 </style>
 </head>
 <body>
+<div class="topbanner" aria-label="FINALMENTE ESTAMOS DE VOLTA - CHUPA!!! - ZW IS BACK">
+  <div class="marquee">
+    <span>FINALMENTE ESTAMOS DE VOLTA&nbsp;&nbsp;·&nbsp;&nbsp;CHUPA!!!&nbsp;&nbsp;·&nbsp;&nbsp;ZW IS BACK&nbsp;&nbsp;·&nbsp;&nbsp;FINALMENTE ESTAMOS DE VOLTA&nbsp;&nbsp;·&nbsp;&nbsp;CHUPA!!!&nbsp;&nbsp;·&nbsp;&nbsp;ZW IS BACK&nbsp;&nbsp;·&nbsp;&nbsp;</span>
+    <span>FINALMENTE ESTAMOS DE VOLTA&nbsp;&nbsp;·&nbsp;&nbsp;CHUPA!!!&nbsp;&nbsp;·&nbsp;&nbsp;ZW IS BACK&nbsp;&nbsp;·&nbsp;&nbsp;FINALMENTE ESTAMOS DE VOLTA&nbsp;&nbsp;·&nbsp;&nbsp;CHUPA!!!&nbsp;&nbsp;·&nbsp;&nbsp;ZW IS BACK&nbsp;&nbsp;·&nbsp;&nbsp;</span>
+  </div>
+</div>
+<div class="verline">ZW Arena · v8.0</div>
 <div class="wrap">
   <div class="hero">
     <img class="hero-img" src="header.png" alt="Z Warriors — Only the Best Will Survive" />
@@ -340,6 +367,12 @@
       <div class="logwrap">
         <div class="collabel">Narração do juiz</div>
         <div class="log" id="log"></div>
+        <div class="collabel" style="margin-top:12px">Provocações</div>
+        <div id="tauntRow" class="taunts"></div>
+        <div class="chatinput">
+          <input id="chatText" placeholder="manda um papo…" maxlength="80" />
+          <button id="chatSend" class="ghost" style="flex:0 0 auto">Enviar</button>
+        </div>
       </div>
 
       <!-- interação (direita) -->
@@ -785,12 +818,13 @@ function peerArrived(){
 
 /* ---- TUTORIAL (treino vs boneco, com o juiz ensinando) ---- */
 const INTRO = [
-  ["Bem-vindo, guerreiro!","Eu sou o juiz — vou te ensinar a lutar no estilo Z Warriors. Cada lutador começa com 50 de HP e 50 de KI."],
-  ["O segredo é a velocidade","A cada turno, os dois escolhem EM SEGREDO uma ação e um número de velocidade de 1 a 10. Quem disser o número MAIOR age primeiro. Os números não se repetem até você zerar os dez."],
-  ["Golpe sempre custa KI","Golpes gastam KI — e aqui vale a regra da casa: todo golpe gasta KI SEMPRE, mesmo que você perca no número ou erre. Escolha com cuidado."],
-  ["Choque de KI","Se os dois jogarem um golpe no MESMO número, rola um Choque de KI: cada um investe KI escondido. Quem investir mais vence e anula o golpe do outro."],
-  ["Defesa e fôlego","Sem KI ou na dúvida? 'Concentrar KI' dá +10 e nunca falha — mas você fica sem defesa no turno. 'Defesa Simples' corta o dano pela metade. Vença quando o HP do oponente chegar a 0."],
-  ["O relógio corre","Você tem um tempo por jogada. Se zerar, você automaticamente concentra KI e a luta segue. Bora treinar contra o boneco!"]
+  ["Bem-vindo, guerreiro!","Eu sou o juiz — vou te ensinar a lutar no estilo Z Warriors. Cada um começa com <b>50 de HP</b> e <b>50 de KI</b>. Quem zerar o HP do outro, vence."],
+  ["O segredo é a velocidade","A cada turno os dois escolhem <b>em segredo</b> uma ação e um número de velocidade de 1 a 10. Quem disser o número <b>maior</b> age primeiro. Cada número só pode ser usado uma vez — quando zerar os dez, eles voltam."],
+  ["Golpe sempre custa KI","Golpes gastam KI — e aqui vale a regra da casa do Rafael: <b>todo golpe gasta KI sempre</b>, mesmo que você perca no número ou erre. Pense bem antes de mandar."],
+  ["Carregar KI é o motor","Sem KI você não solta poder nenhum. <b>Carregar KI</b> (o botão dourado) te dá +10 e é o <b>único comando que não usa número de velocidade</b> — mas no turno que você carrega, fica <b>sem defesa</b>. Use nas brechas."],
+  ["Defesa e Choque de KI","<b>Defesa Simples</b> corta o dano recebido pela metade. E se os dois mandarem golpe no <b>mesmo número</b>, rola o <b>Choque de KI</b>: cada um aposta KI escondido — quem apostar mais vence e anula o golpe do outro."],
+  ["Transformações","Dá pra <b>subir de nível no meio da luta</b>: SSJ, SSJ2, até SSJ4. Cada transformação soma HP e KI e aumenta velocidade e dano. No próximo passo você escolhe seu <b>nível máximo</b> pra treinar (depois isso vem das suas vitórias)."],
+  ["Relógio e papo","Você tem um tempo por jogada — se zerar, você Carrega KI automático e a luta segue. E pode <b>provocar o oponente no chat</b> durante a luta. Bora treinar contra o boneco!"]
 ];
 let introIdx=0;
 function startTutorial(){
@@ -852,6 +886,7 @@ function onNet(msg){
   if(type==="ready"){ peer.ready=true; peer.moves=payload.moves; peer.nick=payload.nick; peer.maxLevel=payload.maxLevel||0; $("#draftWait").innerHTML = waitHtml(`${esc(peer.nick)} está pronto!`, "termine de escolher seus golpes"); tryStartBattle(); }
   if(type==="submit"){ peerSub=payload; if(!mySub){ const e=$("#oppStatus"); if(e) e.innerHTML='<span class="eff">Oponente já jogou — sua vez!</span>'; } maybeReveal(); }
   if(type==="bid"){ peerBid=payload.bid; maybeResolveBid(); }
+  if(type==="chat"){ chatMsg(payload.nick, payload.text, false); }
 }
 
 /* ---- DRAFT ---- */
@@ -899,7 +934,7 @@ function foeKey(){ return ME.seat==="p1"?"p2":"p1"; }
 function myF(){ return state[meKey()]; }
 function foeF(){ return state[foeKey()]; }
 
-function startBattle(){ show("battle"); logTurnSep(); renderArena(); buildSelection(); }
+function startBattle(){ show("battle"); logTurnSep(); renderArena(); buildSelection(); buildChat(); }
 
 function renderArena(){
   const a=$("#arena"); a.innerHTML="";
@@ -955,6 +990,16 @@ function buildSelection(){
     sg.appendChild(el);
   }
   runTimer(TURN_SECONDS, $("#turnTimerNum"), $("#turnTimerBar"), autoSubmitTimeout);
+  // dicas contextuais do tutorial (uma vez cada)
+  if(MODE==="tutorial"){
+    if((f.level||0) < (f.maxLevel||0) && !coachFlags.cantransform){
+      coachFlags.cantransform=true;
+      coachBox("Olha o botão laranja <b>Transformar ▲</b>! Escolha um número de velocidade e mande — se você ganhar/empatar, sobe pra "+(LVL_NAME[(f.level||0)+1]||"o próximo nível")+" e fica mais forte. Ótimo pra virar o jogo.", null, null, "Hora de evoluir");
+    } else if(f.ki < 15 && !coachFlags.lowki){
+      coachFlags.lowki=true;
+      coachBox("Seu KI tá baixo — sem KI não sai golpe. Usa o <b>Carregar KI</b> (botão dourado): +10 e não gasta número de velocidade. Só cuidado, nesse turno você fica sem defesa.", null, null, "Recarrega!");
+    }
+  }
 }
 function checkSubmit(){
   const ok = sel.moveId && (sel.speed || NO_SPEED.has(sel.moveId));
@@ -1104,6 +1149,29 @@ function endGame(){
 /* ---- LOG ---- */
 function logLine(type,text){ const p=document.createElement("p"); if(type==="dmg")p.className="dmg"; if(type==="heal")p.className="heal"; if(type==="info")p.className="info"; p.textContent=text; $("#log").appendChild(p); $("#log").scrollTop=$("#log").scrollHeight; }
 function logTurnSep(){ const p=document.createElement("p"); p.className="turnsep"; p.textContent="— Turno "+ (state?state.turn:1) +" —"; $("#log").appendChild(p); $("#log").scrollTop=$("#log").scrollHeight; }
+
+/* ---- CHAT / PROVOCAÇÕES ---- */
+const TAUNTS = ["Chupa, trouxa! 😈","Toma essa, mano!","Tá fácil, hein","Reza pro próximo turno","Senta que lá vem KI","GG já era","Calma que vou pegar leve… mentira"];
+const BOT_TAUNTS = ["Sou só um boneco e tô ganhando…","É só isso?","Treina mais, guerreiro","Ai ai…","Vem com tudo!"];
+function buildChat(){
+  const row=$("#tauntRow"); if(row){ row.innerHTML=""; TAUNTS.forEach(t=>{ const b=document.createElement("button"); b.textContent=t; b.onclick=()=>sendChat(t); row.appendChild(b); }); }
+  const inp=$("#chatText"), btn=$("#chatSend");
+  if(btn) btn.onclick=()=>{ if(inp&&inp.value.trim()){ sendChat(inp.value.trim()); inp.value=""; } };
+  if(inp) inp.onkeydown=e=>{ if(e.key==="Enter"&&inp.value.trim()){ sendChat(inp.value.trim()); inp.value=""; } };
+}
+function chatMsg(nick, text, mine){
+  const log=$("#log"); if(!log) return;
+  const p=document.createElement("p"); p.className="chat"+(mine?" mine":"");
+  p.innerHTML=`<b>${esc(nick||"?")}:</b> ${esc(text)}`;
+  log.appendChild(p); log.scrollTop=log.scrollHeight;
+}
+function sendChat(text){
+  chatMsg(ME.nick||"Você", text, true);
+  if(net) net.send("chat",{nick:ME.nick||"Guerreiro", text});
+  if(MODE==="tutorial" && Math.random()<0.6){
+    setTimeout(()=>chatMsg("Boneco de Treino", BOT_TAUNTS[Math.floor(Math.random()*BOT_TAUNTS.length)], false), 600);
+  }
+}
 
 /* ---- efeitos visuais + som sintetizado (sem assets externos) ---- */
 let sfxOn=true, _actx=null;
