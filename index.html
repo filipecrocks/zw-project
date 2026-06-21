@@ -1049,10 +1049,32 @@ function waitHtml(title, sub){ return `<div class="waitbox"><div class="waitorb"
 /* ---- CONTA (Google) + PERFIL + CACHE + RANKING ---- */
 let supa=null, session=null, profile=null;
 const cache={ leaderboard:null, leaderboardAt:0 };
+
+/* ---- LOGIN MANUAL (demo) — provisório até ligarmos o Google ---- */
+const DEMO_USERS = { rafael:"Rafael", cleber:"Cleber" };
+const DEMO_PASS  = "chupa";
+let manualUser = null;
+try{ manualUser = JSON.parse(localStorage.getItem("zw_manual")||"null"); }catch(e){}
+function loginManual(){
+  const u = (prompt("Usuário (rafael ou cleber):")||"").trim().toLowerCase();
+  if(!u) return;
+  const p = (prompt("Senha:")||"");
+  if(!DEMO_USERS[u] || p!==DEMO_PASS){ alert("Usuário ou senha inválidos."); return; }
+  manualUser = { id:u, nick:DEMO_USERS[u] };
+  localStorage.setItem("zw_manual", JSON.stringify(manualUser));
+  ME.nick = manualUser.nick; const ni=$("#nick"); if(ni) ni.value=manualUser.nick;
+  renderAccount();
+}
+function logoutManual(){ manualUser=null; localStorage.removeItem("zw_manual"); renderAccount(); }
+/* placar local do demo (por navegador) */
+function localScores(){ try{ return JSON.parse(localStorage.getItem("zw_scores")||"{}"); }catch(e){ return {}; } }
+function saveLocalWin(nick){ if(!nick) return; const s=localScores(); s[nick]=(s[nick]||0)+1; localStorage.setItem("zw_scores", JSON.stringify(s)); }
+
 function levelFromWins(w){ return w>=200?4 : w>=150?3 : w>=100?2 : w>=25?1 : 0; } // 25→nv1,100→nv2,150→nv3,200→nv4
 function levelLabel(l){ return ["Nível 0 / Saiyajin","Nível 1 / SSJ","Nível 2 / SSJ2","Nível 3 / SSJ3","Nível 4 / SSJ4"][l]||("Nível "+l); }
 
 async function initAuth(){
+  if(manualUser){ ME.nick=manualUser.nick; const ni=$("#nick"); if(ni) ni.value=manualUser.nick; }
   renderAccount();
   if(!ONLINE) return;
   try{
@@ -1082,6 +1104,8 @@ async function loadProfile(){
   }catch(e){ console.error("perfil:",e); }
 }
 async function recordResult(iWon){
+  // demo: login manual usa placar local (sem Supabase auth)
+  if(manualUser && !session){ if(iWon) saveLocalWin(manualUser.nick); cache.leaderboard=null; renderAccount(); return; }
   if(!supa||!session||!profile) return;
   try{
     if(iWon){
@@ -1098,12 +1122,16 @@ async function recordResult(iWon){
   }catch(e){ console.error("registrar resultado:",e); }
 }
 async function getLeaderboard(){
-  if(!supa) return [];
-  if(cache.leaderboard && Date.now()-cache.leaderboardAt<30000) return cache.leaderboard;
-  try{
-    const { data } = await supa.from("profiles").select("nick,wins,level").order("wins",{ascending:false}).limit(10);
-    cache.leaderboard=data||[]; cache.leaderboardAt=Date.now(); return cache.leaderboard;
-  }catch(e){ console.error("ranking:",e); return []; }
+  // base: placar local do demo
+  const localList = Object.entries(localScores()).map(([nick,wins])=>({nick,wins,level:levelFromWins(wins)}));
+  let remote=[];
+  if(supa){
+    try{ const { data } = await supa.from("profiles").select("nick,wins,level").order("wins",{ascending:false}).limit(50); remote=data||[]; }
+    catch(e){ console.error("ranking:",e); }
+  }
+  const map={};
+  [...remote, ...localList].forEach(r=>{ const k=r.nick||"?"; if(!map[k]) map[k]={nick:k,wins:0,level:0}; map[k].wins+=(r.wins||0); map[k].level=Math.max(map[k].level||0, r.level||0); });
+  return Object.values(map).sort((a,b)=>b.wins-a.wins).slice(0,10);
 }
 function renderAccount(){
   const line=$("#accountLine"), gb=$("#btnGoogle");
@@ -1112,9 +1140,13 @@ function renderAccount(){
     const w=profile?.wins||0, l=profile?.level||0;
     line.innerHTML = `Logado como <b>${esc(profile?.nick||ME.nick||"?")}</b> · ${esc(levelLabel(l))} · ${w} vitória(s)`;
     if(gb){ gb.textContent="Sair"; gb.onclick=logout; }
+  } else if(manualUser){
+    const w=(localScores()[manualUser.nick]||0), l=levelFromWins(w);
+    line.innerHTML = `Logado como <b>${esc(manualUser.nick)}</b> · ${esc(levelLabel(l))} · ${w} vitória(s) <span class="tag">(demo)</span>`;
+    if(gb){ gb.textContent="Sair"; gb.onclick=logoutManual; }
   } else {
-    line.innerHTML = ONLINE ? "Jogando como convidado — entre com o Google pra salvar vitórias e subir no ranking." : "Modo local. Publique com Supabase pra ativar login e ranking.";
-    if(gb){ gb.textContent="Entrar com Google"; gb.onclick=loginGoogle; }
+    line.innerHTML = "Entre pra salvar vitórias e subir no ranking — ou jogue como convidado.";
+    if(gb){ gb.textContent="Entrar (demo)"; gb.onclick=loginManual; }
   }
 }
 async function toggleRank(){
