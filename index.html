@@ -148,6 +148,17 @@
   .waittext small{display:block;font-weight:500;color:var(--muted);font-size:12px;margin-top:2px}
   .oppready{margin-top:10px}
   .oppready .eff{font-size:13px;padding:5px 12px;background:rgba(70,224,138,.16);border-color:rgba(70,224,138,.45);color:#9ff0bf}
+
+  /* --- balão do juiz (tutorial) --- */
+  .coach{display:flex;gap:14px;align-items:flex-start;border-radius:14px;padding:16px;margin-bottom:16px;
+    background:linear-gradient(110deg,rgba(255,206,77,.10),rgba(255,157,46,.06));border:1px solid rgba(255,206,77,.4)}
+  .coach .judge{width:42px;height:42px;border-radius:50%;flex:0 0 auto;
+    background:radial-gradient(circle at 35% 30%,#fff8,transparent 45%),radial-gradient(circle at 60% 65%,var(--gold),#5a3c00 82%);
+    box-shadow:0 0 16px 2px rgba(255,206,77,.5);animation:waitpulse 1.6s ease-in-out infinite}
+  .coach .ctxt{flex:1}
+  .coach .ctitle{font-weight:800;color:var(--gold);font-size:13px;margin-bottom:3px;text-transform:uppercase;letter-spacing:.5px}
+  .coach .cbody{font-size:14px;line-height:1.5}
+  .coach button{margin-top:10px;padding:8px 16px}
 </style>
 </head>
 <body>
@@ -157,14 +168,19 @@
     <div class="tag" style="margin-top:8px">ZW Arena <b style="color:var(--gold)">7.0</b> — Regras de Luta Z Warriors. O computador é o juiz. Demo 1×1 com timer.</div>
   </div>
 
+  <div id="coachBox" class="coach hidden"></div>
+
   <!-- ===== HOME / SAGUÃO ===== -->
   <div id="home" class="card">
     <!-- entrada -->
     <div id="entry">
       <label>Seu nick de guerreiro</label>
       <input id="nick" placeholder="ex.: Goku ZW" maxlength="20" />
-      <div class="row" style="margin-top:14px"><button id="btnEnter">Entrar no saguão</button></div>
-      <div class="hint" id="netStatus"></div>
+      <div class="row" style="margin-top:14px">
+        <button id="btnTutorial">Sou novo — me ensina a jogar</button>
+        <button id="btnVeteran" class="ghost">Já jogo — ir pro saguão</button>
+      </div>
+      <div class="hint" id="netStatus">No tutorial você treina contra um boneco, com o juiz te explicando cada passo.</div>
     </div>
     <!-- saguão -->
     <div id="lobby" class="hidden">
@@ -395,9 +411,9 @@ function resolveTurn(state, subA, subB, bids){
 function resolveSide(self, foe, sub, move, cls, qualifies, foeDef, ev){
   // ATAQUE: precisa vencer estrito (empate vira choque, já tratado).
   if(cls==="ATAQUE"){
-    if(!qualifies){ ev.push({t:"info",x:`${self.name} foi mais lento — ${move.name} não saiu (não gasta KI).`}); return; }
     if((self.ki) < (move.ki||0)){ ev.push({t:"info",x:`${self.name} não tinha KI pra ${move.name}.`}); return; }
-    self.ki=clampKi(self.ki-(move.ki||0));
+    self.ki=clampKi(self.ki-(move.ki||0));  // regra do juiz: todo golpe gasta KI SEMPRE, mesmo perdendo/errando
+    if(!qualifies){ ev.push({t:"info",x:`${self.name} foi mais lento — ${move.name} não saiu, mas gastou ${move.ki||0} de KI.`}); return; }
     // defesa do oponente?
     if(foeDef && foeDef.kind==="barrier"){ ev.push({t:"info",x:`${foe.name} ergue o Barrier e absorve o ${move.name} por inteiro!`}); return; }
     if(foeDef && foeDef.kind==="esquiva"){ ev.push({t:"info",x:`${foe.name} usa Shunkanido e some — o ${move.name} passa direto!`}); foe.effects.speedBonusNext=1; return; }
@@ -540,21 +556,25 @@ let sel={ moveId:null, speed:null };
 let mySub=null, peerSub=null;     // submissões do turno atual
 let myBid=null, peerBid=null;
 let phase="home";
+let MODE="pvp";           // "pvp" | "tutorial"
+let coachFlags={};        // dicas do tutorial (uma vez cada)
 
 function show(id){ ["home","draft","battle"].forEach(x=>$("#"+x).classList.toggle("hidden",x!==id)); }
 
 /* ---- HOME / SAGUÃO ---- */
-$("#btnEnter").onclick=()=>{
+function enterLobby(){
   const nick=$("#nick").value.trim();
   if(!nick){ $("#netStatus").textContent="Digite seu nick."; return; }
-  ME.nick=nick;
+  MODE="pvp"; ME.nick=nick;
   $("#entry").classList.add("hidden");
   $("#lobby").classList.remove("hidden");
   $("#lobbyWho").textContent = "Você: "+nick+(ONLINE? " · online" : " · local (teste em 2 abas)");
   $("#lobbyStatus").textContent = ONLINE? "" : "Modo local: abra outra aba no mesmo navegador pra ver/entrar nas salas.";
   lobby=makeLobby();
   lobby.onChange(renderRoomList);
-};
+}
+$("#btnVeteran").onclick=enterLobby;
+$("#btnTutorial").onclick=startTutorial;
 $("#btnNewRoom").onclick=()=>createRoom();
 $("#btnJoinCode").onclick=()=>joinRoom($("#room").value.trim());
 
@@ -592,6 +612,60 @@ function start(seat, roomCode){
   $("#draftWait").innerHTML = waitHtml(`Sala ${esc(room)} criada`, "esperando um oponente entrar pela lista do saguão");
 }
 
+/* ---- TUTORIAL (treino vs boneco, com o juiz ensinando) ---- */
+const INTRO = [
+  ["Bem-vindo, guerreiro!","Eu sou o juiz — vou te ensinar a lutar no estilo Z Warriors. Cada lutador começa com 50 de HP e 50 de KI."],
+  ["O segredo é a velocidade","A cada turno, os dois escolhem EM SEGREDO uma ação e um número de velocidade de 1 a 10. Quem disser o número MAIOR age primeiro. Os números não se repetem até você zerar os dez."],
+  ["Golpe sempre custa KI","Golpes gastam KI — e aqui vale a regra da casa: todo golpe gasta KI SEMPRE, mesmo que você perca no número ou erre. Escolha com cuidado."],
+  ["Choque de KI","Se os dois jogarem um golpe no MESMO número, rola um Choque de KI: cada um investe KI escondido. Quem investir mais vence e anula o golpe do outro."],
+  ["Defesa e fôlego","Sem KI ou na dúvida? 'Concentrar KI' dá +10 e nunca falha — mas você fica sem defesa no turno. 'Defesa Simples' corta o dano pela metade. Vença quando o HP do oponente chegar a 0."],
+  ["O relógio corre","Você tem um tempo por jogada. Se zerar, você automaticamente concentra KI e a luta segue. Bora treinar contra o boneco!"]
+];
+let introIdx=0;
+function startTutorial(){
+  MODE="tutorial"; ME.nick=($("#nick").value.trim()||"Novato"); ME.seat="p1"; coachFlags={};
+  $("#entry").classList.add("hidden");
+  introIdx=0; showIntro();
+}
+function showIntro(){
+  if(introIdx>=INTRO.length){ goTutorialDraft(); return; }
+  const [t,b]=INTRO[introIdx];
+  coachBox(b, introIdx<INTRO.length-1?"Próximo":"Escolher meus golpes", ()=>{ introIdx++; showIntro(); }, t);
+}
+function goTutorialDraft(){
+  buildDraft(); show("draft");
+  coachBox("Escolha 3 golpes — eles ficam fixos até o fim da luta. Soco, Chute, Concentrar KI e Defesa Simples são sempre grátis. Quando escolher, clique em 'Pronto para lutar'.", null, null, "Monte seu set");
+}
+function startTutorialBattle(){
+  const meF=newFighter(ME.nick); meF.moves=draftSel.slice();
+  const botF=newFighter("Boneco de Treino"); botF.moves=botDraft();
+  state={p1:meF,p2:botF,turn:1}; myReady=true; peer.ready=true;
+  startBattle();
+  coachBox("Sua vez! Escolha uma ação e um número de velocidade. Maior número age primeiro — confirme antes do tempo acabar.", null, null, "Lute!");
+}
+/* coachBox(corpo, btnLabel|null, onClick|null, titulo|null) */
+function coachBox(body, btnLabel, onClick, title){
+  const box=$("#coachBox"); if(!box) return;
+  box.classList.remove("hidden");
+  box.innerHTML = `<div class="judge"></div><div class="ctxt"><div class="ctitle">${esc(title||"Juiz")}</div><div class="cbody">${body}</div></div>`;
+  if(btnLabel){ const b=document.createElement("button"); b.textContent=btnLabel; b.onclick=onClick; box.querySelector(".ctxt").appendChild(b); }
+}
+/* ---- boneco de treino ---- */
+function findMove(name){ const m=Object.values(MOVES).find(x=>x.name===name); return m?m.id:null; }
+function botDraft(){ return ["Kame Hame Ha","Galick Ho","Masenko"].map(findMove).filter(Boolean); }
+function botSubmit(){
+  const f=state.p2;
+  const pool=[...f.moves,"soco","chute","concentrar","defesa"].filter(id=>{ const m=MOVES[id]; return (m.ki||0)<=f.ki; });
+  const moveId=pool[Math.floor(Math.random()*pool.length)]||"defesa";
+  const speed=f.speeds[Math.floor(Math.random()*f.speeds.length)];
+  return {moveId,speed,seat:"p2"};
+}
+function botBidValue(){
+  if(!pendingSubs) return 0;
+  const m=MOVES[pendingSubs.subB.moveId]; const max=Math.max(0, state.p2.ki-(m.ki||0));
+  return Math.floor(Math.random()*Math.min(15,max+1));
+}
+
 /* ---- NET ---- */
 function onNet(msg){
   if(msg.from===ME.id) return;
@@ -625,6 +699,7 @@ function toggleDraft(id,el){
 }
 $("#btnReady").onclick=()=>{
   $("#btnReady").disabled=true;
+  if(MODE==="tutorial"){ startTutorialBattle(); return; }
   net.send("ready",{moves:draftSel,nick:ME.nick});
   $("#draftWait").innerHTML=waitHtml("Você está pronto", "esperando o oponente escolher os golpes");
   myReady=true; peer.moves=peer.moves; tryStartBattle();
@@ -714,13 +789,14 @@ function doSubmit(auto){
   clearTimer();
   mySub={ moveId:sel.moveId, speed:sel.speed, seat:ME.seat };
   $("#selectPane").classList.add("hidden");
-  $("#phaseLabel").textContent="aguardando oponente";
-  $("#selWait").innerHTML = waitHtml(auto?"Tempo esgotado — jogada automática!":"Confirmado em segredo", "esperando o oponente jogar");
-  net.send("submit",mySub);
-  maybeReveal();
+  $("#phaseLabel").textContent = MODE==="tutorial" ? "o juiz resolve…" : "aguardando oponente";
+  $("#selWait").innerHTML = waitHtml(auto?"Tempo esgotado — você concentrou KI!":"Confirmado em segredo", MODE==="tutorial"?"o boneco responde…":"esperando o oponente jogar");
+  if(net) net.send("submit",mySub);
+  if(MODE==="tutorial"){ peerSub=botSubmit(); setTimeout(maybeReveal,550); }
+  else maybeReveal();
 }
 function autoSubmitTimeout(){
-  if(!sel.moveId) sel.moveId="defesa";            // padrão seguro: Defesa Simples
+  if(!sel.moveId) sel.moveId="concentrar";   // regra do juiz: sem jogada no tempo -> concentra KI
   if(!sel.speed){ const av=myF().speeds; sel.speed=av[Math.floor(Math.random()*av.length)]; }
   doSubmit(true);
 }
@@ -746,6 +822,7 @@ function openBid(subA,subB){
   const maxBid=Math.max(0, myF().ki-(mMy.ki||0));
   $("#bidMax").textContent=maxBid; $("#bidInput").max=maxBid; $("#bidInput").value=0;
   $("#bidWait").textContent="";
+  if(MODE==="tutorial" && !coachFlags.clash){ coachFlags.clash=true; coachBox("Os dois jogaram golpe no mesmo número! Agora é o CHOQUE DE KI: invista quanto quiser do seu KI. Quem investir mais vence e anula o golpe do outro.", null); }
   runTimer(BID_SECONDS, $("#bidTimerNum"), $("#bidTimerBar"), autoBidTimeout);
 }
 function doBid(){
@@ -753,8 +830,9 @@ function doBid(){
   myBid=Math.max(0,parseInt($("#bidInput").value||"0",10));
   $("#bidPane").classList.add("hidden");
   $("#bidWait").innerHTML = waitHtml("Choque enviado","esperando o KI do oponente");
-  net.send("bid",{bid:myBid,seat:ME.seat});
-  maybeResolveBid();
+  if(net) net.send("bid",{bid:myBid,seat:ME.seat});
+  if(MODE==="tutorial"){ peerBid=botBidValue(); setTimeout(maybeResolveBid,450); }
+  else maybeResolveBid();
 }
 function autoBidTimeout(){ $("#bidInput").value=0; doBid(); }
 $("#btnBid").onclick=()=>doBid();
@@ -774,6 +852,7 @@ function commit(r,subA,subB){
   r.events.forEach(e=>logLine(e.t,e.x));
   renderArena();
   playFx(before);
+  if(MODE==="tutorial" && !coachFlags.firstResult && !state.over){ coachFlags.firstResult=true; coachBox("Viu? Quem disse o número maior agiu primeiro. E repare: o KI caiu — todo golpe gasta KI, acertando ou não. Continue até zerar o HP do boneco!", null); }
   if(state.over){ endGame(); return; }
   buildSelection();
 }
