@@ -1,0 +1,1535 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>ZW Arena</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0c12; --panel:#11141c; --panel-2:#171b26; --line:#222838;
+    --txt:#e9edf6; --muted:#8b93a7; --gold:#ffce4d; --gold-2:#ff9d2e;
+    --ki:#4ec3ff; --hp:#46e08a; --hp-low:#ff5566; --aura:#7c5cff;
+    --shadow:0 10px 40px rgba(0,0,0,.45);
+    --r:14px;
+  }
+  *{box-sizing:border-box}
+  .topbanner{ position:sticky; top:0; z-index:60; overflow:hidden; white-space:nowrap;
+    background:linear-gradient(90deg,var(--gold-2),var(--gold),var(--gold-2));
+    border-bottom:1px solid rgba(0,0,0,.3); box-shadow:0 2px 16px rgba(255,157,46,.35) }
+  .topbanner .marquee{ display:inline-block; padding:7px 0; will-change:transform; animation:marq 22s linear infinite }
+  .topbanner .marquee span{ color:#2a1800; font-weight:900; font-size:13px; letter-spacing:1.5px;
+    font-family:"Anton",Impact,sans-serif }
+  @keyframes marq{ from{transform:translateX(0)} to{transform:translateX(-50%)} }
+  .verline{ text-align:center; color:var(--muted); font-size:11px; letter-spacing:2px;
+    text-transform:uppercase; padding:6px 0 0 }
+  @media (prefers-reduced-motion: reduce){ .topbanner .marquee{ animation:none } }
+  html,body{margin:0;height:100%}
+  body{
+    background:
+      radial-gradient(1200px 600px at 50% -10%, #1a2030 0%, transparent 60%),
+      radial-gradient(800px 500px at 90% 110%, #1b1530 0%, transparent 55%),
+      var(--bg);
+    color:var(--txt);
+    font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:980px;margin:0 auto;padding:22px 16px 60px}
+  h1,h2,h3{margin:0 0 .4em}
+  h1{font-size:30px;letter-spacing:.5px}
+  .hero{margin-bottom:14px;text-align:center}
+  .hero-img{width:100%;max-width:780px;height:auto;display:block;margin:0 auto;border-radius:12px;
+    border:1px solid var(--line);box-shadow:0 12px 44px rgba(0,0,0,.55), 0 0 0 1px rgba(78,195,255,.12) inset}
+  .tag{color:var(--muted);font-size:13px}
+  .card{background:linear-gradient(180deg,var(--panel),var(--panel-2));border:1px solid var(--line);
+    border-radius:var(--r);padding:18px;box-shadow:var(--shadow);margin-bottom:16px}
+  label{display:block;font-size:12px;color:var(--muted);margin:0 0 6px;text-transform:uppercase;letter-spacing:.6px}
+  input,select{width:100%;background:#0c0f17;border:1px solid var(--line);color:var(--txt);
+    border-radius:10px;padding:11px 12px;font-size:15px;outline:none}
+  input:focus,select:focus{border-color:var(--gold-2)}
+  .row{display:flex;gap:10px;flex-wrap:wrap}
+  .row>*{flex:1;min-width:120px}
+  button{cursor:pointer;border:0;border-radius:11px;padding:12px 16px;font-weight:700;font-size:15px;
+    background:linear-gradient(135deg,var(--gold),var(--gold-2));color:#1a1206;transition:.12s transform}
+  button:hover{transform:translateY(-1px)}
+  button:disabled{opacity:.4;cursor:not-allowed;transform:none}
+  button.ghost{background:#0c0f17;color:var(--txt);border:1px solid var(--line)}
+  button.danger{background:linear-gradient(135deg,#ff6a6a,#e0354f);color:#fff}
+  .hidden{display:none!important}
+  .hint{color:var(--muted);font-size:13px;margin-top:8px}
+  .pill{display:inline-block;font-size:11px;padding:3px 8px;border-radius:999px;background:#0c0f17;border:1px solid var(--line);color:var(--muted)}
+
+  /* battle */
+  .arena{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:680px){.arena{grid-template-columns:1fr}}
+  .fighter{background:#0c0f17;border:1px solid var(--line);border-radius:var(--r);padding:14px}
+  .fighter.me{border-color:var(--gold-2);box-shadow:0 0 0 1px rgba(255,157,46,.25) inset}
+  .fname{font-weight:800;font-size:17px;display:flex;justify-content:space-between;align-items:center}
+  .bar{height:12px;border-radius:999px;background:#1c2130;overflow:hidden;margin:5px 0 2px}
+  .bar>i{display:block;height:100%;border-radius:999px;transition:width .5s}
+  .hpfill{background:linear-gradient(90deg,#2fae67,var(--hp))}
+  .kifill{background:linear-gradient(90deg,#2a8fd1,var(--ki))}
+  .stat{display:flex;justify-content:space-between;font-size:12px;color:var(--muted)}
+  .effects{margin-top:8px;min-height:20px;display:flex;gap:6px;flex-wrap:wrap}
+  .eff{font-size:11px;padding:2px 8px;border-radius:999px;background:rgba(124,92,255,.18);border:1px solid rgba(124,92,255,.4);color:#c7bbff}
+
+  .log{background:#080a10;border:1px solid var(--line);border-radius:var(--r);padding:14px;
+    height:230px;overflow:auto;font-size:14px}
+  .battlebody{display:grid;grid-template-columns:1fr 1.15fr;gap:14px;margin-top:14px;align-items:start}
+  .collabel{font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:6px}
+  .battlebody .log{height:420px}
+  .taunts{display:flex;flex-wrap:wrap;gap:6px}
+  .taunts button{flex:0 0 auto;width:auto;padding:6px 10px;font-size:12px;font-weight:700;
+    background:#0c0f17;border:1px solid var(--line);color:var(--txt);border-radius:999px;cursor:pointer}
+  .taunts button:hover{border-color:var(--gold-2);color:var(--gold)}
+  .chatinput{display:flex;gap:8px;margin-top:8px}
+  .chatinput input{flex:1}
+  #log p.chat{color:#cfe6ff;border-left:2px solid var(--ki);padding-left:8px;margin:4px 0}
+  #log p.chat b{color:var(--ki)}
+  #log p.chat.mine{border-left-color:var(--gold);color:#ffe9b8}
+  #log p.chat.mine b{color:var(--gold)}
+  @media(max-width:760px){
+    .battlebody{grid-template-columns:1fr}
+    .battlebody .interact{order:1}
+    .battlebody .logwrap{order:2}
+    .battlebody .log{height:200px}
+  }
+  .log p{margin:0 0 8px}
+  .log .turnsep{color:var(--gold);font-weight:700;border-top:1px dashed var(--line);padding-top:8px;margin-top:10px}
+  .log .dmg{color:#ff8a8a}
+  .log .heal{color:#7ef0a8}
+  .log .info{color:var(--muted)}
+
+  .moves{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-top:6px}
+  .move{background:#0c0f17;border:1px solid var(--line);border-radius:10px;padding:9px 10px;cursor:pointer;font-size:13px;position:relative}
+  .move:hover{border-color:var(--gold-2)}
+  .move.sel{border-color:var(--gold);background:rgba(255,206,77,.08)}
+  .move.dis{opacity:.35;cursor:not-allowed}
+  .move .mn{font-weight:700}
+  .move .ms{color:var(--muted);font-size:11px;margin-top:2px}
+  .move .badge{position:absolute;top:6px;right:6px;font-size:9px;color:#1a1206;background:var(--gold);border-radius:6px;padding:1px 5px;font-weight:800}
+
+  .speeds{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+  .spd{width:42px;height:42px;border-radius:10px;border:1px solid var(--line);background:#0c0f17;
+    color:var(--txt);font-weight:800;font-size:16px;display:grid;place-items:center;cursor:pointer}
+  .spd.sel{background:var(--ki);color:#04212f;border-color:var(--ki)}
+  .spd.used{opacity:.25;cursor:not-allowed;text-decoration:line-through}
+  .move.hot{border-color:var(--gold);background:linear-gradient(135deg,rgba(255,206,77,.16),rgba(255,157,46,.07));
+    box-shadow:0 0 0 1px rgba(255,206,77,.35),0 0 18px rgba(255,157,46,.22)}
+  .move.hot .mn{color:var(--gold)}
+  .move.hot .badge{background:var(--ki);color:#04212f}
+  .speeds.disabled{opacity:.35;pointer-events:none;filter:grayscale(.7)}
+  .move.tf{border-color:#ff9d2e;background:linear-gradient(135deg,rgba(255,157,46,.18),rgba(255,206,77,.06));
+    box-shadow:0 0 0 1px rgba(255,157,46,.4),0 0 20px rgba(255,157,46,.3)}
+  .move.tf .mn{color:#ffc24d}
+  .center{text-align:center}
+  .waitdot::after{content:"";animation:dots 1.2s steps(4,end) infinite}
+  @keyframes dots{0%{content:""}25%{content:"."}50%{content:".."}75%{content:"..."}}
+  .big{font-size:22px;font-weight:900}
+  .kobanner{font-size:34px;font-weight:900;text-align:center;padding:20px;background:linear-gradient(135deg,var(--gold),var(--gold-2));color:#1a1206;border-radius:var(--r)}
+  .roomitem{display:flex;justify-content:space-between;align-items:center;background:#0c0f17;border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:8px}
+  .roomitem .ri-name{font-weight:700}
+  .roomitem .ri-code{color:var(--muted);font-size:12px}
+  .roomitem button{flex:0 0 auto;padding:8px 14px}
+
+  /* --- efeitos de jogo --- */
+  .fighter{position:relative;transition:transform .12s}
+  .fhead{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+  .orb{width:40px;height:40px;border-radius:50%;flex:0 0 auto;
+    box-shadow:0 0 16px 2px var(--orb-glow,rgba(124,92,255,.55));
+    background:radial-gradient(circle at 34% 30%, #ffffffcc, transparent 42%),
+               radial-gradient(circle at 62% 68%, var(--orb,#7c5cff), #0a0c12 82%)}
+  .fighter.aura{box-shadow:0 0 0 1px rgba(255,206,77,.4) inset, 0 0 24px rgba(255,157,46,.28)}
+  .fighter.aura .orb{animation:orbpulse 1.1s ease-in-out infinite}
+  @keyframes orbpulse{50%{box-shadow:0 0 26px 6px var(--orb-glow,rgba(255,157,46,.7))}}
+  .fighter.hit{animation:hitflash .5s ease}
+  .fighter.healed{animation:healflash .6s ease}
+  @keyframes hitflash{0%{background:rgba(255,70,90,.4)}100%{background:#0c0f17}}
+  @keyframes healflash{0%{background:rgba(70,224,138,.32)}100%{background:#0c0f17}}
+  .fighter.shake{animation:shk .35s}
+  @keyframes shk{10%,90%{transform:translateX(-2px)}30%,70%{transform:translateX(4px)}50%{transform:translateX(-6px)}}
+  .floatnum{position:absolute;right:16px;top:46px;font-weight:900;font-size:28px;pointer-events:none;z-index:4;
+    text-shadow:0 2px 8px rgba(0,0,0,.7);animation:floatup 1s ease forwards}
+  .floatnum.dmg{color:#ff6a7a}.floatnum.heal{color:#7ef0a8}.floatnum.ki{color:var(--ki);font-size:18px;top:100px}
+  @keyframes floatup{0%{opacity:0;transform:translateY(10px) scale(.8)}20%{opacity:1;transform:translateY(0) scale(1.12)}100%{opacity:0;transform:translateY(-36px) scale(1)}}
+  .bar.low>i{animation:lowpulse 1s infinite}
+  @keyframes lowpulse{50%{filter:brightness(1.5)}}
+  .burst{position:absolute;inset:0;pointer-events:none;z-index:5}
+  .burst i{position:absolute;left:50%;top:50%;width:9px;height:9px;border-radius:50%;
+    background:var(--gold);box-shadow:0 0 8px var(--gold-2);animation:spark .75s ease-out forwards}
+  @keyframes spark{to{transform:translate(var(--dx),var(--dy)) scale(.2);opacity:0}}
+  .sfxbtn{background:#0c0f17;border:1px solid var(--line);color:var(--muted);border-radius:8px;
+    padding:4px 10px;font-size:12px;font-weight:700;cursor:pointer}
+
+  /* --- timer de jogada --- */
+  .timerrow{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+  .timernum{font-weight:900;font-size:20px;min-width:38px;text-align:center;color:var(--ki);
+    text-shadow:0 0 10px rgba(78,195,255,.5)}
+  .timernum.low{color:var(--hp-low);text-shadow:0 0 12px rgba(255,85,102,.7);animation:tnum .5s infinite}
+  @keyframes tnum{50%{transform:scale(1.18)}}
+  .timerwrap{flex:1;height:8px;border-radius:999px;background:#1c2130;overflow:hidden}
+  .timerbar{height:100%;width:100%;background:linear-gradient(90deg,var(--ki),#2a8fd1);transition:width 1s linear}
+  .timerbar.low{background:linear-gradient(90deg,var(--hp-low),#c0263b)}
+
+  /* --- aguardando oponente (chamativo) --- */
+  .waitbox{display:flex;align-items:center;gap:18px;border-radius:16px;padding:22px 20px;margin-top:14px;
+    background:linear-gradient(110deg,rgba(78,195,255,.10),rgba(124,92,255,.12));
+    border:1px solid rgba(78,195,255,.32);position:relative;overflow:hidden}
+  .waitbox::after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent,rgba(255,255,255,.07),transparent);
+    transform:translateX(-100%);animation:sweep 1.8s infinite}
+  @keyframes sweep{100%{transform:translateX(100%)}}
+  .waitorb{width:46px;height:46px;border-radius:50%;flex:0 0 auto;position:relative;
+    background:radial-gradient(circle at 35% 30%,#ffffffcc,transparent 45%),radial-gradient(circle at 62% 66%,var(--ki),#0a0c12 82%);
+    animation:waitpulse 1.1s ease-in-out infinite}
+  .waitorb::before{content:"";position:absolute;inset:-9px;border-radius:50%;border:2px solid transparent;
+    border-top-color:var(--ki);border-right-color:var(--aura);animation:spin 1s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  @keyframes waitpulse{0%,100%{box-shadow:0 0 8px 1px rgba(78,195,255,.5);transform:scale(.92)}50%{box-shadow:0 0 24px 8px rgba(78,195,255,.78);transform:scale(1.1)}}
+  .waittext{font-weight:800;font-size:18px}
+  .waittext small{display:block;font-weight:500;color:var(--muted);font-size:13px;margin-top:3px}
+
+  /* --- SUA VEZ --- */
+  .yourturn{font-weight:900;font-size:24px;letter-spacing:2px;color:var(--gold);text-align:center;margin-bottom:12px;
+    text-shadow:0 0 20px rgba(255,206,77,.55);animation:yt 1.3s ease-in-out infinite}
+  @keyframes yt{50%{transform:scale(1.07);text-shadow:0 0 30px rgba(255,206,77,.85)}}
+
+  /* --- flash de revelação (próxima ação) --- */
+  .reveal{position:fixed;inset:0;display:grid;place-items:center;z-index:60;pointer-events:none;
+    background:rgba(8,10,16,.6);backdrop-filter:blur(3px)}
+  .reveal .rv{display:flex;align-items:center;gap:18px;animation:rvin .35s ease}
+  .reveal .side{padding:14px 18px;border-radius:14px;background:#11141c;border:1px solid var(--line);
+    box-shadow:0 14px 50px rgba(0,0,0,.6);font-weight:900;font-size:clamp(15px,4.5vw,24px);text-align:center;max-width:40vw}
+  .reveal .side small{display:block;color:var(--muted);font-size:.62em;font-weight:600;margin-top:4px}
+  .reveal .vs{font-weight:900;font-size:clamp(26px,8vw,44px);color:var(--gold);text-shadow:0 0 22px rgba(255,206,77,.7);animation:vspulse .6s ease infinite}
+  @keyframes vspulse{50%{transform:scale(1.15)}}
+  @keyframes rvin{from{opacity:0;transform:scale(.88)}to{opacity:1;transform:scale(1)}}
+  .oppready{margin-top:10px}
+  .oppready .eff{font-size:13px;padding:5px 12px;background:rgba(70,224,138,.16);border-color:rgba(70,224,138,.45);color:#9ff0bf}
+
+  /* --- balão do juiz (tutorial) --- */
+  .coach{display:flex;gap:14px;align-items:flex-start;border-radius:14px;padding:16px;margin-bottom:16px;
+    background:linear-gradient(110deg,rgba(255,206,77,.10),rgba(255,157,46,.06));border:1px solid rgba(255,206,77,.4)}
+  .coach .judge{width:42px;height:42px;border-radius:50%;flex:0 0 auto;
+    background:radial-gradient(circle at 35% 30%,#fff8,transparent 45%),radial-gradient(circle at 60% 65%,var(--gold),#5a3c00 82%);
+    box-shadow:0 0 16px 2px rgba(255,206,77,.5);animation:waitpulse 1.6s ease-in-out infinite}
+  .coach .ctxt{flex:1}
+  .coach .ctitle{font-weight:800;color:var(--gold);font-size:13px;margin-bottom:3px;text-transform:uppercase;letter-spacing:.5px}
+  .coach .cbody{font-size:14px;line-height:1.5}
+  .coach button{margin-top:10px;padding:8px 16px}
+  .acctbar{background:#0c0f17;border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:14px}
+  /* ---- landing ---- */
+  .wordmark{ font-family:"Anton",Impact,system-ui,sans-serif; font-weight:400;
+    font-size:clamp(42px,12vw,88px); line-height:.9; letter-spacing:2px; text-align:center; margin:16px 0 8px;
+    background:linear-gradient(180deg,#ffffff 2%,var(--gold) 36%,var(--gold-2) 76%,#c25212 100%);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    filter:drop-shadow(0 2px 0 rgba(0,0,0,.45)) drop-shadow(0 0 28px rgba(255,157,46,.45));
+    -webkit-text-stroke:1px rgba(0,0,0,.22) }
+  .lede{ max-width:620px; margin:0 auto; text-align:center; color:#c5ccdb;
+    font-size:clamp(14px,2.6vw,17px); line-height:1.55 }
+  .acctline{ text-align:center; color:var(--muted); font-size:13px; margin:18px auto 14px; max-width:560px; line-height:1.45 }
+  .cta{ display:flex; gap:10px; flex-wrap:wrap; justify-content:center; max-width:520px; margin:0 auto }
+  .cta>button{ flex:1 1 150px }
+  .cta-primary{ background:linear-gradient(135deg,var(--gold),var(--gold-2)); color:#2a1c00; font-weight:800;
+    box-shadow:0 6px 22px rgba(255,157,46,.35); border:none }
+  .linklike{ display:block; margin:14px auto 0; background:none; border:none; color:var(--ki);
+    font-size:13px; cursor:pointer; text-decoration:underline; width:auto; padding:4px }
+  .pwrap{ display:flex; gap:8px; align-items:stretch }
+  .pwrap input{ flex:1; min-width:0 }
+  .pwtoggle{ flex:0 0 auto; width:48px; background:#0c0f17; border:1px solid var(--line); color:var(--muted);
+    border-radius:10px; cursor:pointer; font-size:18px; line-height:1; padding:0; display:grid; place-items:center }
+  .pwtoggle:hover{ border-color:var(--gold-2) }
+  .features{ display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-top:24px }
+  .feat{ background:#0c0f17; border:1px solid var(--line); border-radius:12px; padding:13px 14px }
+  .feat-k{ display:block; font-weight:800; color:var(--gold); font-size:12px; text-transform:uppercase; letter-spacing:.6px; margin-bottom:4px }
+  .feat-d{ display:block; color:#aeb6c7; font-size:13px; line-height:1.45 }
+  @media(max-width:560px){ .features{ grid-template-columns:1fr } }
+  /* ---- perfil / progressão ---- */
+  .prof-head{ text-align:center; margin-bottom:18px }
+  .prof-orb{ width:92px; height:92px; border-radius:50%; margin:0 auto 10px;
+    background:radial-gradient(circle at 35% 30%,#fff8,transparent 45%),radial-gradient(circle at 60% 65%,var(--gold),#5a3c00 82%);
+    box-shadow:0 0 28px 6px rgba(255,206,77,.45); display:grid; place-items:center;
+    font-family:"Anton",Impact,sans-serif; font-size:26px; color:#3a2600 }
+  .prof-name{ font-size:22px; font-weight:900 }
+  .prof-tier{ color:var(--gold); font-weight:800; font-size:14px; letter-spacing:.5px }
+  .prof-stats{ display:flex; justify-content:center; gap:18px; margin-top:10px; color:var(--muted); font-size:13px }
+  .prof-stats b{ color:var(--txt); font-size:17px; display:block }
+  .next-card{ background:#0c0f17; border:1px solid rgba(255,206,77,.3); border-radius:12px; padding:14px; margin:6px 0 18px }
+  .next-card .nl{ font-size:13px; color:var(--muted); margin-bottom:8px }
+  .next-card .nl b{ color:var(--gold) }
+  .pbar{ height:12px; background:#1a1f2c; border-radius:99px; overflow:hidden; border:1px solid var(--line) }
+  .pbar i{ display:block; height:100%; background:linear-gradient(90deg,var(--gold),var(--gold-2)); border-radius:99px }
+  .ladder{ display:flex; flex-direction:column; gap:8px }
+  .tier{ display:flex; align-items:center; gap:12px; padding:11px 13px; border-radius:12px;
+    background:#0c0f17; border:1px solid var(--line) }
+  .tier.done{ border-color:rgba(70,224,138,.45) }
+  .tier.now{ border-color:var(--gold); box-shadow:0 0 0 1px rgba(255,206,77,.4),0 0 18px rgba(255,157,46,.22) }
+  .tier.locked{ opacity:.55 }
+  .tier .tb{ width:40px; height:40px; border-radius:50%; flex:0 0 auto; display:grid; place-items:center; font-size:18px;
+    background:radial-gradient(circle at 60% 60%,var(--gold),#4a3200 85%); box-shadow:0 0 12px rgba(255,206,77,.4) }
+  .tier.locked .tb{ background:#222838; box-shadow:none; filter:grayscale(1) }
+  .tier .tt{ flex:1 }
+  .tier .tn{ font-weight:800 }
+  .tier .ts{ font-size:12px; color:var(--muted) }
+  .tier .tstate{ font-size:12px; font-weight:800 }
+  .tier.done .tstate{ color:var(--hp) }
+  .tier.now .tstate{ color:var(--gold) }
+  .rankrow{display:flex;justify-content:space-between;padding:7px 10px;border-radius:8px;background:#0c0f17;border:1px solid var(--line);margin-bottom:6px;font-size:14px}
+  .rankrow b{color:var(--gold)}
+  .rankrow .lvl{color:var(--muted);font-size:12px}
+</style>
+</head>
+<body>
+<div class="topbanner" aria-label="FINALMENTE ESTAMOS DE VOLTA - CHUPA!!! - ZW IS BACK">
+  <div class="marquee">
+    <span>FINALMENTE ESTAMOS DE VOLTA&nbsp;&nbsp;·&nbsp;&nbsp;CHUPA!!!&nbsp;&nbsp;·&nbsp;&nbsp;ZW IS BACK&nbsp;&nbsp;·&nbsp;&nbsp;FINALMENTE ESTAMOS DE VOLTA&nbsp;&nbsp;·&nbsp;&nbsp;CHUPA!!!&nbsp;&nbsp;·&nbsp;&nbsp;ZW IS BACK&nbsp;&nbsp;·&nbsp;&nbsp;</span>
+    <span>FINALMENTE ESTAMOS DE VOLTA&nbsp;&nbsp;·&nbsp;&nbsp;CHUPA!!!&nbsp;&nbsp;·&nbsp;&nbsp;ZW IS BACK&nbsp;&nbsp;·&nbsp;&nbsp;FINALMENTE ESTAMOS DE VOLTA&nbsp;&nbsp;·&nbsp;&nbsp;CHUPA!!!&nbsp;&nbsp;·&nbsp;&nbsp;ZW IS BACK&nbsp;&nbsp;·&nbsp;&nbsp;</span>
+  </div>
+</div>
+<div class="verline">ZW Arena · v8.0</div>
+<div class="wrap">
+  <div class="hero">
+    <img class="hero-img" src="header.png" alt="Z Warriors — Only the Best Will Survive" />
+    <h1 class="wordmark">ZW&nbsp;ARENA</h1>
+    <p class="lede">O lendário sistema de luta do clã <b>Z Warriors</b>, recriado do zero. Combate por turnos — sem dado, sem sorte. Quem ler melhor o oponente, vence.</p>
+  </div>
+
+  <div id="coachBox" class="coach hidden"></div>
+
+  <!-- ===== HOME / SAGUÃO ===== -->
+  <div id="home" class="card">
+    <!-- entrada -->
+    <div id="entry">
+
+      <!-- LANDING -->
+      <div id="landingView">
+        <div id="accountLine" class="acctline">Carregando…</div>
+        <div class="cta">
+          <button id="btnSignup" class="cta-primary">Criar conta</button>
+          <button id="btnLogin" class="ghost">Entrar</button>
+          <button id="btnGuest" class="ghost">Jogar sem conta</button>
+          <button id="btnPlay" class="cta-primary hidden">Jogar agora</button>
+          <button id="btnLogout" class="ghost hidden">Sair</button>
+        </div>
+        <button id="btnRank" class="linklike">Ver ranking do clã</button>
+        <button id="btnProfile" class="linklike">Meu perfil &amp; progressão</button>
+        <div id="rankPane" class="hidden" style="margin:12px auto;max-width:520px"></div>
+        <div class="features">
+          <div class="feat"><span class="feat-k">Turnos secretos</span><span class="feat-d">Os dois jogam ao mesmo tempo, escondido. Quem disser a velocidade maior age primeiro.</span></div>
+          <div class="feat"><span class="feat-k">Choque de KI</span><span class="feat-d">Golpe contra golpe no mesmo número? Uma aposta secreta de KI decide quem passa.</span></div>
+          <div class="feat"><span class="feat-k">Transformações</span><span class="feat-d">Suba de SSJ até SSJ4 no meio da luta e vire o jogo na hora certa.</span></div>
+          <div class="feat"><span class="feat-k">Ranking do clã</span><span class="feat-d">Cada vitória conta. Evolua de nível e suba no placar dos Z Warriors.</span></div>
+        </div>
+      </div>
+
+      <!-- CRIAR CONTA / ENTRAR -->
+      <div id="authView" class="hidden">
+        <h2 id="authTitle">Criar conta</h2>
+        <div id="authNick"><label>Nick de guerreiro</label><input id="suNick" placeholder="ex.: Goku ZW" maxlength="20" /></div>
+        <label style="margin-top:12px">E-mail</label>
+        <input id="auEmail" type="email" autocomplete="email" placeholder="voce@email.com" />
+        <label style="margin-top:12px">Senha</label>
+        <div class="pwrap">
+          <input id="auPass" type="password" autocomplete="current-password" placeholder="mínimo 6 caracteres" />
+          <button type="button" id="btnShowPass" class="pwtoggle" aria-label="Mostrar senha">👁</button>
+        </div>
+        <div id="authMsg" class="hint" style="min-height:18px;margin-top:8px"></div>
+        <button id="btnAuthGo" style="width:100%">Criar conta</button>
+        <div class="row" style="margin-top:10px">
+          <button id="btnAuthSwap" class="ghost">Já tenho conta — entrar</button>
+          <button id="btnAuthBack" class="ghost">Voltar</button>
+        </div>
+      </div>
+
+      <!-- JOGAR (após login ou convidado) -->
+      <div id="playView" class="hidden">
+        <div id="playWho" class="acctline" style="margin-top:0"></div>
+        <label>Seu nick de guerreiro</label>
+        <input id="nick" placeholder="ex.: Goku ZW" maxlength="20" />
+        <div class="row" style="margin-top:14px">
+          <button id="btnTutorial">Sou novo — me ensina a jogar</button>
+          <button id="btnVeteran" class="ghost">Já jogo — ir pro saguão</button>
+        </div>
+        <button id="btnZW" style="width:100%;margin-top:10px;background:linear-gradient(135deg,#4ec3ff,#7c5cff);color:#04121f">Entrar na Sala ZW (todo mundo aqui)</button>
+        <div class="hint" id="netStatus">No tutorial você treina contra um boneco. Pra jogar com os amigos agora, todos entram na <b>Sala ZW</b>.</div>
+        <div class="row" style="margin-top:6px;justify-content:center">
+          <button id="btnPlayBack" class="linklike" style="margin:0">← voltar</button>
+          <button id="btnPlayLogout" class="linklike hidden" style="margin:0;color:var(--hp-low)">Sair da conta</button>
+        </div>
+      </div>
+
+      <!-- PERFIL / PROGRESSÃO -->
+      <div id="profileView" class="hidden">
+        <div id="profileBody"></div>
+        <button id="btnProfileBack" class="linklike">← voltar</button>
+      </div>
+    </div>
+    <!-- saguão -->
+    <div id="lobby" class="hidden">
+      <div class="row" style="align-items:center">
+        <div style="flex:1"><h2 style="margin:0">Saguão</h2><div class="tag" id="lobbyWho"></div></div>
+        <div style="flex:0 0 auto"><button id="btnNewRoom">+ Criar sala</button></div>
+      </div>
+      <label style="margin-top:16px">Salas abertas</label>
+      <div id="roomList"></div>
+      <div class="hint" id="lobbyStatus"></div>
+      <details style="margin-top:8px">
+        <summary class="tag" style="cursor:pointer">entrar por código</summary>
+        <div class="row" style="margin-top:8px">
+          <input id="room" placeholder="código da sala" maxlength="16" />
+          <button id="btnJoinCode" class="ghost" style="flex:0 0 auto">Entrar</button>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <!-- ===== DRAFT ===== -->
+  <div id="draft" class="card hidden">
+    <h2>Escolha seus golpes <span class="pill" id="draftCount">0/3</span></h2>
+    <div class="hint">Sempre disponíveis (não contam no limite): <b>Soco, Chute, Carregar KI, Defesa Simples</b>.
+      Golpes de carga (T.E.>1) chegam na próxima versão.</div>
+    <div id="moveGrid" class="moves"></div>
+    <label style="margin-top:14px">Nível máximo de transformação <span class="tag">· sandbox pra testar SSJ — depois vai ser pelas suas vitórias</span></label>
+    <select id="maxLevelSel" style="width:100%;margin-top:6px;padding:11px;border-radius:10px;background:#0c0f17;color:var(--ink);border:1px solid var(--line);font-size:15px">
+      <option value="0">Base / Saiyajin (sem transformação)</option>
+      <option value="1">Até SSJ (nível 1)</option>
+      <option value="2">Até SSJ2 (nível 2)</option>
+      <option value="3">Até SSJ3 (nível 3)</option>
+      <option value="4">Até SSJ4 (nível 4)</option>
+    </select>
+    <div class="row" style="margin-top:14px">
+      <button id="btnReady" disabled>Pronto para lutar</button>
+    </div>
+    <div class="hint" id="draftWait"></div>
+  </div>
+
+  <!-- ===== BATTLE ===== -->
+  <div id="battle" class="card hidden">
+    <div class="arena" id="arena"></div>
+
+    <div class="stat" style="margin-top:14px"><span class="pill">Turno <b id="turnNo">1</b></span><span style="display:flex;gap:8px;align-items:center"><span id="phaseLabel" class="tag"></span><button id="btnMusic" class="sfxbtn">🎵 on</button><button id="btnSfx" class="sfxbtn">som: on</button></span></div>
+
+    <div class="battlebody">
+      <!-- chat / narração (esquerda) -->
+      <div class="logwrap">
+        <div class="collabel">Narração do juiz</div>
+        <div class="log" id="log"></div>
+        <div class="collabel" style="margin-top:12px">Provocações</div>
+        <div id="tauntRow" class="taunts"></div>
+        <div class="chatinput">
+          <input id="chatText" placeholder="manda um papo…" maxlength="80" />
+          <button id="chatSend" class="ghost" style="flex:0 0 auto">Enviar</button>
+        </div>
+      </div>
+
+      <!-- interação (direita) -->
+      <div class="interact">
+        <!-- selection -->
+        <div id="selectPane">
+          <div class="yourturn">SUA VEZ</div>
+          <div class="timerrow">
+            <span id="turnTimerNum" class="timernum">30</span>
+            <div class="timerwrap"><div id="turnTimerBar" class="timerbar"></div></div>
+          </div>
+          <div id="myStatus" class="pill" style="display:block;margin-bottom:8px;font-size:13px"></div>
+          <div id="oppStatus" class="oppready"></div>
+
+          <label>Comandos básicos <span class="tag">· sempre têm, não gastam KI</span></label>
+          <div id="basicGrid" class="moves"></div>
+
+          <label style="margin-top:12px">Poderes <span class="tag">· seus golpes (gastam KI)</span></label>
+          <div id="powerGrid" class="moves"></div>
+
+          <label style="margin-top:12px">Velocidade <span class="tag">· maior age primeiro; não repete até zerar</span></label>
+          <div class="hint" id="speedNote" style="margin-top:0;margin-bottom:6px"></div>
+          <div id="speedGrid" class="speeds"></div>
+
+          <div class="row" style="margin-top:14px"><button id="btnSubmit" disabled>Confirmar (em segredo)</button></div>
+        </div>
+
+        <!-- ki clash -->
+        <div id="bidPane" class="hidden">
+          <div class="card" style="background:#0c0f17">
+            <h3>Choque de KI!</h3>
+            <div class="timerrow"><span id="bidTimerNum" class="timernum">20</span><div class="timerwrap"><div id="bidTimerBar" class="timerbar"></div></div></div>
+            <div class="hint">Os dois jogaram golpe no mesmo número. Quem investir mais KI vence e anula o golpe do oponente. Empate de KI → os dois acertam.</div>
+            <label style="margin-top:10px">KI extra para potencializar (você tem <b id="bidMax">0</b>)</label>
+            <input id="bidInput" type="number" min="0" value="0" />
+            <div class="row" style="margin-top:12px"><button id="btnBid">Confirmar choque</button></div>
+          </div>
+        </div>
+
+        <!-- result / ko -->
+        <div id="koPane" class="hidden">
+          <div class="kobanner" id="koText"></div>
+          <div class="row" style="margin-top:14px">
+            <button id="btnRematch">Revanche</button>
+            <button class="ghost" id="btnKoProfile">Meu perfil</button>
+            <button class="ghost" onclick="location.reload()">Início</button>
+          </div>
+        </div>
+
+        <!-- aguardando (fora dos painéis pra nunca sumir) -->
+        <div class="hint" id="selWait"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tag center" style="margin-top:10px">Projeto de fã, sem fins comerciais — Filipe, Rafael &amp; Clebler · regras © clã Z Warriors · <b style="color:var(--gold)">chupa!!!</b></div>
+</div>
+<div id="reveal" class="reveal hidden"></div>
+
+<script>
+/* ============================================================================
+   ZW ARENA — protótipo v0.1
+   Tudo num arquivo só, de propósito (fácil de testar e de versionar como semente
+   do repo). A intenção é portar o ENGINE (puro, determinístico) pro stack Expo
+   depois SEM reescrever a lógica. Seções marcadas para o Claude Code refatorar.
+   ========================================================================== */
+
+/* ---------------------------------------------------------------------------
+   CONFIG — cole aqui as chaves do Supabase para jogar pela internet.
+   Deixe vazio para usar o modo local (2 abas via BroadcastChannel).
+   A "anon/publishable key" é pública por design (vai no client), então pode
+   ficar aqui sem problema. NUNCA cole a service_role/secret key no client.
+--------------------------------------------------------------------------- */
+const CONFIG = {
+  supabaseUrl: "https://xrddqixvhmtertcsevtz.supabase.co",       // ex.: "https://xxxx.supabase.co"
+  supabaseAnonKey: "sb_publishable_d9EX10TeLmg_8U3ApqNgZQ_s0DsPiwV",   // ex.: "sb_publishable_xxx" ou a anon key (jwt)
+};
+
+/* ---------------------------------------------------------------------------
+   DADOS DE GOLPES  (extraídos do RZW 5.0)
+   Em v0.1 só habilitamos T.E.=1 para a resolução ficar 100% correta.
+   Os de carga ficam listados como referência (charge:true) e desabilitados.
+--------------------------------------------------------------------------- */
+const GOLPES = [
+  // nome, dano, ki, te
+  ["Ashikara Kame Hame Ha",12,14,1],["Big Bang Attack",18,20,1],["Burning Attack",16,18,1],
+  ["Cho Kame Hame Ha",26,40,1],["Daichiretsuzan",20,30,1],["Dodonpa",6,6,1],
+  ["Dragon Fist",100,130,1],["Dragon Thunder",70,90,1],["Energy Spartor",6,6,1],
+  ["Eraser Cannon",16,18,1],["Eye Beam",8,8,1],["Final Flash",20,30,1],["Galick Ho",16,18,1],
+  ["Kame Hame Ha",18,20,1],["Kienzan",12,14,1],["Kikoha",8,10,1],["Kikoho",14,16,1],
+  ["Makankosappo",16,18,1],["Masenko",14,16,1],["Riogafuufuken",8,10,1],["Solar Attack",50,75,1],
+  ["Super Dodonpa",10,12,1],["Strange Fire",40,60,1],["Super Kame Hame Ha",80,100,1],
+  // carga (referência — desabilitados em v0.1)
+  ["Barekutsuhama",20,10,2],["Chame Saikoda",45,30,2],["Crasher Ball",36,24,2],
+  ["Death Ball",90,36,3],["Genki Dama",70,30,3],["Honoo",26,12,2],["Power Ball (7 esferas)",300,200,3],
+  ["Revenge Death Ball",180,150,2],
+];
+
+// monta lista de moves "draftáveis" + livres + habilidades
+const MOVES = {};
+function reg(m){ MOVES[m.id]=m; return m; }
+let _id=0; const nid=()=>"m"+(_id++);
+
+GOLPES.forEach(([name,dano,ki,te])=>{
+  reg({id:nid(),name,kind:"golpe",dano,ki,te,charge:te>1});
+});
+
+// golpes sempre disponíveis
+const SOCO = reg({id:"soco",name:"Soco",kind:"golpe",dano:1,ki:0,te:1,free:true});
+const CHUTE= reg({id:"chute",name:"Chute",kind:"golpe",dano:1,ki:0,te:1,free:true});
+
+// habilidades (draftáveis) — handlers customizados
+reg({id:"shunkanido",name:"Shunkanido",kind:"esquiva",ki:10,te:1,
+  desc:"Esquiva de 1 ataque (vence/empata) e +1 de velocidade no próximo turno."});
+reg({id:"barrier",name:"Barrier",kind:"defesa",ki:15,te:1,
+  desc:"Bloqueia 1 técnica por inteiro (vence/empata). Não toma dano nenhum."});
+reg({id:"regeneration",name:"Regeneration",kind:"cura",ki:15,te:1,hp:15,
+  desc:"+15 HP (vence/empata)."});
+reg({id:"kaioken",name:"Kaioken",kind:"buff",ki:15,te:1,
+  desc:"+5 em todos os danos até o fim da luta (vence/empata)."});
+
+// habilidades sempre disponíveis (livres)
+const CONCENTRAR = reg({id:"concentrar",name:"Carregar KI",kind:"concentra",ki:0,te:1,free:true,
+  desc:"+10 KI · não usa velocidade · mas fica sem defesa o turno todo"});
+const DEFESA = reg({id:"defesa",name:"Defesa Simples",kind:"defesa_simples",ki:0,te:1,free:true,
+  desc:"Metade do dano recebido (vence/empata)."});
+const TRANSFORMAR = reg({id:"transformar",name:"Transformar ▲",kind:"transforma",ki:0,te:1,free:true,
+  desc:"Sobe 1 nível (+1 no seu número) · ganha HP, KI, velocidade e dano"});
+
+const DRAFTABLE = Object.values(MOVES).filter(m=>!m.free);
+const KI_CAP = 100;   // nível 0
+const PICK_COUNT = 3; // golpes escolhidos no início (demo). No RZW são 5 (6 no nv3, 7 no nv4).
+// --- níveis / transformações (RZW: HP e KI somam entre níveis; velocidade e dano são os do nível atual) ---
+const LVL_HP  = {1:80, 2:100, 3:110, 4:130};
+const LVL_KI  = {1:80, 2:90,  3:100, 4:110};
+const LVL_VEL = {0:0, 1:1, 2:2, 3:3, 4:4};
+const LVL_DANO= {0:0, 1:5, 2:10, 3:15, 4:20};
+const LVL_CAP = {0:100, 1:220, 2:320, 3:430, 4:99999};
+const LVL_NAME= {0:"Base", 1:"SSJ", 2:"SSJ2", 3:"SSJ3", 4:"SSJ4"};
+const TURN_SECONDS = 30; // tempo pra escolher ação + velocidade
+const BID_SECONDS  = 20; // tempo pra resolver o choque de KI
+const NO_SPEED = new Set(["concentrar"]); // ações que NÃO exigem número de velocidade (regra). Carregar KI é a única em jogo hoje.
+
+/* ---------------------------------------------------------------------------
+   ENGINE  (puro / determinístico) — o coração do jogo.
+   resolveTurn(state, subA, subB, bids?) -> { state, events, needBid }
+   "A" é sempre p1, "B" sempre p2 (ambos os clientes calculam igual).
+--------------------------------------------------------------------------- */
+function newFighter(name, maxLevel){
+  return { name, hp:50, maxHp:50, ki:50, speeds:[1,2,3,4,5,6,7,8,9,10],
+           level:0, maxLevel:(maxLevel||0), kiCap:100,
+           moves:[], effects:{ kaioken:false, speedBonusNext:0, lvlSpeed:0, lvlDano:0 } };
+}
+function clampF(f,v){ return Math.max(0, Math.min(f.kiCap||KI_CAP, v)); }
+function dmgOf(move, fighter){
+  let d = move.dano||0;
+  if(move.kind==="golpe" && d>0){
+    if(fighter.effects.kaioken) d += 5;
+    d += (fighter.effects.lvlDano||0);
+  }
+  return d;
+}
+function classify(move){
+  if(["golpe"].includes(move.kind)) return "ATAQUE";
+  if(["defesa","defesa_simples"].includes(move.kind)) return "DEFESA";
+  if(move.kind==="esquiva") return "ESQUIVA";
+  if(move.kind==="cura"||move.kind==="buff"||move.kind==="concentra") return "UTIL";
+  return "UTIL";
+}
+
+// sub = { moveId, speed, xbonus? }
+function effSpeed(sub, f){ return sub.speed + (sub.xbonus||0) + (f.effects.lvlSpeed||0) + (f.effects.speedBonusNext||0); }
+
+function resolveTurn(state, subA, subB, bids){
+  // clona
+  const S = JSON.parse(JSON.stringify(state));
+  const a=S.p1, b=S.p2;
+  const mA=MOVES[subA.moveId], mB=MOVES[subB.moveId];
+  const ev=[];
+  const sa=effSpeed(subA,a), sb=effSpeed(subB,b);
+
+  // consumir bônus de velocidade (foi usado este turno)
+  a.effects.speedBonusNext=0; b.effects.speedBonusNext=0;
+
+  const cA=classify(mA), cB=classify(mB);
+  const aWins = sa>sb, bWins = sb>sa, tie = sa===sb;
+
+  // ---- choque de KI (dois ataques empatados) ----
+  if(tie && cA==="ATAQUE" && cB==="ATAQUE"){
+    if(!bids) return { needBid:true };
+    const bidA=Math.max(0,Math.min(bids.a||0, a.ki - (mA.ki||0)));
+    const bidB=Math.max(0,Math.min(bids.b||0, b.ki - (mB.ki||0)));
+    a.ki=clampF(a, a.ki-(mA.ki||0)-bidA);
+    b.ki=clampF(b, b.ki-(mB.ki||0)-bidB);
+    ev.push({t:"info",x:`Choque de KI! ${a.name} investe ${bidA} · ${b.name} investe ${bidB}.`});
+    if(bidA>bidB){ apply(b,a,mA,ev); ev.push({t:"info",x:`O golpe de ${b.name} foi anulado.`}); }
+    else if(bidB>bidA){ apply(a,b,mB,ev); ev.push({t:"info",x:`O golpe de ${a.name} foi anulado.`}); }
+    else { apply(b,a,mA,ev); apply(a,b,mB,ev); ev.push({t:"info",x:`KI empatou — os dois golpes acertam!`}); }
+    finishTurn(S,subA,subB,ev); return { state:S, events:ev };
+  }
+
+  // ---- resolução padrão ----
+  // defesas/esquivas resolvem com vencer OU empatar (exceção da regra)
+  const aDefends = (cA==="DEFESA"||cA==="ESQUIVA") && (sa>=sb);
+  const bDefends = (cB==="DEFESA"||cB==="ESQUIVA") && (sb>=sa);
+
+  // ações de A
+  resolveSide(a,b,subA,mA,cA,aWins||tie, bDefends?mB:null, ev);
+  // ações de B
+  resolveSide(b,a,subB,mB,cB,bWins||tie, aDefends?mA:null, ev);
+
+  finishTurn(S,subA,subB,ev);
+  return { state:S, events:ev };
+}
+
+function resolveSide(self, foe, sub, move, cls, qualifies, foeDef, ev){
+  // ATAQUE: precisa vencer estrito (empate vira choque, já tratado).
+  if(cls==="ATAQUE"){
+    if((self.ki) < (move.ki||0)){ ev.push({t:"info",x:`${self.name} não tinha KI pra ${move.name}.`}); return; }
+    self.ki=clampF(self, self.ki-(move.ki||0));  // regra do juiz: todo golpe gasta KI SEMPRE, mesmo perdendo/errando
+    if(!qualifies){ ev.push({t:"info",x:`${self.name} foi mais lento — ${move.name} não saiu, mas gastou ${move.ki||0} de KI.`}); return; }
+    // defesa do oponente?
+    if(foeDef && foeDef.kind==="barrier"){ ev.push({t:"info",x:`${foe.name} ergue o Barrier e absorve o ${move.name} por inteiro!`}); return; }
+    if(foeDef && foeDef.kind==="esquiva"){ ev.push({t:"info",x:`${foe.name} usa Shunkanido e some — o ${move.name} passa direto!`}); foe.effects.speedBonusNext=1; return; }
+    let d=dmgOf(move,self);
+    if(foeDef && (foeDef.kind==="defesa"||foeDef.kind==="defesa_simples")){ d=Math.floor(d/2); ev.push({t:"info",x:`${foe.name} se defende — dano pela metade.`}); }
+    foe.hp=Math.max(0,foe.hp-d);
+    ev.push({t:"dmg",x:`${self.name} acerta ${move.name} em ${foe.name} — ${d} de dano!`});
+    return;
+  }
+  // ações não-ataque resolvem com vencer/empatar (concentrar sempre resolve)
+  if(cls==="UTIL"){
+    if(move.kind==="transforma"){
+      if(!qualifies){ ev.push({t:"info",x:`${self.name} tentou se transformar mas foi mais lento.`}); return; }
+      if((self.level||0) >= (self.maxLevel||0)){ ev.push({t:"info",x:`${self.name} já está no nível máximo.`}); return; }
+      const L = self.level = (self.level||0)+1;
+      self.hp += (LVL_HP[L]||0);
+      self.maxHp = (self.maxHp||50) + (LVL_HP[L]||0);
+      self.kiCap = LVL_CAP[L] || self.kiCap;
+      self.ki = clampF(self, self.ki + (LVL_KI[L]||0));
+      self.effects.lvlSpeed = LVL_VEL[L]||0;   // não soma: é o valor do nível atual
+      self.effects.lvlDano  = LVL_DANO[L]||0;
+      ev.push({t:"heal",x:`${self.name} explode em ${LVL_NAME[L]}! +${LVL_HP[L]} HP, +${LVL_KI[L]} KI, velocidade +${LVL_VEL[L]}, dano +${LVL_DANO[L]}.`});
+      return;
+    }
+    if(move.kind==="concentra"){ const before=self.ki; self.ki=clampF(self, self.ki+10); ev.push({t:"info",x:`${self.name} concentra KI (+${self.ki-before}). Fica vulnerável.`}); return; }
+    if(!qualifies){ ev.push({t:"info",x:`${self.name} foi mais lento e não conseguiu usar ${move.name}.`}); return; }
+    if(self.ki<(move.ki||0)){ ev.push({t:"info",x:`${self.name} sem KI pra ${move.name}.`}); return; }
+    self.ki=clampF(self, self.ki-(move.ki||0));
+    if(move.kind==="cura"){ self.hp+=move.hp; ev.push({t:"heal",x:`${self.name} usa Regeneration (+${move.hp} HP).`}); }
+    if(move.kind==="buff"){ self.effects.kaioken=true; ev.push({t:"info",x:`${self.name} ativa Kaioken! +5 em todos os danos.`}); }
+    return;
+  }
+  // DEFESA/ESQUIVA sem ataque pra defender
+  if(cls==="DEFESA"||cls==="ESQUIVA"){
+    if(qualifies){
+      if(self.ki<(move.ki||0)){ ev.push({t:"info",x:`${self.name} sem KI pra ${move.name}.`}); return; }
+      self.ki=clampF(self, self.ki-(move.ki||0));
+      if(move.kind==="esquiva"){ self.effects.speedBonusNext=1; ev.push({t:"info",x:`${self.name} usa Shunkanido (+1 de velocidade no próximo turno).`}); }
+      else ev.push({t:"info",x:`${self.name} fica em guarda (${move.name}).`});
+    } else {
+      ev.push({t:"info",x:`${self.name} tentou ${move.name} mas perdeu no número.`});
+    }
+  }
+}
+
+function apply(target, attacker, move, ev){
+  if(attacker.ki<(move.ki||0)){ ev.push({t:"info",x:`${attacker.name} sem KI pra ${move.name}.`}); return; }
+  const d=dmgOf(move,attacker);
+  target.hp=Math.max(0,target.hp-d);
+  ev.push({t:"dmg",x:`${attacker.name} acerta ${move.name} em ${target.name} — ${d} de dano!`});
+}
+
+function finishTurn(S,subA,subB){
+  consumeSpeed(S.p1,subA.speed); consumeSpeed(S.p2,subB.speed);
+  S.turn=(S.turn||1)+1;
+  S.over = S.p1.hp<=0 || S.p2.hp<=0;
+  if(S.over){
+    if(S.p1.hp<=0 && S.p2.hp<=0) S.winner="empate";
+    else S.winner = S.p1.hp<=0 ? "p2" : "p1";
+  }
+}
+function consumeSpeed(f,n){ f.speeds=f.speeds.filter(x=>x!==n); if(f.speeds.length===0) f.speeds=[1,2,3,4,5,6,7,8,9,10]; }
+
+/* ---------------------------------------------------------------------------
+   TRANSPORT  — abstração de rede. Local (BroadcastChannel) já funciona.
+   Supabase entra sozinho se CONFIG tiver chaves. Mesma interface dos dois.
+   send(type,payload) / onMessage(cb)
+--------------------------------------------------------------------------- */
+const ONLINE = !!(CONFIG.supabaseUrl && CONFIG.supabaseAnonKey);
+let _sbClient=null;
+async function getSupabase(){
+  if(_sbClient) return _sbClient;
+  const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2");
+  _sbClient = createClient(CONFIG.supabaseUrl, CONFIG.supabaseAnonKey);
+  return _sbClient;
+}
+
+class LocalTransport{
+  constructor(room){ this.ch=new BroadcastChannel("zw-"+room); this.cbs=[];
+    this.ch.onmessage=e=>this.cbs.forEach(cb=>cb(e.data)); }
+  send(type,payload){ this.ch.postMessage({type,payload,from:ME.id}); }
+  onMessage(cb){ this.cbs.push(cb); }
+}
+class SupabaseTransport{
+  constructor(room){ this.room=room; this.cbs=[]; this.ready=false; this.queue=[]; this._init(); }
+  async _init(){
+    try{
+      this.sb=await getSupabase();
+      this.chan=this.sb.channel("zw-"+this.room,{config:{broadcast:{self:false}}});
+      this.chan.on("broadcast",{event:"msg"},({payload})=>this.cbs.forEach(cb=>cb(payload)));
+      await this.chan.subscribe(s=>{ if(s==="SUBSCRIBED"){ this.ready=true; this.queue.forEach(m=>this._raw(m)); this.queue=[]; } });
+    }catch(err){ console.error("Supabase indisponível, caindo pro modo local:",err); alert("Não consegui conectar no Supabase neste ambiente. Use o modo local (2 abas) ou rode fora do sandbox."); }
+  }
+  _raw(m){ this.chan.send({type:"broadcast",event:"msg",payload:m}); }
+  send(type,payload){ const m={type,payload,from:ME.id}; if(this.ready) this._raw(m); else this.queue.push(m); }
+  onMessage(cb){ this.cbs.push(cb); }
+}
+function makeTransport(room){ return ONLINE ? new SupabaseTransport(room) : new LocalTransport(room); }
+
+/* ---------------------------------------------------------------------------
+   LOBBY  — registro de salas abertas (lista do saguão).
+   Online: Presence num canal "zw:lobby" (host se anuncia, todos veem).
+   Local: BroadcastChannel com anúncio + heartbeat (testar em 2 abas).
+   onChange(cb) recebe a lista [{room,nick}]. announce/unannounce do host.
+--------------------------------------------------------------------------- */
+class LocalLobby{
+  constructor(){ this.ch=new BroadcastChannel("zw:lobby"); this.cbs=[]; this.rooms={}; this.mine=null;
+    this.ch.onmessage=e=>this._on(e.data);
+    this.ch.postMessage({t:"list?"});
+    this._hb=setInterval(()=>{ if(this.mine) this.ch.postMessage({t:"room",info:this.mine}); this._sweep(); },2000);
+  }
+  _on(m){
+    if(m.t==="room"){ this.rooms[m.info.room]={...m.info,ts:Date.now()}; this._emit(); }
+    else if(m.t==="close"){ delete this.rooms[m.room]; this._emit(); }
+    else if(m.t==="list?"){ if(this.mine) this.ch.postMessage({t:"room",info:this.mine}); }
+  }
+  _sweep(){ const now=Date.now(); let ch=false; for(const k in this.rooms){ if(now-this.rooms[k].ts>6000){ delete this.rooms[k]; ch=true; } } if(ch) this._emit(); }
+  _emit(){ const l=Object.values(this.rooms); this.cbs.forEach(cb=>cb(l)); }
+  announce(info){ this.mine=info; this.ch.postMessage({t:"room",info}); }
+  unannounce(){ if(this.mine){ this.ch.postMessage({t:"close",room:this.mine.room}); this.mine=null; } }
+  onChange(cb){ this.cbs.push(cb); cb(Object.values(this.rooms)); }
+}
+class SupabaseLobby{
+  constructor(){ this.cbs=[]; this.ready=false; this.pending=null; this._init(); }
+  async _init(){
+    try{
+      const sb=await getSupabase();
+      this.chan=sb.channel("zw:lobby",{config:{presence:{key:ME.id}}});
+      this.chan.on("presence",{event:"sync"},()=>this._emit());
+      this.chan.on("presence",{event:"join"},()=>this._emit());
+      this.chan.on("presence",{event:"leave"},()=>this._emit());
+      await this.chan.subscribe(async s=>{ if(s==="SUBSCRIBED"){ this.ready=true; if(this.pending) await this.chan.track(this.pending); this._emit(); } });
+    }catch(err){ console.error("Lobby Supabase indisponível:",err); }
+  }
+  _emit(){ if(!this.chan) return; const st=this.chan.presenceState(); const rooms=[];
+    Object.values(st).forEach(arr=>arr.forEach(p=>{ if(p && p.room) rooms.push({room:p.room,nick:p.nick}); }));
+    this.cbs.forEach(cb=>cb(rooms)); }
+  async announce(info){ this.pending=info; if(this.ready) await this.chan.track(info); }
+  async unannounce(){ this.pending=null; if(this.ready&&this.chan) await this.chan.untrack(); }
+  onChange(cb){ this.cbs.push(cb); }
+}
+function makeLobby(){ return ONLINE ? new SupabaseLobby() : new LocalLobby(); }
+
+/* ---------------------------------------------------------------------------
+   CONTROLLER / UI
+--------------------------------------------------------------------------- */
+const $=s=>document.querySelector(s);
+const ME={ id:Math.random().toString(36).slice(2), nick:"", seat:null }; // seat: "p1"|"p2"
+let net=null, room="", peer={ nick:null, ready:false, moves:null };
+let lobby=null, lobbyRooms=[];
+let state=null;          // estado global da luta {p1,p2,turn,over,winner}
+let sel={ moveId:null, speed:null };
+let mySub=null, peerSub=null;     // submissões do turno atual
+let myBid=null, peerBid=null;
+let phase="home";
+let MODE="pvp";           // "pvp" | "tutorial"
+let coachFlags={};        // dicas do tutorial (uma vez cada)
+
+function show(id){ ["home","draft","battle"].forEach(x=>$("#"+x).classList.toggle("hidden",x!==id)); if(id==="home") stopMusic(); }
+
+/* ---- HOME / SAGUÃO ---- */
+function enterLobby(){
+  const nick=$("#nick").value.trim();
+  if(!nick){ $("#netStatus").textContent="Digite seu nick."; return; }
+  MODE="pvp"; ME.nick=nick;
+  $("#entry").classList.add("hidden");
+  $("#lobby").classList.remove("hidden");
+  $("#lobbyWho").textContent = "Você: "+nick+(ONLINE? " · online" : " · local (teste em 2 abas)");
+  $("#lobbyStatus").textContent = ONLINE? "" : "Modo local: abra outra aba no mesmo navegador pra ver/entrar nas salas.";
+  lobby=makeLobby();
+  lobby.onChange(renderRoomList);
+}
+$("#btnVeteran").onclick=enterLobby;
+$("#btnTutorial").onclick=startTutorial;
+$("#btnZW").onclick=joinZW;
+$("#btnNewRoom").onclick=()=>createRoom();
+$("#btnJoinCode").onclick=()=>joinRoom($("#room").value.trim());
+
+function genCode(){ return Math.random().toString(36).slice(2,6); }
+function createRoom(){
+  const code=genCode();
+  if(lobby) lobby.announce({room:code, nick:ME.nick});
+  start("p1", code);
+}
+function joinRoom(code){
+  if(!code) return;
+  if(lobby) lobby.unannounce();
+  start("p2", code);
+}
+function renderRoomList(rooms){
+  lobbyRooms=rooms;
+  const box=$("#roomList"); if(!box) return; box.innerHTML="";
+  const others=rooms.filter(r=>r.room!==room);
+  if(!others.length){ box.innerHTML='<div class="hint">Nenhuma sala aberta ainda. Clique em “+ Criar sala”.</div>'; return; }
+  others.forEach(r=>{
+    const el=document.createElement("div"); el.className="roomitem";
+    el.innerHTML=`<div><div class="ri-name">${esc(r.nick||"?")}</div><div class="ri-code">sala ${esc(r.room)}</div></div>`;
+    const b=document.createElement("button"); b.textContent="Entrar"; b.onclick=()=>joinRoom(r.room);
+    el.appendChild(b); box.appendChild(el);
+  });
+}
+function esc(s){ return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+function start(seat, roomCode){
+  ME.seat=seat; room=roomCode;
+  net=makeTransport(room);
+  net.onMessage(onNet);
+  net.send("hello",{id:ME.id, nick:ME.nick, seat});
+  buildDraft(); show("draft");
+  $("#draftWait").innerHTML = waitHtml(`Sala ${esc(room)} criada`, "esperando um oponente entrar pela lista do saguão");
+}
+function joinZW(){
+  MODE="pvp"; ME.nick=($("#nick").value.trim()||("Guerreiro"+Math.floor(Math.random()*900+100)));
+  ME.seat=null;  // assento decidido pelo handshake (por id)
+  $("#entry").classList.add("hidden");
+  room="ZW"; net=makeTransport(room); net.onMessage(onNet);
+  net.send("hello",{id:ME.id, nick:ME.nick});
+  buildDraft(); show("draft");
+  $("#draftWait").innerHTML = waitHtml("Sala ZW · teste", "esperando outro guerreiro — peça pro Rafael e o Clebler abrirem o link e clicarem em 'Sala ZW'");
+  startMusic();
+}
+function negotiateSeat(){ if(ME.seat==null && peer.id){ ME.seat = (ME.id < peer.id) ? "p1" : "p2"; } }
+function peerArrived(){
+  if(state) return; // já em luta
+  $("#draftWait").innerHTML = waitHtml(`Oponente conectado: ${esc(peer.nick||"?")}`, "escolha seus golpes e clique em 'Pronto para lutar'");
+}
+
+/* ---- TUTORIAL (treino vs boneco, com o juiz ensinando) ---- */
+const INTRO = [
+  ["Bem-vindo, guerreiro!","Eu sou o juiz — vou te ensinar a lutar no estilo Z Warriors. Cada um começa com <b>50 de HP</b> e <b>50 de KI</b>. Quem zerar o HP do outro, vence."],
+  ["O segredo é a velocidade","A cada turno os dois escolhem <b>em segredo</b> uma ação e um número de velocidade de 1 a 10. Quem disser o número <b>maior</b> age primeiro. Cada número só pode ser usado uma vez — quando zerar os dez, eles voltam."],
+  ["Golpe sempre custa KI","Golpes gastam KI — e aqui vale a regra da casa do Rafael: <b>todo golpe gasta KI sempre</b>, mesmo que você perca no número ou erre. Pense bem antes de mandar."],
+  ["Carregar KI é o motor","Sem KI você não solta poder nenhum. <b>Carregar KI</b> (o botão dourado) te dá +10 e é o <b>único comando que não usa número de velocidade</b> — mas no turno que você carrega, fica <b>sem defesa</b>. Use nas brechas."],
+  ["Defesa e Choque de KI","<b>Defesa Simples</b> corta o dano recebido pela metade. E se os dois mandarem golpe no <b>mesmo número</b>, rola o <b>Choque de KI</b>: cada um aposta KI escondido — quem apostar mais vence e anula o golpe do outro."],
+  ["Transformações","Dá pra <b>subir de nível no meio da luta</b>: SSJ, SSJ2, até SSJ4. Cada transformação soma HP e KI e aumenta velocidade e dano. No próximo passo você escolhe seu <b>nível máximo</b> pra treinar (depois isso vem das suas vitórias)."],
+  ["Relógio e papo","Você tem um tempo por jogada — se zerar, você Carrega KI automático e a luta segue. E pode <b>provocar o oponente no chat</b> durante a luta. Bora treinar contra o boneco!"]
+];
+let introIdx=0;
+function startTutorial(){
+  MODE="tutorial"; ME.nick=($("#nick").value.trim()||"Novato"); ME.seat="p1"; coachFlags={};
+  $("#entry").classList.add("hidden");
+  introIdx=0; showIntro();
+}
+function showIntro(){
+  if(introIdx>=INTRO.length){ goTutorialDraft(); return; }
+  const [t,b]=INTRO[introIdx];
+  coachBox(b, introIdx<INTRO.length-1?"Próximo":"Escolher meus golpes", ()=>{ introIdx++; showIntro(); }, t);
+}
+function goTutorialDraft(){
+  buildDraft(); show("draft");
+  coachBox("Escolha 3 golpes — eles ficam fixos até o fim da luta. Soco, Chute, Carregar KI e Defesa Simples são sempre grátis. Quando escolher, clique em 'Pronto para lutar'.", null, null, "Monte seu set");
+}
+function myMaxLevel(){ const s=$("#maxLevelSel"); return s ? (parseInt(s.value,10)||0) : 0; }
+function startTutorialBattle(){
+  const ml=myMaxLevel();
+  const meF=newFighter(ME.nick, ml); meF.moves=draftSel.slice();
+  const botF=newFighter("Boneco de Treino", ml); botF.moves=botDraft();
+  state={p1:meF,p2:botF,turn:1}; myReady=true; peer.ready=true;
+  startBattle();
+  coachBox("Sua vez! Escolha uma ação e um número de velocidade. Maior número age primeiro — confirme antes do tempo acabar.", null, null, "Lute!");
+}
+/* coachBox(corpo, btnLabel|null, onClick|null, titulo|null) */
+function coachBox(body, btnLabel, onClick, title){
+  const box=$("#coachBox"); if(!box) return;
+  box.classList.remove("hidden");
+  box.innerHTML = `<div class="judge"></div><div class="ctxt"><div class="ctitle">${esc(title||"Juiz")}</div><div class="cbody">${body}</div></div>`;
+  if(btnLabel){ const b=document.createElement("button"); b.textContent=btnLabel; b.onclick=onClick; box.querySelector(".ctxt").appendChild(b); }
+}
+/* ---- boneco de treino ---- */
+function findMove(name){ const m=Object.values(MOVES).find(x=>x.name===name); return m?m.id:null; }
+function botDraft(){ return ["Kame Hame Ha","Galick Ho","Masenko"].map(findMove).filter(Boolean); }
+function botSubmit(){
+  const f=state.p2;
+  const pool=[...f.moves,"soco","chute","concentrar","defesa"];
+  if((f.level||0) < (f.maxLevel||0)) pool.push("transformar");
+  const aff=pool.filter(id=>{ const m=MOVES[id]; return (m.ki||0)<=f.ki; });
+  const moveId=aff[Math.floor(Math.random()*aff.length)]||"defesa";
+  const speed = NO_SPEED.has(moveId) ? 0 : f.speeds[Math.floor(Math.random()*f.speeds.length)];
+  const sub={moveId,speed,seat:"p2"};
+  if(moveId==="transformar") sub.xbonus=1;
+  return sub;
+}
+function botBidValue(){
+  if(!pendingSubs) return 0;
+  const m=MOVES[pendingSubs.subB.moveId]; const max=Math.max(0, state.p2.ki-(m.ki||0));
+  return Math.floor(Math.random()*Math.min(15,max+1));
+}
+
+/* ---- NET ---- */
+function onNet(msg){
+  if(msg.from===ME.id) return;
+  const {type,payload}=msg;
+  if(type==="hello"){ peer.nick=payload.nick; peer.id=payload.id; negotiateSeat(); if(lobby) lobby.unannounce(); net.send("hello-ack",{id:ME.id,nick:ME.nick,seat:ME.seat}); peerArrived(); }
+  if(type==="hello-ack"){ peer.nick=payload.nick; peer.id=payload.id; negotiateSeat(); if(lobby) lobby.unannounce(); peerArrived(); }
+  if(type==="ready"){ peer.ready=true; peer.moves=payload.moves; peer.nick=payload.nick; peer.maxLevel=payload.maxLevel||0; $("#draftWait").innerHTML = waitHtml(`${esc(peer.nick)} está pronto!`, "termine de escolher seus golpes"); tryStartBattle(); }
+  if(type==="submit"){ peerSub=payload; if(!mySub){ const e=$("#oppStatus"); if(e) e.innerHTML='<span class="eff">Oponente já jogou — sua vez!</span>'; } maybeReveal(); }
+  if(type==="bid"){ peerBid=payload.bid; maybeResolveBid(); }
+  if(type==="chat"){ chatMsg(payload.nick, payload.text, false); }
+}
+
+/* ---- DRAFT ---- */
+function buildDraft(){
+  const grid=$("#moveGrid"); grid.innerHTML="";
+  DRAFTABLE.forEach(m=>{
+    const el=document.createElement("div");
+    el.className="move"+(m.charge?" dis":"");
+    const sub = m.kind==="golpe" ? `Dano ${m.dano} · KI ${m.ki} · T.E.${m.te}` : (m.desc||`KI ${m.ki}`);
+    el.innerHTML=`<div class="mn">${m.name}</div><div class="ms">${sub}</div>`+(m.charge?`<span class="badge">carga</span>`:"");
+    if(!m.charge) el.onclick=()=>toggleDraft(m.id,el);
+    grid.appendChild(el);
+  });
+}
+let draftSel=[];
+function toggleDraft(id,el){
+  const i=draftSel.indexOf(id);
+  if(i>=0){ draftSel.splice(i,1); el.classList.remove("sel"); }
+  else { if(draftSel.length>=PICK_COUNT){ return; } draftSel.push(id); el.classList.add("sel"); }
+  $("#draftCount").textContent=draftSel.length+"/"+PICK_COUNT;
+  $("#btnReady").disabled = draftSel.length!==PICK_COUNT;
+}
+$("#btnReady").onclick=()=>{
+  $("#btnReady").disabled=true;
+  if(MODE==="tutorial"){ startTutorialBattle(); return; }
+  net.send("ready",{moves:draftSel,nick:ME.nick,maxLevel:myMaxLevel()});
+  $("#draftWait").innerHTML=waitHtml("Você está pronto", "esperando o oponente escolher os golpes");
+  myReady=true; peer.moves=peer.moves; tryStartBattle();
+};
+let myReady=false;
+function tryStartBattle(){
+  if(myReady && peer.ready && peer.moves){
+    // monta estado: p1/p2 determinístico independente do assento
+    const meF=newFighter(ME.nick, myMaxLevel()); meF.moves=draftSel.slice();
+    const peF=newFighter(peer.nick||"Oponente", peer.maxLevel||0); peF.moves=peer.moves.slice();
+    state = ME.seat==="p1" ? {p1:meF,p2:peF,turn:1} : {p1:peF,p2:meF,turn:1};
+    state.turn=1;
+    startBattle();
+  }
+}
+
+/* ---- BATTLE ---- */
+function meKey(){ return ME.seat; }
+function foeKey(){ return ME.seat==="p1"?"p2":"p1"; }
+function myF(){ return state[meKey()]; }
+function foeF(){ return state[foeKey()]; }
+
+function startBattle(){ show("battle"); logTurnSep(); renderArena(); buildSelection(); buildChat(); startMusic(); syncNick(); }
+
+function renderArena(){
+  const a=$("#arena"); a.innerHTML="";
+  [ [myF(),true],[foeF(),false] ].forEach(([f,mine])=>{
+    const hpPct=Math.max(0,Math.min(100,f.hp/(f.maxHp||50)*100));
+    const kiPct=Math.max(0,Math.min(100,f.ki/(f.kiCap||KI_CAP)*100));
+    const effs=[]; if(f.effects.kaioken)effs.push("Kaioken"); if(f.effects.speedBonusNext)effs.push("+1 veloc.");
+    const buffed = f.effects.kaioken || f.effects.speedBonusNext || (f.level>0);
+    const oc=orbColors(f.name);
+    const lowHp = f.hp <= (f.maxHp||50)*0.3;
+    const lvlPill = f.level>0 ? `<span class="pill" style="background:rgba(255,206,77,.18);color:var(--gold);border-color:rgba(255,206,77,.5)">${LVL_NAME[f.level]}</span>` : '';
+    const el=document.createElement("div");
+    el.className="fighter"+(mine?" me":"")+(buffed?" aura":"");
+    el.dataset.seat = mine?meKey():foeKey();
+    el.innerHTML=`
+      <div class="fhead">
+        <div class="orb" style="--orb:${oc.c};--orb-glow:${oc.glow}"></div>
+        <div class="fname">${f.name||"?"} ${lvlPill} ${mine?'<span class="pill">você</span>':''}</div>
+      </div>
+      <div class="bar ${lowHp?'low':''}"><i class="hpfill" style="width:${hpPct}%;background:${lowHp?'linear-gradient(90deg,#c0263b,var(--hp-low))':''}"></i></div>
+      <div class="stat"><span>HP</span><span>${f.hp}/${f.maxHp||50}</span></div>
+      <div class="bar"><i class="kifill" style="width:${kiPct}%"></i></div>
+      <div class="stat"><span>KI</span><span>${f.ki}/${f.kiCap||KI_CAP}</span></div>
+      <div class="effects">${effs.map(e=>`<span class="eff">${e}</span>`).join("")}</div>`;
+    a.appendChild(el);
+  });
+  $("#turnNo").textContent=state.turn;
+}
+
+function buildSelection(){
+  $("#selectPane").classList.remove("hidden");
+  $("#bidPane").classList.add("hidden");
+  $("#koPane").classList.add("hidden");
+  $("#selWait").textContent="";
+  $("#oppStatus").innerHTML="";
+  $("#phaseLabel").textContent="escolha sua ação em segredo";
+  const f=myF();
+  $("#myStatus").innerHTML = `Seu status — HP <b>${f.hp}/${f.maxHp||50}</b> · KI <b>${f.ki}/${f.kiCap||KI_CAP}</b>`+(f.level>0?` · <b style="color:var(--gold)">${LVL_NAME[f.level]}</b>`:"");
+  sel={moveId:null,speed:null}; mySub=null; peerSub=null; myBid=null; peerBid=null;
+  // comandos básicos (sempre, grátis) e poderes (golpes escolhidos)
+  const basics=["soco","chute","concentrar","defesa"];
+  if((f.level||0) < (f.maxLevel||0)) basics.push("transformar");
+  fillMoves($("#basicGrid"), basics);
+  fillMoves($("#powerGrid"), myF().moves);
+  // velocidades
+  const sg=$("#speedGrid"); sg.innerHTML=""; sg.classList.remove("disabled"); if($("#speedNote")) $("#speedNote").textContent="";
+  for(let n=1;n<=10;n++){
+    const used=!myF().speeds.includes(n);
+    const el=document.createElement("div");
+    el.className="spd"+(used?" used":"");
+    el.textContent=n;
+    if(!used) el.onclick=()=>{ if(sel.moveId && NO_SPEED.has(sel.moveId)) return; sel.speed=n; [...sg.children].forEach(c=>c.classList.remove("sel")); el.classList.add("sel"); checkSubmit(); };
+    sg.appendChild(el);
+  }
+  runTimer(TURN_SECONDS, $("#turnTimerNum"), $("#turnTimerBar"), autoSubmitTimeout);
+  // dicas contextuais do tutorial (uma vez cada)
+  if(MODE==="tutorial"){
+    if((f.level||0) < (f.maxLevel||0) && !coachFlags.cantransform){
+      coachFlags.cantransform=true;
+      coachBox("Olha o botão laranja <b>Transformar ▲</b>! Escolha um número de velocidade e mande — se você ganhar/empatar, sobe pra "+(LVL_NAME[(f.level||0)+1]||"o próximo nível")+" e fica mais forte. Ótimo pra virar o jogo.", null, null, "Hora de evoluir");
+    } else if(f.ki < 15 && !coachFlags.lowki){
+      coachFlags.lowki=true;
+      coachBox("Seu KI tá baixo — sem KI não sai golpe. Usa o <b>Carregar KI</b> (botão dourado): +10 e não gasta número de velocidade. Só cuidado, nesse turno você fica sem defesa.", null, null, "Recarrega!");
+    }
+  }
+}
+function checkSubmit(){
+  const ok = sel.moveId && (sel.speed || NO_SPEED.has(sel.moveId));
+  $("#btnSubmit").disabled = !ok;
+}
+function fillMoves(grid, ids){
+  if(!grid) return; grid.innerHTML="";
+  ids.forEach(id=>{
+    const m=MOVES[id]; if(!m) return;
+    const el=document.createElement("div");
+    const unaffordable = (m.ki||0) > myF().ki;   // sem KI -> não dá pra escolher
+    const hot = (id==="concentrar");
+    const tf  = (id==="transformar");
+    el.className="move"+(unaffordable?" dis":"")+(hot?" hot":"")+(tf?" tf":"");
+    const sub = m.kind==="golpe" ? `Dano ${m.dano} · KI ${m.ki}` : (m.desc || (m.ki?`KI ${m.ki}`:"grátis"));
+    let badge = unaffordable ? `<span class="badge" style="background:#e0354f;color:#fff">sem KI</span>` : (hot?`<span class="badge">sem vel.</span>`:"");
+    if(tf){ const nx=(myF().level||0)+1; badge=`<span class="badge" style="background:var(--gold);color:#3a2600">→ ${LVL_NAME[nx]||("nv"+nx)}</span>`; }
+    el.innerHTML=`<div class="mn">${m.name}</div><div class="ms">${sub}</div>`+badge;
+    if(!unaffordable) el.onclick=()=>pickMove(id, el);
+    grid.appendChild(el);
+  });
+}
+function pickMove(id, el){
+  sel.moveId=id;
+  document.querySelectorAll("#selectPane .move.sel").forEach(c=>c.classList.remove("sel"));
+  el.classList.add("sel");
+  applySpeedRule();
+  checkSubmit();
+}
+function applySpeedRule(){
+  const sg=$("#speedGrid"), note=$("#speedNote");
+  if(sel.moveId && NO_SPEED.has(sel.moveId)){
+    sel.speed=null; if(sg){ sg.querySelectorAll(".spd").forEach(c=>c.classList.remove("sel")); sg.classList.add("disabled"); }
+    if(note) note.textContent="Carregar KI não usa velocidade — confirme direto. Mas você fica sem defesa neste turno.";
+  } else {
+    if(sg) sg.classList.remove("disabled"); if(note) note.textContent="";
+  }
+}
+
+function doSubmit(auto){
+  clearTimer();
+  const speed = (sel.moveId && NO_SPEED.has(sel.moveId)) ? 0 : sel.speed;
+  mySub={ moveId:sel.moveId, speed, seat:ME.seat };
+  if(sel.moveId==="transformar") mySub.xbonus=1;
+  $("#selectPane").classList.add("hidden");
+  $("#phaseLabel").textContent = MODE==="tutorial" ? "o juiz resolve…" : "aguardando oponente";
+  $("#selWait").innerHTML = waitHtml(auto?"Tempo esgotado — você carregou KI!":"Confirmado em segredo", MODE==="tutorial"?"o boneco responde…":"esperando o oponente jogar");
+  if(net) net.send("submit",mySub);
+  if(MODE==="tutorial"){ peerSub=botSubmit(); setTimeout(maybeReveal,550); }
+  else maybeReveal();
+}
+function autoSubmitTimeout(){
+  if(!sel.moveId) sel.moveId="concentrar";   // regra do juiz: sem jogada no tempo -> Carregar KI
+  if(!NO_SPEED.has(sel.moveId) && !sel.speed){ const av=myF().speeds; sel.speed=av[Math.floor(Math.random()*av.length)]; }
+  doSubmit(true);
+}
+$("#btnSubmit").onclick=()=>doSubmit(false);
+
+function subBySeat(seat){ if(mySub&&mySub.seat===seat)return mySub; if(peerSub&&peerSub.seat===seat)return peerSub; return null; }
+
+function maybeReveal(){
+  if(!(mySub&&peerSub)) return;
+  const subA=subBySeat("p1"), subB=subBySeat("p2");
+  showReveal(subA,subB,()=>{
+    const r=resolveTurn(state,subA,subB,null);
+    if(r.needBid){ openBid(subA,subB); return; }
+    commit(r,subA,subB);
+  });
+}
+function speedLabel(sub){ return sub.speed ? `vel ${sub.speed}` : "sem velocidade"; }
+function showReveal(subA,subB,cb){
+  const A=state.p1,B=state.p2,mA=MOVES[subA.moveId],mB=MOVES[subB.moveId];
+  const el=$("#reveal");
+  if(!el){ cb(); return; }
+  el.innerHTML=`<div class="rv">
+    <div class="side">${esc(A.name)}<small>${esc(mA.name)} · ${speedLabel(subA)}</small></div>
+    <div class="vs">VS</div>
+    <div class="side">${esc(B.name)}<small>${esc(mB.name)} · ${speedLabel(subB)}</small></div>
+  </div>`;
+  el.classList.remove("hidden");
+  setTimeout(()=>{ el.classList.add("hidden"); cb(); }, 1050);
+}
+
+/* ---- choque de KI ---- */
+let pendingSubs=null;
+function openBid(subA,subB){
+  pendingSubs={subA,subB};
+  $("#bidPane").classList.remove("hidden");
+  $("#phaseLabel").textContent="choque de KI";
+  const mMy=MOVES[(ME.seat==="p1"?subA:subB).moveId];
+  const maxBid=Math.max(0, myF().ki-(mMy.ki||0));
+  $("#bidMax").textContent=maxBid; $("#bidInput").max=maxBid; $("#bidInput").value=0;
+  $("#selWait").textContent="";
+  if(MODE==="tutorial" && !coachFlags.clash){ coachFlags.clash=true; coachBox("Os dois jogaram golpe no mesmo número! Agora é o CHOQUE DE KI: invista quanto quiser do seu KI. Quem investir mais vence e anula o golpe do outro.", null); }
+  runTimer(BID_SECONDS, $("#bidTimerNum"), $("#bidTimerBar"), autoBidTimeout);
+}
+function doBid(){
+  clearTimer();
+  myBid=Math.max(0,parseInt($("#bidInput").value||"0",10));
+  $("#bidPane").classList.add("hidden");
+  $("#selWait").innerHTML = waitHtml("Choque enviado","esperando o KI do oponente");
+  if(net) net.send("bid",{bid:myBid,seat:ME.seat});
+  if(MODE==="tutorial"){ peerBid=botBidValue(); setTimeout(maybeResolveBid,450); }
+  else maybeResolveBid();
+}
+function autoBidTimeout(){ $("#bidInput").value=0; doBid(); }
+$("#btnBid").onclick=()=>doBid();
+function maybeResolveBid(){
+  if(myBid==null||peerBid==null||!pendingSubs) return;
+  const bids = ME.seat==="p1" ? {a:myBid,b:peerBid} : {a:peerBid,b:myBid};
+  const r=resolveTurn(state,pendingSubs.subA,pendingSubs.subB,bids);
+  commit(r,pendingSubs.subA,pendingSubs.subB); pendingSubs=null;
+}
+
+/* ---- commit do turno ---- */
+function commit(r,subA,subB){
+  const before = { p1:{hp:state.p1.hp,ki:state.p1.ki}, p2:{hp:state.p2.hp,ki:state.p2.ki} };
+  state=r.state;
+  logTurnSep();
+  logLine("info", narrChoice(subA,"p1")+" | "+narrChoice(subB,"p2"));
+  r.events.forEach(e=>logLine(e.t,e.x));
+  renderArena();
+  playFx(before);
+  if(MODE==="tutorial" && !coachFlags.firstResult && !state.over){ coachFlags.firstResult=true; coachBox("Viu? Quem disse o número maior agiu primeiro. E repare: o KI caiu — todo golpe gasta KI, acertando ou não. Continue até zerar o HP do boneco!", null); }
+  if(state.over){ endGame(); return; }
+  buildSelection();
+}
+function narrChoice(sub,seat){
+  const f=state[seat]; const m=MOVES[sub.moveId];
+  return `${f.name}: ${m.name} (${speedLabel(sub)})`;
+}
+
+function endGame(){
+  clearTimer();
+  stopMusic();
+  $("#selectPane").classList.add("hidden"); $("#bidPane").classList.add("hidden");
+  $("#koPane").classList.remove("hidden");
+  let txt;
+  if(state.winner==="empate") txt="DUPLO K.O. — Empate!";
+  else { const w=state[state.winner]; txt=`K.O.! ${w.name} venceu!`; }
+  $("#koText").textContent=txt;
+  $("#phaseLabel").textContent="fim de luta";
+  playSfx("ko");
+  ["p1","p2"].forEach(seat=>{ if(state[seat].hp<=0){ const c=document.querySelector(`#arena .fighter[data-seat="${seat}"]`); if(c) koBurst(c); }});
+  if(MODE!=="tutorial" && state.winner!=="empate"){ recordResult(state.winner===ME.seat).catch(()=>{}); }
+}
+
+/* ---- LOG ---- */
+function logLine(type,text){ const p=document.createElement("p"); if(type==="dmg")p.className="dmg"; if(type==="heal")p.className="heal"; if(type==="info")p.className="info"; p.textContent=text; $("#log").appendChild(p); $("#log").scrollTop=$("#log").scrollHeight; }
+function logTurnSep(){ const p=document.createElement("p"); p.className="turnsep"; p.textContent="— Turno "+ (state?state.turn:1) +" —"; $("#log").appendChild(p); $("#log").scrollTop=$("#log").scrollHeight; }
+
+/* ---- CHAT / PROVOCAÇÕES ---- */
+const TAUNTS = ["Chupa, trouxa! 😈","Toma essa, mano!","Tá fácil, hein","Reza pro próximo turno","Senta que lá vem KI","GG já era","Calma que vou pegar leve… mentira"];
+const BOT_TAUNTS = ["Sou só um boneco e tô ganhando…","É só isso?","Treina mais, guerreiro","Ai ai…","Vem com tudo!"];
+function buildChat(){
+  const row=$("#tauntRow"); if(row){ row.innerHTML=""; TAUNTS.forEach(t=>{ const b=document.createElement("button"); b.textContent=t; b.onclick=()=>sendChat(t); row.appendChild(b); }); }
+  const inp=$("#chatText"), btn=$("#chatSend");
+  if(btn) btn.onclick=()=>{ if(inp&&inp.value.trim()){ sendChat(inp.value.trim()); inp.value=""; } };
+  if(inp) inp.onkeydown=e=>{ if(e.key==="Enter"&&inp.value.trim()){ sendChat(inp.value.trim()); inp.value=""; } };
+}
+function chatMsg(nick, text, mine){
+  const log=$("#log"); if(!log) return;
+  const p=document.createElement("p"); p.className="chat"+(mine?" mine":"");
+  p.innerHTML=`<b>${esc(nick||"?")}:</b> ${esc(text)}`;
+  log.appendChild(p); log.scrollTop=log.scrollHeight;
+}
+function sendChat(text){
+  chatMsg(ME.nick||"Você", text, true);
+  if(net) net.send("chat",{nick:ME.nick||"Guerreiro", text});
+  if(MODE==="tutorial" && Math.random()<0.6){
+    setTimeout(()=>chatMsg("Boneco de Treino", BOT_TAUNTS[Math.floor(Math.random()*BOT_TAUNTS.length)], false), 600);
+  }
+}
+
+/* ---- efeitos visuais + som sintetizado (sem assets externos) ---- */
+let sfxOn=true, _actx=null;
+function actx(){ if(!_actx){ try{ _actx=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } if(_actx&&_actx.state==="suspended") _actx.resume(); return _actx; }
+function playSfx(type){
+  if(!sfxOn) return; const ac=actx(); if(!ac) return; const now=ac.currentTime;
+  const o=ac.createOscillator(), g=ac.createGain(); o.connect(g); g.connect(ac.destination);
+  if(type==="hit"){ o.type="square"; o.frequency.setValueAtTime(190,now); o.frequency.exponentialRampToValueAtTime(60,now+.12); g.gain.setValueAtTime(.16,now); g.gain.exponentialRampToValueAtTime(.001,now+.16); o.start(now); o.stop(now+.18); }
+  else if(type==="heal"){ o.type="sine"; o.frequency.setValueAtTime(440,now); o.frequency.linearRampToValueAtTime(720,now+.18); g.gain.setValueAtTime(.001,now); g.gain.linearRampToValueAtTime(.1,now+.05); g.gain.exponentialRampToValueAtTime(.001,now+.25); o.start(now); o.stop(now+.27); }
+  else if(type==="charge"){ o.type="sine"; o.frequency.setValueAtTime(130,now); o.frequency.exponentialRampToValueAtTime(520,now+.3); g.gain.setValueAtTime(.001,now); g.gain.linearRampToValueAtTime(.09,now+.1); g.gain.exponentialRampToValueAtTime(.001,now+.35); o.start(now); o.stop(now+.37); }
+  else if(type==="ko"){ o.type="sawtooth"; o.frequency.setValueAtTime(220,now); o.frequency.exponentialRampToValueAtTime(40,now+.6); g.gain.setValueAtTime(.2,now); g.gain.exponentialRampToValueAtTime(.001,now+.7); o.start(now); o.stop(now+.72); }
+  else if(type==="tick"){ o.type="triangle"; o.frequency.setValueAtTime(880,now); g.gain.setValueAtTime(.045,now); g.gain.exponentialRampToValueAtTime(.001,now+.06); o.start(now); o.stop(now+.07); }
+}
+
+/* ---- TRILHA DE BATALHA (original, sintetizada — sem copyright) ---- */
+let musicOn=true, _mGain=null, _mTimer=null, _mStep=0;
+function mGain(){ const ac=actx(); if(!ac) return null; if(!_mGain){ _mGain=ac.createGain(); _mGain.gain.value=0.10; _mGain.connect(ac.destination); } return _mGain; }
+const MN={ A2:110, F2:87.31, G2:98, C3:130.81, A3:220, B3:246.94, C4:261.63, D4:293.66, E4:329.63, F4:349.23, G4:392, A4:440, C5:523.25 };
+// progressão heroica em Lá menor (1 compasso cada): Am · F · C · G
+const PROG=[
+  {bass:MN.A2, arp:[MN.A3,MN.C4,MN.E4,MN.A4]},
+  {bass:MN.F2, arp:[MN.F4,MN.A3,MN.C4,MN.F4]},
+  {bass:MN.C3, arp:[MN.C4,MN.E4,MN.G4,MN.C5]},
+  {bass:MN.G2, arp:[MN.G4,MN.B3,MN.D4,MN.G4]}
+];
+function mVoice(freq,dur,type,vol){ const ac=actx(),out=mGain(); if(!ac||!out) return; const t=ac.currentTime;
+  const o=ac.createOscillator(),g=ac.createGain(); o.type=type; o.frequency.value=freq;
+  g.gain.setValueAtTime(0.0001,t); g.gain.linearRampToValueAtTime(vol,t+0.01); g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+  o.connect(g); g.connect(out); o.start(t); o.stop(t+dur+0.02); }
+function mDrum(kind){ const ac=actx(),out=mGain(); if(!ac||!out) return; const t=ac.currentTime;
+  if(kind==="kick"){ const o=ac.createOscillator(),g=ac.createGain(); o.type="sine"; o.frequency.setValueAtTime(140,t); o.frequency.exponentialRampToValueAtTime(45,t+0.12); g.gain.setValueAtTime(0.45,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.16); o.connect(g); g.connect(out); o.start(t); o.stop(t+0.18); }
+  else { const n=ac.createBufferSource(), buf=ac.createBuffer(1,Math.floor(ac.sampleRate*0.15),ac.sampleRate), d=buf.getChannelData(0); for(let i=0;i<d.length;i++) d[i]=Math.random()*2-1; n.buffer=buf;
+    const f=ac.createBiquadFilter(); f.type="highpass"; f.frequency.value=(kind==="hat")?7000:2500; const g=ac.createGain(); const vol=(kind==="hat")?0.05:0.22, dur=(kind==="hat")?0.03:0.12;
+    g.gain.setValueAtTime(vol,t); g.gain.exponentialRampToValueAtTime(0.0001,t+dur); n.connect(f); f.connect(g); g.connect(out); n.start(t); n.stop(t+dur+0.02); } }
+function mTick(){
+  const bar=Math.floor(_mStep/16)%4, s=_mStep%16, ch=PROG[bar];
+  if(s%8===0) mDrum("kick");
+  if(s%8===4) mDrum("snare");
+  if(s%2===0) mDrum("hat");
+  if(s%2===0) mVoice(ch.bass,0.18,"sawtooth",0.20);
+  mVoice(ch.arp[s%4],0.10,"square",0.075);
+  _mStep=(_mStep+1)%64;
+}
+function startMusic(){ if(!musicOn||_mTimer) return; if(!actx()) return; _mStep=0; _mTimer=setInterval(mTick,109); } // ~138 BPM
+function stopMusic(){ if(_mTimer){ clearInterval(_mTimer); _mTimer=null; } }
+function toggleMusic(){ musicOn=!musicOn; const b=$("#btnMusic"); if(b) b.textContent="🎵 "+(musicOn?"on":"off"); if(musicOn) startMusic(); else stopMusic(); }
+function hueFromName(name){ let h=0; for(const c of (name||"x")) h=(h*31+c.charCodeAt(0))%360; return h; }
+function orbColors(name){ const h=hueFromName(name); return { c:`hsl(${h} 85% 60%)`, glow:`hsla(${h},90%,60%,.6)` }; }
+function floatText(card,txt,cls){ if(!card)return; const d=document.createElement("div"); d.className="floatnum "+cls; d.textContent=txt; card.appendChild(d); setTimeout(()=>d.remove(),1000); }
+function flashCard(card,cls){ if(!card)return; card.classList.remove(cls); void card.offsetWidth; card.classList.add(cls); setTimeout(()=>card.classList.remove(cls),650); }
+function shake(card){ if(!card)return; card.classList.remove("shake"); void card.offsetWidth; card.classList.add("shake"); setTimeout(()=>card.classList.remove("shake"),360); }
+function koBurst(card){ const b=document.createElement("div"); b.className="burst";
+  for(let i=0;i<16;i++){ const s=document.createElement("i"); const ang=Math.random()*6.28, dist=40+Math.random()*45;
+    s.style.setProperty("--dx",Math.cos(ang)*dist+"px"); s.style.setProperty("--dy",Math.sin(ang)*dist+"px");
+    s.style.animationDelay=(Math.random()*.12)+"s"; b.appendChild(s); }
+  card.appendChild(b); setTimeout(()=>b.remove(),900); }
+function playFx(before){
+  ["p1","p2"].forEach(seat=>{
+    const c=document.querySelector(`#arena .fighter[data-seat="${seat}"]`);
+    const dHp=state[seat].hp-before[seat].hp, dKi=state[seat].ki-before[seat].ki;
+    if(dHp<0){ flashCard(c,"hit"); shake(c); floatText(c,dHp,"dmg"); playSfx("hit"); }
+    else if(dHp>0){ flashCard(c,"healed"); floatText(c,"+"+dHp,"heal"); playSfx("heal"); }
+    if(dKi>0){ floatText(c,"+"+dKi+" KI","ki"); if(dHp>=0) playSfx("charge"); }
+  });
+}
+/* ---- timer de jogada ---- */
+let timerInt=null;
+function clearTimer(){ if(timerInt){ clearInterval(timerInt); timerInt=null; } }
+function runTimer(seconds, numEl, barEl, onExpire){
+  clearTimer(); if(!numEl||!barEl) return;
+  let left=seconds; render();
+  timerInt=setInterval(()=>{
+    left--;
+    if(left<=0){ render(); clearTimer(); onExpire&&onExpire(); return; }
+    if(left<=5) playSfx("tick");
+    render();
+  },1000);
+  function render(){
+    const v=Math.max(0,left); numEl.textContent=v;
+    barEl.style.width=(v/seconds*100)+"%";
+    const low=left<=5; numEl.classList.toggle("low",low); barEl.classList.toggle("low",low);
+  }
+}
+function waitHtml(title, sub){ return `<div class="waitbox"><div class="waitorb"></div><div class="waittext">${title}<small>${sub||""}</small></div></div>`; }
+
+/* ---- CONTA (e-mail/senha) + PERFIL + CACHE + RANKING ---- */
+let supa=null, session=null, profile=null;
+const cache={ leaderboard:null, leaderboardAt:0 };
+function levelFromWins(w){ return w>=200?4 : w>=150?3 : w>=100?2 : w>=25?1 : 0; } // 25→nv1,100→nv2,150→nv3,200→nv4
+function levelLabel(l){ return ["Nível 0 / Saiyajin","Nível 1 / SSJ","Nível 2 / SSJ2","Nível 3 / SSJ3","Nível 4 / SSJ4"][l]||("Nível "+l); }
+
+async function initAuth(){
+  renderAccount();
+  if(!ONLINE) return;
+  try{
+    supa=await getSupabase();
+    const { data } = await supa.auth.getSession();
+    session=data?.session||null;
+    supa.auth.onAuthStateChange((_e,s)=>{ session=s; afterAuth(); });
+    await afterAuth();
+  }catch(e){ console.error("auth init:",e); renderAccount(); }
+}
+async function afterAuth(){ if(session?.user) await loadProfile(); else profile=null; renderAccount(); }
+
+let authMode="signup";
+function entryShow(which){ ["landingView","authView","playView","profileView"].forEach(id=>{ const e=$("#"+id); if(e) e.classList.toggle("hidden", id!==which); }); }
+function openAuthUI(mode){
+  authMode=mode; entryShow("authView");
+  $("#authTitle").textContent = mode==="signup"?"Criar conta":"Entrar";
+  $("#btnAuthGo").textContent = mode==="signup"?"Criar conta":"Entrar";
+  $("#btnAuthSwap").textContent = mode==="signup"?"Já tenho conta — entrar":"Não tenho conta — criar";
+  $("#authNick").classList.toggle("hidden", mode!=="signup");
+  $("#auPass").setAttribute("autocomplete", mode==="signup"?"new-password":"current-password");
+  const p=$("#auPass"), sp=$("#btnShowPass"); if(p) p.type="password"; if(sp){ sp.textContent="👁"; sp.setAttribute("aria-label","Mostrar senha"); }
+  $("#authMsg").textContent="";
+}
+function traduzErro(m){
+  m=m||"";
+  if(/already registered|already exists|User already/i.test(m)) return "Esse e-mail já tem conta. Tente entrar.";
+  if(/Invalid login|invalid credentials/i.test(m)) return "E-mail ou senha incorretos.";
+  if(/at least 6|password should be/i.test(m)) return "A senha precisa de pelo menos 6 caracteres.";
+  if(/valid email|invalid format/i.test(m)) return "E-mail inválido.";
+  if(/Email not confirmed/i.test(m)) return "Confirme seu e-mail pelo link que enviamos e tente entrar de novo.";
+  if(/rate limit|too many|429/i.test(m)) return "Limite de e-mails do Supabase atingido (uns 4/hora). Desligue a confirmação de e-mail no painel (ou configure SMTP) e tente com um e-mail novo.";
+  return m;
+}
+async function doAuth(){
+  const msg=$("#authMsg");
+  if(!supa){ msg.textContent="Login só funciona no site publicado (zwarriors.xyz). Por aqui, use 'Jogar sem conta'."; return; }
+  const email=$("#auEmail").value.trim(), pass=$("#auPass").value;
+  if(!email||!pass){ msg.textContent="Preencha e-mail e senha."; return; }
+  $("#btnAuthGo").disabled=true; msg.textContent="Um instante…";
+  try{
+    if(authMode==="signup"){
+      const nick=($("#suNick").value.trim()||email.split("@")[0]);
+      const { data, error } = await supa.auth.signUp({ email, password:pass, options:{ data:{ nick } } });
+      if(error){ msg.textContent=traduzErro(error.message); return; }
+      if(!data.session){ msg.textContent="Conta criada! Confirme pelo link no seu e-mail e depois entre."; openAuthUI("login"); return; }
+      session=data.session; await afterAuth(); enterPlay();
+    } else {
+      const { data, error } = await supa.auth.signInWithPassword({ email, password:pass });
+      if(error){ msg.textContent=traduzErro(error.message); return; }
+      session=data.session; await afterAuth(); enterPlay();
+    }
+  }catch(e){ msg.textContent="Deu erro: "+(e.message||e); }
+  finally{ $("#btnAuthGo").disabled=false; }
+}
+function enterPlay(){
+  entryShow("playView");
+  const f=$("#nick"); if(f){ if(profile?.nick) f.value=profile.nick; else if(ME.nick) f.value=ME.nick; }
+  toggleHidden("#btnPlayLogout", !(session&&session.user));
+  const who=$("#playWho");
+  if(who) who.innerHTML = session?.user
+    ? `Logado como <b style="color:var(--gold)">${esc(profile?.nick||"?")}</b> — suas vitórias contam no ranking.`
+    : `Jogando como <b>convidado</b> — crie uma conta depois pra salvar suas vitórias.`;
+}
+async function logout(){ try{ if(supa) await supa.auth.signOut(); }catch(e){} session=null; profile=null; renderAccount(); entryShow("landingView"); }
+async function loadProfile(){
+  if(!supa||!session) return;
+  const uid=session.user.id;
+  const meta=session.user.user_metadata||{};
+  const fallback=(meta.nick||meta.full_name||meta.name||("Guerreiro "+uid.slice(0,4)));
+  try{
+    let { data } = await supa.from("profiles").select("*").eq("id",uid).maybeSingle();
+    if(!data){ const ins=await supa.from("profiles").insert({ id:uid, nick:fallback }).select().maybeSingle(); data=ins.data; }
+    profile=data;
+    if(profile?.nick){ ME.nick=profile.nick; const ni=$("#nick"); if(ni) ni.value=profile.nick; }
+  }catch(e){ console.error("perfil:",e); }
+}
+async function syncNick(){
+  if(!supa||!session||!profile) return;
+  const n=(ME.nick||"").trim();
+  if(!n || n===profile.nick) return;
+  try{ await supa.from("profiles").update({ nick:n, updated_at:new Date().toISOString() }).eq("id",session.user.id); profile.nick=n; cache.leaderboard=null; }catch(e){}
+}
+async function recordResult(iWon){
+  if(!supa||!session||!profile) return;
+  try{
+    if(iWon){
+      const wins=(profile.wins||0)+1, lvl=levelFromWins(wins);
+      await supa.from("profiles").update({ wins, level:lvl, updated_at:new Date().toISOString() }).eq("id",session.user.id);
+      profile.wins=wins; profile.level=lvl;
+      await supa.from("matches").insert({ room, winner_nick:ME.nick, loser_nick:(peer.nick||"?"), turns:state?.turn||0 });
+    } else {
+      const losses=(profile.losses||0)+1;
+      await supa.from("profiles").update({ losses, updated_at:new Date().toISOString() }).eq("id",session.user.id);
+      profile.losses=losses;
+    }
+    cache.leaderboard=null; // invalida cache
+  }catch(e){ console.error("registrar resultado:",e); }
+}
+async function getLeaderboard(){
+  if(!supa) return [];
+  if(cache.leaderboard && Date.now()-cache.leaderboardAt<30000) return cache.leaderboard;
+  try{
+    const { data } = await supa.from("profiles").select("nick,wins,level").order("wins",{ascending:false}).limit(10);
+    cache.leaderboard=data||[]; cache.leaderboardAt=Date.now(); return cache.leaderboard;
+  }catch(e){ console.error("ranking:",e); return []; }
+}
+function toggleHidden(sel,hide){ const e=$(sel); if(e) e.classList.toggle("hidden",!!hide); }
+
+/* ---- PERFIL / PROGRESSÃO (gamificação) ---- */
+const TIERS=[
+  {lvl:0, name:"Saiyajin", req:0,   icon:"🥋"},
+  {lvl:1, name:"SSJ",      req:25,  icon:"⚡"},
+  {lvl:2, name:"SSJ2",     req:100, icon:"🔥"},
+  {lvl:3, name:"SSJ3",     req:150, icon:"💥"},
+  {lvl:4, name:"SSJ4",     req:200, icon:"🌟"}
+];
+function ladderHtml(wins){
+  const cur=TIERS.filter(t=>wins>=t.req).pop();
+  return `<div class="collabel">Caminho do guerreiro</div><div class="ladder">`+TIERS.map(t=>{
+    let cls="locked", state=`🔒 faltam ${t.req-wins} V`;
+    if(wins>=t.req){ cls=(t===cur)?"now":"done"; state=(t===cur)?"você está aqui":"✓ desbloqueado"; }
+    return `<div class="tier ${cls}"><div class="tb">${t.icon}</div><div class="tt"><div class="tn">${t.name}</div><div class="ts">${t.req===0?"início":t.req+" vitórias"}</div></div><div class="tstate">${state}</div></div>`;
+  }).join("")+`</div>`;
+}
+function openProfile(){ entryShow("profileView"); renderProfile(); }
+function renderProfile(){
+  const body=$("#profileBody"); if(!body) return;
+  if(!(session&&session.user)){
+    body.innerHTML=`<div class="prof-head"><div class="prof-orb">ZW</div><div class="prof-name">Convidado</div><div class="prof-tier">sem progressão salva</div></div>
+      <div class="next-card"><div class="nl">Crie uma conta pra ter seu perfil, salvar vitórias e evoluir de <b>Saiyajin até SSJ4</b>.</div></div>
+      ${ladderHtml(0)}`;
+    return;
+  }
+  const wins=profile?.wins||0, losses=profile?.losses||0, total=wins+losses, wr=total?Math.round(wins/total*100):0;
+  const cur=TIERS.filter(t=>wins>=t.req).pop();
+  const next=TIERS.find(t=>t.req>wins);
+  let nextHtml;
+  if(next){
+    const span=next.req-cur.req, got=wins-cur.req, pct=Math.max(0,Math.min(100,Math.round(got/span*100)));
+    nextHtml=`<div class="next-card"><div class="nl">Faltam <b>${next.req-wins}</b> vitória(s) pra <b>${next.name}</b></div><div class="pbar"><i style="width:${pct}%"></i></div></div>`;
+  } else {
+    nextHtml=`<div class="next-card"><div class="nl">🌟 Nível máximo alcançado: <b>SSJ4</b>. Você é lenda do clã ZW.</div></div>`;
+  }
+  body.innerHTML=`<div class="prof-head">
+      <div class="prof-orb">${cur.icon}</div>
+      <div class="prof-name">${esc(profile?.nick||"?")}</div>
+      <div class="prof-tier">Nível ${cur.lvl} · ${cur.name}</div>
+      <div class="prof-stats"><span><b>${wins}</b>vitórias</span><span><b>${losses}</b>derrotas</span><span><b>${wr}%</b>aproveit.</span></div>
+    </div>${nextHtml}${ladderHtml(wins)}`;
+}
+function renderAccount(){
+  const line=$("#accountLine");
+  const logged=!!(session&&session.user);
+  if(line){
+    line.innerHTML = logged
+      ? `Logado como <b style="color:var(--gold)">${esc(profile?.nick||"?")}</b> · ${esc(levelLabel(profile?.level||0))} · ${profile?.wins||0} vitória(s)`
+      : (ONLINE
+          ? "Crie sua conta ou entre pra salvar vitórias e subir no ranking — ou caia na porrada agora, sem conta."
+          : "Modo local (sem servidor). Publicado com Supabase, as contas e o ranking ligam sozinhos.");
+  }
+  toggleHidden("#btnSignup", logged);
+  toggleHidden("#btnLogin", logged);
+  toggleHidden("#btnGuest", logged);
+  toggleHidden("#btnPlay", !logged);
+  toggleHidden("#btnLogout", !logged);
+}
+async function toggleRank(){
+  const pane=$("#rankPane"); if(!pane) return;
+  if(!pane.classList.contains("hidden")){ pane.classList.add("hidden"); return; }
+  pane.classList.remove("hidden");
+  pane.innerHTML='<div class="hint">Carregando ranking…</div>';
+  const list=await getLeaderboard();
+  if(!list.length){ pane.innerHTML='<div class="hint">Ranking vazio (ou Supabase não configurado ainda). Os primeiros a logar e vencer aparecem aqui!</div>'; return; }
+  pane.innerHTML='<div class="collabel">Top guerreiros</div>'+list.map((p,i)=>`<div class="rankrow"><span><b>${i+1}.</b> ${esc(p.nick)} <span class="lvl">· ${esc(levelLabel(p.level||0))}</span></span><span>${p.wins||0} V</span></div>`).join("");
+}
+/* fiação dos botões de conta / jogar */
+(function wireAuthUI(){
+  const on=(id,fn)=>{ const e=$("#"+id); if(e) e.onclick=fn; };
+  on("btnSignup", ()=>openAuthUI("signup"));
+  on("btnLogin",  ()=>openAuthUI("login"));
+  on("btnGuest",  ()=>enterPlay());
+  on("btnPlay",   ()=>enterPlay());
+  on("btnLogout", logout);
+  on("btnAuthGo", doAuth);
+  on("btnAuthSwap", ()=>openAuthUI(authMode==="signup"?"login":"signup"));
+  on("btnAuthBack", ()=>entryShow("landingView"));
+  on("btnPlayBack", ()=>entryShow("landingView"));
+  on("btnPlayLogout", logout);
+  const sp=$("#btnShowPass"); if(sp) sp.onclick=()=>{ const p=$("#auPass"); if(!p) return; const show=p.type==="password"; p.type=show?"text":"password"; sp.textContent=show?"🙈":"👁"; sp.setAttribute("aria-label", show?"Ocultar senha":"Mostrar senha"); };
+  on("btnRank", toggleRank);
+  on("btnProfile", openProfile);
+  on("btnProfileBack", ()=>entryShow("landingView"));
+  const pass=$("#auPass"); if(pass) pass.addEventListener("keydown",e=>{ if(e.key==="Enter") doAuth(); });
+})();
+
+const _sfxBtn=document.querySelector("#btnSfx");
+if(_sfxBtn) _sfxBtn.onclick=()=>{ sfxOn=!sfxOn; _sfxBtn.textContent="som: "+(sfxOn?"on":"off"); if(sfxOn) playSfx("charge"); };
+const _musBtn=document.querySelector("#btnMusic");
+if(_musBtn) _musBtn.onclick=toggleMusic;
+
+function rematch(){
+  if(MODE==="tutorial"){ state=null; coachFlags={}; startTutorialBattle(); }
+  else { location.reload(); } // pvp: recomeça o handshake na Sala ZW
+}
+(function wireKo(){
+  const r=$("#btnRematch"); if(r) r.onclick=rematch;
+  const p=$("#btnKoProfile"); if(p) p.onclick=()=>{ stopMusic(); show("home"); $("#entry").classList.remove("hidden"); $("#lobby").classList.add("hidden"); openProfile(); };
+})();
+
+show("home");
+initAuth();
+</script>
+</body>
+</html>

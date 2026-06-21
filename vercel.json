@@ -1,0 +1,7 @@
+{
+  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/arena-base", "destination": "/arena-base.html" },
+    { "source": "/arena", "destination": "/arena-base.html" }
+  ]
+}
