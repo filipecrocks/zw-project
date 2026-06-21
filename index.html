@@ -235,10 +235,11 @@
     box-shadow:0 6px 22px rgba(255,157,46,.35); border:none }
   .linklike{ display:block; margin:14px auto 0; background:none; border:none; color:var(--ki);
     font-size:13px; cursor:pointer; text-decoration:underline; width:auto; padding:4px }
-  .pwrap{ position:relative }
-  .pwrap input{ padding-right:78px }
-  .pwtoggle{ position:absolute; right:6px; top:50%; transform:translateY(-50%); width:auto;
-    background:none; border:none; color:var(--ki); font-size:12px; cursor:pointer; padding:6px 8px; text-decoration:underline }
+  .pwrap{ display:flex; gap:8px; align-items:stretch }
+  .pwrap input{ flex:1; min-width:0 }
+  .pwtoggle{ flex:0 0 auto; width:48px; background:#0c0f17; border:1px solid var(--line); color:var(--muted);
+    border-radius:10px; cursor:pointer; font-size:18px; line-height:1; padding:0; display:grid; place-items:center }
+  .pwtoggle:hover{ border-color:var(--gold-2) }
   .features{ display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-top:24px }
   .feat{ background:#0c0f17; border:1px solid var(--line); border-radius:12px; padding:13px 14px }
   .feat-k{ display:block; font-weight:800; color:var(--gold); font-size:12px; text-transform:uppercase; letter-spacing:.6px; margin-bottom:4px }
@@ -331,7 +332,7 @@
         <label style="margin-top:12px">Senha</label>
         <div class="pwrap">
           <input id="auPass" type="password" autocomplete="current-password" placeholder="mínimo 6 caracteres" />
-          <button type="button" id="btnShowPass" class="pwtoggle">mostrar</button>
+          <button type="button" id="btnShowPass" class="pwtoggle" aria-label="Mostrar senha">👁</button>
         </div>
         <div id="authMsg" class="hint" style="min-height:18px;margin-top:8px"></div>
         <button id="btnAuthGo" style="width:100%">Criar conta</button>
@@ -1338,6 +1339,7 @@ function openAuthUI(mode){
   $("#btnAuthSwap").textContent = mode==="signup"?"Já tenho conta — entrar":"Não tenho conta — criar";
   $("#authNick").classList.toggle("hidden", mode!=="signup");
   $("#auPass").setAttribute("autocomplete", mode==="signup"?"new-password":"current-password");
+  const p=$("#auPass"), sp=$("#btnShowPass"); if(p) p.type="password"; if(sp){ sp.textContent="👁"; sp.setAttribute("aria-label","Mostrar senha"); }
   $("#authMsg").textContent="";
 }
 function traduzErro(m){
@@ -1499,7 +1501,7 @@ async function toggleRank(){
   on("btnAuthBack", ()=>entryShow("landingView"));
   on("btnPlayBack", ()=>entryShow("landingView"));
   on("btnPlayLogout", logout);
-  const sp=$("#btnShowPass"); if(sp) sp.onclick=()=>{ const p=$("#auPass"); if(!p) return; const show=p.type==="password"; p.type=show?"text":"password"; sp.textContent=show?"ocultar":"mostrar"; p.focus(); };
+  const sp=$("#btnShowPass"); if(sp) sp.onclick=()=>{ const p=$("#auPass"); if(!p) return; const show=p.type==="password"; p.type=show?"text":"password"; sp.textContent=show?"🙈":"👁"; sp.setAttribute("aria-label", show?"Ocultar senha":"Mostrar senha"); };
   on("btnRank", toggleRank);
   on("btnProfile", openProfile);
   on("btnProfileBack", ()=>entryShow("landingView"));
