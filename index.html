@@ -153,6 +153,12 @@
   .badge.on{ opacity:1; filter:none; border-color:rgba(255,206,77,.5); box-shadow:0 0 18px rgba(255,157,46,.2) }
   .badge .bi{ font-size:30px } .badge .bn{ font-size:11px; margin-top:4px; color:#c2c9d8 }
   .refbox{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-top:8px }
+  .refhero{ display:flex; gap:16px; align-items:center; border:1px solid rgba(255,206,77,.4); border-radius:18px; padding:20px 22px; margin:0 0 26px; background:radial-gradient(380px 180px at 100% 0,rgba(78,195,255,.12),transparent),radial-gradient(420px 200px at 0 120%,rgba(255,157,46,.16),transparent),var(--panel) }
+  @media(max-width:560px){ .refhero{ flex-direction:column; text-align:center } }
+  .refhero .rh-ic{ width:60px;height:60px;flex:0 0 auto;border-radius:50%;display:grid;place-items:center;font-size:30px;background:radial-gradient(circle at 35% 30%,#fff8,transparent 45%),radial-gradient(circle at 60% 65%,var(--gold),#5a2e00 82%);box-shadow:0 0 26px 4px rgba(255,157,46,.45) }
+  .refhero .rh-body{ flex:1; min-width:0 }
+  .refhero .rh-title{ font-family:var(--display); letter-spacing:.5px; font-size:22px; color:var(--gold) }
+  .refhero .rh-sub{ color:#c9d0df; font-size:14px; margin:4px 0 12px }
   .refbox input{ flex:1; min-width:200px; background:var(--panel2); border:1px solid var(--line); border-radius:10px; color:var(--txt); padding:10px 12px; font-family:var(--body) }
 
   /* chat em destaque */
@@ -321,6 +327,7 @@ function viewInicio(){
   const feat=CHARS[0]||{n:"Son Goku",bio:"",pw:99,series:[],id:"goku"};
   return `<div class="hero"><div class="aura"></div><h1>O PORTAL DO CLÃ Z WARRIORS</h1><p>O universo Dragon Ball num lugar só: séries, sagas, episódios, personagens, técnicas, curiosidades e quiz. E o jogo de luta do clã, a <b>ZW Arena</b>.</p><div class="ctas"><a class="btn" href="#/personagens">Explorar o portal</a><a class="btn ghost" href="${ARENA_URL}">⚔️ Jogar a Arena</a></div></div>
   <div class="ghero"><div class="gaura"></div><div class="gorbs"><span></span><span></span><span></span></div><div class="ghead"><span class="gicon">🐉</span><div><div class="gtitle">Pergunte ao Guardião Z</div><div class="gsub">O sábio do clã responde sobre todo o universo Dragon Ball — em PT-BR.</div></div></div><div class="gmsgs" id="ghMsgs"></div><form class="gform" id="ghForm"><input id="ghInput" class="ginput" autocomplete="off" maxlength="1000"><button class="gbtn" type="submit">Perguntar</button></form><div class="gchips">${GH_EXAMPLES.map(q=>`<button class="gchip" type="button" onclick="ghAsk(this.textContent)">${esc(q)}</button>`).join("")}</div></div>
+  ${referralBox()}
   <div class="section-title">Em destaque<span class="more" onclick="location.hash='#/personagem/${esc(feat.id)}'">ver ficha →</span></div>
   <div class="feature"><div class="bigorb">${esc((feat.n||"?")[0])}</div><div><div class="meta">Personagem lendário</div><h2>${esc(feat.n)}</h2><p>${esc(feat.bio)}</p><div class="powerbar"><i style="width:${feat.pw||0}%"></i></div><span class="tagline">Aparece em ${(feat.series||[]).length} séries</span></div></div>
   <div class="section-title">Séries<span class="more" onclick="location.hash='#/series'">todas →</span></div>
@@ -475,7 +482,15 @@ function setAuthMode(){
   $("#amErr").textContent="";
 }
 async function logout(){ const s=await sb(); await s.auth.signOut(); document.getElementById('udrop')?.classList.remove('open'); }
-async function copyRef(){ const i=$("#refLink"); if(!i) return; try{ await navigator.clipboard.writeText(i.value);}catch(e){ i.select(); document.execCommand&&document.execCommand("copy"); } const b=event&&event.target; if(b){ const t=b.textContent; b.textContent="Copiado! ✓"; setTimeout(()=>b.textContent=t,1500);} }
+async function copyRef(id){ const i=$("#"+(id||"refLink")); if(!i) return; try{ await navigator.clipboard.writeText(i.value);}catch(e){ i.select(); document.execCommand&&document.execCommand("copy"); } const b=event&&event.target; if(b){ const t=b.textContent; b.textContent="Copiado! ✓"; setTimeout(()=>b.textContent=t,1500);} }
+function referralBox(){
+  const head=`<div class="rh-ic">🤝</div><div class="rh-body"><div class="rh-title">Convide amigos, ganhe zenny</div>`;
+  if(ME && MYPROFILE && MYPROFILE.referral_code){
+    const link="https://www.zwarriors.xyz/?ref="+MYPROFILE.referral_code;
+    return `<div class="refhero">${head}<div class="rh-sub">Cada amigo que criar conta pelo seu link te dá <b>+100 zenny</b> na Arena (e ele ganha +50 de boas-vindas).</div><div class="refbox"><input id="hrefLink" readonly value="${esc(link)}"><button class="btn" onclick="copyRef('hrefLink')">Copiar link</button></div></div></div>`;
+  }
+  return `<div class="refhero">${head}<div class="rh-sub">Crie sua conta pra pegar seu link de indicação — cada amigo que entrar por ele te dá <b>+100 zenny</b> na Arena.</div><button class="btn" onclick="openAuth('signup')">Entrar / criar conta pra pegar seu link</button></div></div>`;
+}
 
 async function toggleInter(type,id,kind,ev){
   if(ev) ev.preventDefault();
