@@ -110,6 +110,9 @@
   .ibtn:hover{ border-color:var(--gold-2) }
   .ibtn.on{ color:#2a1800; background:linear-gradient(135deg,var(--gold),var(--gold-2)); border-color:transparent }
   .ibtn.save.on{ background:linear-gradient(135deg,#bfe6ff,var(--ki)); }
+  .ebtn{ display:inline-block; margin-top:8px; margin-left:6px; background:transparent; border:1px dashed rgba(255,206,77,.5); color:var(--gold); border-radius:8px; padding:4px 10px; font-size:12px; font-weight:700; cursor:pointer; font-family:var(--body) }
+  .ebtn:hover{ background:rgba(255,206,77,.1) }
+  #editModal textarea{ width:100%; min-height:150px; background:var(--panel2); border:1px solid var(--line); border-radius:10px; color:var(--txt); padding:12px; font-family:var(--body); font-size:15px; resize:vertical }
 
   .quizbox{ border:1px solid var(--line); border-radius:16px; background:var(--panel); padding:22px }
   .quizq{ font-size:19px; font-weight:700; margin:6px 0 16px }
@@ -250,6 +253,8 @@
   <div class="swap" id="amSwap"></div>
 </div></div>
 
+<div class="modalbg" id="editModal"><div class="modal"><span class="x" onclick="closeEdit()">✕</span><h3>Editar conteúdo</h3><div class="sub" id="emLabel"></div><textarea id="emText"></textarea><div class="err" id="emErr"></div><button class="btn" onclick="saveEdit()" style="width:100%;margin-top:8px">Salvar</button></div></div>
+
 <button id="chatFab">💬 Guardião Z</button>
 <div id="chatPanel"><div id="chatHead"><span>Guardião do Saber Z</span><span class="x" onclick="toggleChat(false)">✕</span></div><div id="chatMsgs"></div><form id="chatForm"><input id="chatInput" placeholder="Pergunte sobre Dragon Ball…" maxlength="1000" autocomplete="off"><button type="submit">➤</button></form></div>
 
@@ -269,7 +274,7 @@ async function sb(){ if(_sb) return _sb; const {createClient}=await import("http
 
 /* ---- estado ---- */
 let SERIES=[],CHARS=[],EPISODES=[],SAGAS=[],TECHS=[],CURIOSIDADES=[],BADGES=[],DATA_READY=false,DATA_ERR=null;
-let ME=null,ACCESS_TOKEN=null,MYPROFILE=null;
+let ME=null,ACCESS_TOKEN=null,MYPROFILE=null,IS_ADMIN=false;
 let LIKE_COUNTS={}, MY_LIKES=new Set(), MY_SAVES=new Set(), READ_SEEN=new Set();
 const PAL={saiyajin:["#ffb24d","#7a3d00","rgba(255,157,46,.55)"],terraqueo:["#7fd0ff","#0c3a55","rgba(78,195,255,.5)"],namekuseijin:["#7af0a0","#0c4a2a","rgba(70,224,138,.5)"],vilao:["#ff6f8a","#5a0a1a","rgba(224,53,79,.5)"],divindade:["#c8a0ff","#2a1055","rgba(160,120,255,.55)"],androide:["#cfd6e6","#2a3142","rgba(200,210,230,.4)"]};
 const RACE_LABEL={saiyajin:"Saiyajin",terraqueo:"Terráqueo",namekuseijin:"Namekuseijin",vilao:"Vilão",divindade:"Divindade",androide:"Androide"};
@@ -332,9 +337,9 @@ function viewSerie(id){
   trackRead("series",id);
   const eps=EPISODES.filter(e=>e.series_id===id);
   let epsHtml;
-  if(eps.length){ const bySaga={}; eps.forEach(e=>{const k=e.saga||"Episódios";(bySaga[k]=bySaga[k]||[]).push(e);}); epsHtml=Object.entries(bySaga).map(([saga,list])=>`<div class="section-title">${esc(saga)}</div>${list.map(e=>`<div class="ep"><div class="n">${esc(e.n)}</div><div class="epbody"><h4>${esc(e.t)}</h4><p>${esc(e.s)}</p>${interactBar("episode",e.id)}</div></div>`).join("")}`).join(""); }
+  if(eps.length){ const bySaga={}; eps.forEach(e=>{const k=e.saga||"Episódios";(bySaga[k]=bySaga[k]||[]).push(e);}); epsHtml=Object.entries(bySaga).map(([saga,list])=>`<div class="section-title">${esc(saga)}</div>${list.map(e=>`<div class="ep"><div class="n">${esc(e.n)}</div><div class="epbody"><h4>${esc(e.t)}</h4><p>${esc(e.s)}</p>${editBtn("episodes",e.id,"summary")}${interactBar("episode",e.id)}</div></div>`).join("")}`).join(""); }
   else epsHtml=`<div class="card" style="margin-top:16px"><p>Episódios desta série em breve.</p></div>`;
-  return `<span class="back" onclick="location.hash='#/series'">← Séries</span><div class="section-title">${esc(s.name)}</div><div class="meta" style="margin:-6px 0 8px">${esc(s.year)} · ${esc(s.eps)}</div><p class="lead">${esc(s.blurb)}</p>${epsHtml}${arenaMid()}`;
+  return `<span class="back" onclick="location.hash='#/series'">← Séries</span><div class="section-title">${esc(s.name)}</div><div class="meta" style="margin:-6px 0 8px">${esc(s.year)} · ${esc(s.eps)}</div><p class="lead">${esc(s.blurb)}</p>${editBtn("series",s.id,"blurb")}${epsHtml}${arenaMid()}`;
 }
 let charFilter="todos",charQuery="";
 function viewPersonagens(){
@@ -346,11 +351,11 @@ function setCharFilter(r){charFilter=r;render();}
 function viewPersonagem(id){
   const c=CHARS.find(x=>x.id===id); if(!c) return viewPersonagens();
   trackRead("character",id);
-  return `<span class="back" onclick="location.hash='#/personagens'">← Personagens</span><div class="card"><div class="charrow" style="align-items:flex-start">${orb(c)}<div><h2 style="margin:0 0 4px;font-family:var(--display);letter-spacing:.5px">${esc(c.n)}</h2><div class="meta">${RACE_LABEL[c.race]||c.race||""}</div><div style="margin-top:6px">${(c.series||[]).map(sid=>{const s=SERIES.find(x=>x.id===sid);return s?`<span class="chip">${esc(s.name)}</span>`:"";}).join("")}</div></div></div><p style="margin-top:14px;color:#d6dcea">${esc(c.bio)}</p><div class="meta" style="margin-top:10px">Poder (referência lúdica)</div><div class="powerbar"><i style="width:${c.pw||0}%"></i></div>${interactBar("character",c.id)}</div>${arenaMid()}`;
+  return `<span class="back" onclick="location.hash='#/personagens'">← Personagens</span><div class="card"><div class="charrow" style="align-items:flex-start">${orb(c)}<div><h2 style="margin:0 0 4px;font-family:var(--display);letter-spacing:.5px">${esc(c.n)}</h2><div class="meta">${RACE_LABEL[c.race]||c.race||""}</div><div style="margin-top:6px">${(c.series||[]).map(sid=>{const s=SERIES.find(x=>x.id===sid);return s?`<span class="chip">${esc(s.name)}</span>`:"";}).join("")}</div></div></div><p style="margin-top:14px;color:#d6dcea">${esc(c.bio)}</p>${editBtn("characters",c.id,"bio")}<div class="meta" style="margin-top:10px">Poder (referência lúdica)</div><div class="powerbar"><i style="width:${c.pw||0}%"></i></div>${editBtn("characters",c.id,"power")}${interactBar("character",c.id)}</div>${arenaMid()}`;
 }
-function viewSagas(){ return `<div class="section-title">Sagas &amp; Arcos</div><p class="lead">As grandes sagas do universo Dragon Ball, do Pilaf ao Torneio do Poder.</p><div class="grid g2">${SAGAS.map(s=>{const se=SERIES.find(x=>x.id===s.s);return `<div class="card" style="--ac:${se?se.ac:'#ffce4d'}"><div class="accent"></div><div class="meta">${se?esc(se.name):''}</div><h3>${esc(s.n)}</h3><p>${esc(s.d)}</p>${interactBar("saga",s.id)}</div>`;}).join("")}</div>${arenaMid()}`; }
-function viewTecnicas(){ return `<div class="section-title">Técnicas &amp; Transformações</div><p class="lead">As técnicas que definem o universo — e que inspiram a <b>ZW Arena</b>.</p><div class="grid g2">${TECHS.map(t=>`<div class="card" style="--ac:${t.tr?'#ffce4d':'#4ec3ff'}"><div class="accent"></div><div class="meta">${t.tr?'Transformação':'Técnica'}</div><h3>${esc(t.n)}</h3><p>${esc(t.d)}</p>${t.arena?`<span class="tagline">${esc(t.arena)}</span>`:""}${interactBar("technique",t.id)}</div>`).join("")}</div>${arenaMid()}`; }
-function viewCuriosidades(){ return `<div class="section-title">Curiosidades</div><p class="lead">Você sabia? Fatos e bastidores do universo Dragon Ball.</p>${CURIOSIDADES.map(c=>`<div class="curio"><b>Você sabia?</b> ${esc(c.body)}${interactBar("curiosity",c.id)}</div>`).join("")}${arenaMid()}`; }
+function viewSagas(){ return `<div class="section-title">Sagas &amp; Arcos</div><p class="lead">As grandes sagas do universo Dragon Ball, do Pilaf ao Torneio do Poder.</p><div class="grid g2">${SAGAS.map(s=>{const se=SERIES.find(x=>x.id===s.s);return `<div class="card" style="--ac:${se?se.ac:'#ffce4d'}"><div class="accent"></div><div class="meta">${se?esc(se.name):''}</div><h3>${esc(s.n)}</h3><p>${esc(s.d)}</p>${editBtn("sagas",s.id,"description")}${interactBar("saga",s.id)}</div>`;}).join("")}</div>${arenaMid()}`; }
+function viewTecnicas(){ return `<div class="section-title">Técnicas &amp; Transformações</div><p class="lead">As técnicas que definem o universo — e que inspiram a <b>ZW Arena</b>.</p><div class="grid g2">${TECHS.map(t=>`<div class="card" style="--ac:${t.tr?'#ffce4d':'#4ec3ff'}"><div class="accent"></div><div class="meta">${t.tr?'Transformação':'Técnica'}</div><h3>${esc(t.n)}</h3><p>${esc(t.d)}</p>${editBtn("techniques",t.id,"description")}${t.arena?`<span class="tagline">${esc(t.arena)}</span>`:""}${interactBar("technique",t.id)}</div>`).join("")}</div>${arenaMid()}`; }
+function viewCuriosidades(){ return `<div class="section-title">Curiosidades</div><p class="lead">Você sabia? Fatos e bastidores do universo Dragon Ball.</p>${CURIOSIDADES.map(c=>`<div class="curio"><b>Você sabia?</b> ${esc(c.body)}${editBtn("curiosities",c.id,"body")}${interactBar("curiosity",c.id)}</div>`).join("")}${arenaMid()}`; }
 function viewTimeline(){ return `<div class="section-title">Linha do tempo</div><p class="lead">Os marcos da franquia, do mangá ao presente.</p>${TIMELINE.map(e=>`<div class="ep"><div class="n">${e.y}</div><div class="epbody"><h4>${esc(e.t)}</h4><p>${esc(e.d)}</p></div></div>`).join("")}${arenaMid()}`; }
 let quizI=0,quizScore=0,quizLock=false;
 function viewQuiz(){ quizI=0;quizScore=0;quizLock=false; return `<div class="section-title">Quiz Dragon Ball</div><div id="quizBox" class="quizbox"></div>`; }
@@ -418,8 +423,8 @@ function genCode(){ const c="ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; let s=""; for(le
 async function initAuth(){ const s=await sb(); const {data:{session}}=await s.auth.getSession(); await setSession(session); s.auth.onAuthStateChange((_e,sess)=>setSession(sess)); }
 async function setSession(session){
   ME=session?.user||null; ACCESS_TOKEN=session?.access_token||null;
-  if(ME){ await loadProfile(); await loadInteractions(); await applyReferral(); gamifyPing("visit"); }
-  else { MYPROFILE=null; MY_LIKES=new Set(); MY_SAVES=new Set(); }
+  if(ME){ await loadProfile(); await loadInteractions(); await applyReferral(); IS_ADMIN=await checkAdmin(); gamifyPing("visit"); }
+  else { MYPROFILE=null; MY_LIKES=new Set(); MY_SAVES=new Set(); IS_ADMIN=false; }
   renderAuth(); render();
 }
 async function loadProfile(){
@@ -484,6 +489,39 @@ async function toggleInter(type,id,kind,ev){
 const SEEN_KEY="zw_read_seen";
 function trackRead(type,id){
   if(!ME) return; const k=type+":"+id; if(READ_SEEN.has(k)) return; READ_SEEN.add(k); gamifyPing("read");
+}
+
+/* ---- edição admin inline (RLS no banco garante a segurança) ---- */
+async function checkAdmin(){ try{ const {data}=await (await sb()).rpc("is_zw_admin"); return !!data; }catch(e){ return false; } }
+const EDITMAP={
+  "series|blurb":{arr:()=>SERIES,f:"blurb",t:"text",label:"Blurb da série"},
+  "characters|bio":{arr:()=>CHARS,f:"bio",t:"text",label:"Bio do personagem"},
+  "characters|power":{arr:()=>CHARS,f:"pw",t:"num",label:"Poder do personagem (0–100)"},
+  "episodes|summary":{arr:()=>EPISODES,f:"s",t:"text",label:"Resumo do episódio"},
+  "sagas|description":{arr:()=>SAGAS,f:"d",t:"text",label:"Descrição da saga"},
+  "techniques|description":{arr:()=>TECHS,f:"d",t:"text",label:"Texto da técnica"},
+  "curiosities|body":{arr:()=>CURIOSIDADES,f:"body",t:"text",label:"Texto da curiosidade"},
+};
+function editBtn(table,id,dbfield){ if(!IS_ADMIN) return ""; return `<button class="ebtn" onclick="openEdit('${table}','${esc(String(id))}','${dbfield}')">✏️ editar</button>`; }
+let EDIT_CTX=null;
+function openEdit(table,id,dbfield){
+  const m=EDITMAP[table+"|"+dbfield]; if(!m) return;
+  const row=m.arr().find(x=>String(x.id)===String(id)); if(!row) return;
+  EDIT_CTX={table,id,dbfield,key:table+"|"+dbfield};
+  $("#emLabel").textContent=m.label; $("#emText").value=row[m.f]==null?"":String(row[m.f]); $("#emErr").textContent="";
+  $("#editModal").classList.add("open"); $("#emText").focus();
+}
+function closeEdit(){ $("#editModal").classList.remove("open"); }
+async function saveEdit(){
+  if(!EDIT_CTX) return; const {table,id,dbfield,key}=EDIT_CTX, m=EDITMAP[key];
+  let val=$("#emText").value; if(m.t==="num") val=Math.max(0,Math.min(100,parseInt(val,10)||0));
+  const err=$("#emErr"); err.style.color="var(--muted)"; err.textContent="Salvando…";
+  try{
+    const {error}=await (await sb()).from(table).update({[dbfield]:val}).eq("id",id);
+    if(error) throw error;
+    const row=m.arr().find(x=>String(x.id)===String(id)); if(row) row[m.f]=val;
+    closeEdit(); render();
+  }catch(ex){ err.style.color="var(--red)"; err.textContent=ex.message||"Não consegui salvar (você é admin?)."; }
 }
 
 /* ---- chat em destaque + widget ---- */
