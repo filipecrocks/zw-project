@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>ZW Arena — protótipo v0.1</title>
+<title>ZW Arena 7.0</title>
 <style>
   :root{
     --bg:#0a0c12; --panel:#11141c; --panel-2:#171b26; --line:#222838;
@@ -122,13 +122,39 @@
   @keyframes spark{to{transform:translate(var(--dx),var(--dy)) scale(.2);opacity:0}}
   .sfxbtn{background:#0c0f17;border:1px solid var(--line);color:var(--muted);border-radius:8px;
     padding:4px 10px;font-size:12px;font-weight:700;cursor:pointer}
+
+  /* --- timer de jogada --- */
+  .timerrow{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+  .timernum{font-weight:900;font-size:20px;min-width:38px;text-align:center;color:var(--ki);
+    text-shadow:0 0 10px rgba(78,195,255,.5)}
+  .timernum.low{color:var(--hp-low);text-shadow:0 0 12px rgba(255,85,102,.7);animation:tnum .5s infinite}
+  @keyframes tnum{50%{transform:scale(1.18)}}
+  .timerwrap{flex:1;height:8px;border-radius:999px;background:#1c2130;overflow:hidden}
+  .timerbar{height:100%;width:100%;background:linear-gradient(90deg,var(--ki),#2a8fd1);transition:width 1s linear}
+  .timerbar.low{background:linear-gradient(90deg,var(--hp-low),#c0263b)}
+
+  /* --- aguardando oponente (chamativo) --- */
+  .waitbox{display:flex;align-items:center;gap:14px;border-radius:14px;padding:16px 16px;margin-top:12px;
+    background:linear-gradient(110deg,rgba(78,195,255,.08),rgba(124,92,255,.10));
+    border:1px solid rgba(78,195,255,.28);position:relative;overflow:hidden}
+  .waitbox::after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent,rgba(255,255,255,.06),transparent);
+    transform:translateX(-100%);animation:sweep 1.8s infinite}
+  @keyframes sweep{100%{transform:translateX(100%)}}
+  .waitorb{width:30px;height:30px;border-radius:50%;flex:0 0 auto;
+    background:radial-gradient(circle at 35% 30%,#ffffffcc,transparent 45%),radial-gradient(circle at 62% 66%,var(--ki),#0a0c12 82%);
+    animation:waitpulse 1.1s ease-in-out infinite}
+  @keyframes waitpulse{0%,100%{box-shadow:0 0 8px 1px rgba(78,195,255,.5);transform:scale(.9)}50%{box-shadow:0 0 22px 7px rgba(78,195,255,.75);transform:scale(1.1)}}
+  .waittext{font-weight:800;font-size:15px}
+  .waittext small{display:block;font-weight:500;color:var(--muted);font-size:12px;margin-top:2px}
+  .oppready{margin-top:10px}
+  .oppready .eff{font-size:13px;padding:5px 12px;background:rgba(70,224,138,.16);border-color:rgba(70,224,138,.45);color:#9ff0bf}
 </style>
 </head>
 <body>
 <div class="wrap">
   <div class="hero">
     <img class="hero-img" src="header.png" alt="Z Warriors — Only the Best Will Survive" />
-    <div class="tag" style="margin-top:8px">ZW Arena · protótipo v0.1 — Regras de Luta Z Warriors. O computador é o juiz. Demo 1×1.</div>
+    <div class="tag" style="margin-top:8px">ZW Arena <b style="color:var(--gold)">7.0</b> — Regras de Luta Z Warriors. O computador é o juiz. Demo 1×1 com timer.</div>
   </div>
 
   <!-- ===== HOME / SAGUÃO ===== -->
@@ -182,7 +208,12 @@
 
     <!-- selection -->
     <div id="selectPane" style="margin-top:14px">
-      <div id="myStatus" class="pill" style="display:block;margin-bottom:10px;font-size:13px"></div>
+      <div class="timerrow">
+        <span id="turnTimerNum" class="timernum">30</span>
+        <div class="timerwrap"><div id="turnTimerBar" class="timerbar"></div></div>
+      </div>
+      <div id="myStatus" class="pill" style="display:block;margin-bottom:8px;font-size:13px"></div>
+      <div id="oppStatus" class="oppready"></div>
       <label>1) Escolha sua ação</label>
       <div id="actionGrid" class="moves"></div>
       <label style="margin-top:12px">2) Número de velocidade <span class="tag">(maior = mais rápido; não repete até zerar)</span></label>
@@ -196,7 +227,11 @@
     <!-- ki clash -->
     <div id="bidPane" class="hidden" style="margin-top:14px">
       <div class="card" style="background:#0c0f17">
-        <h3>⚡ Choque de KI!</h3>
+        <h3>Choque de KI!</h3>
+        <div class="timerrow">
+          <span id="bidTimerNum" class="timernum">20</span>
+          <div class="timerwrap"><div id="bidTimerBar" class="timerbar"></div></div>
+        </div>
         <div class="hint">Empate de velocidade entre dois golpes. Quem investir mais KI vence e anula o golpe do oponente. Empate de KI → os dois acertam.</div>
         <label style="margin-top:10px">KI extra para potencializar (você tem <b id="bidMax">0</b>)</label>
         <input id="bidInput" type="number" min="0" value="0" />
@@ -286,6 +321,8 @@ const DEFESA = reg({id:"defesa",name:"Defesa Simples",kind:"defesa_simples",ki:0
 const DRAFTABLE = Object.values(MOVES).filter(m=>!m.free);
 const KI_CAP = 100;   // nível 0
 const PICK_COUNT = 3; // golpes escolhidos no início (demo). No RZW são 5 (6 no nv3, 7 no nv4).
+const TURN_SECONDS = 30; // tempo pra escolher ação + velocidade
+const BID_SECONDS  = 20; // tempo pra resolver o choque de KI
 
 /* ---------------------------------------------------------------------------
    ENGINE  (puro / determinístico) — o coração do jogo.
@@ -552,7 +589,7 @@ function start(seat, roomCode){
   net.onMessage(onNet);
   net.send("hello",{nick:ME.nick, seat});
   buildDraft(); show("draft");
-  $("#draftWait").innerHTML = `Sala <b>${esc(room)}</b> · esperando oponente<span class="waitdot"></span>`;
+  $("#draftWait").innerHTML = waitHtml(`Sala ${esc(room)} criada`, "esperando um oponente entrar pela lista do saguão");
 }
 
 /* ---- NET ---- */
@@ -561,8 +598,8 @@ function onNet(msg){
   const {type,payload}=msg;
   if(type==="hello"){ peer.nick=payload.nick; if(lobby) lobby.unannounce(); net.send("hello-ack",{nick:ME.nick,seat:ME.seat}); }
   if(type==="hello-ack"){ peer.nick=payload.nick; if(lobby) lobby.unannounce(); }
-  if(type==="ready"){ peer.ready=true; peer.moves=payload.moves; peer.nick=payload.nick; $("#draftWait").innerHTML = `<b>${peer.nick}</b> está pronto.`; tryStartBattle(); }
-  if(type==="submit"){ peerSub=payload; maybeReveal(); }
+  if(type==="ready"){ peer.ready=true; peer.moves=payload.moves; peer.nick=payload.nick; $("#draftWait").innerHTML = waitHtml(`${esc(peer.nick)} está pronto!`, "termine de escolher seus golpes"); tryStartBattle(); }
+  if(type==="submit"){ peerSub=payload; if(!mySub){ const e=$("#oppStatus"); if(e) e.innerHTML='<span class="eff">Oponente já jogou — sua vez!</span>'; } maybeReveal(); }
   if(type==="bid"){ peerBid=payload.bid; maybeResolveBid(); }
 }
 
@@ -589,7 +626,7 @@ function toggleDraft(id,el){
 $("#btnReady").onclick=()=>{
   $("#btnReady").disabled=true;
   net.send("ready",{moves:draftSel,nick:ME.nick});
-  $("#draftWait").innerHTML='Esperando o oponente<span class="waitdot"></span>';
+  $("#draftWait").innerHTML=waitHtml("Você está pronto", "esperando o oponente escolher os golpes");
   myReady=true; peer.moves=peer.moves; tryStartBattle();
 };
 let myReady=false;
@@ -643,6 +680,7 @@ function buildSelection(){
   $("#bidPane").classList.add("hidden");
   $("#koPane").classList.add("hidden");
   $("#selWait").textContent="";
+  $("#oppStatus").innerHTML="";
   $("#phaseLabel").textContent="escolha sua ação em segredo";
   $("#myStatus").innerHTML = `Seu status — HP <b>${myF().hp}/50</b> · KI <b>${myF().ki}/${KI_CAP}</b>`;
   sel={moveId:null,speed:null}; mySub=null; peerSub=null; myBid=null; peerBid=null;
@@ -668,17 +706,25 @@ function buildSelection(){
     if(!used) el.onclick=()=>{ sel.speed=n; [...sg.children].forEach(c=>c.classList.remove("sel")); el.classList.add("sel"); checkSubmit(); };
     sg.appendChild(el);
   }
+  runTimer(TURN_SECONDS, $("#turnTimerNum"), $("#turnTimerBar"), autoSubmitTimeout);
 }
 function checkSubmit(){ $("#btnSubmit").disabled = !(sel.moveId && sel.speed); }
 
-$("#btnSubmit").onclick=()=>{
+function doSubmit(auto){
+  clearTimer();
   mySub={ moveId:sel.moveId, speed:sel.speed, seat:ME.seat };
   $("#selectPane").classList.add("hidden");
   $("#phaseLabel").textContent="aguardando oponente";
-  $("#selWait").innerHTML='Confirmado em segredo. Esperando o oponente<span class="waitdot"></span>';
+  $("#selWait").innerHTML = waitHtml(auto?"Tempo esgotado — jogada automática!":"Confirmado em segredo", "esperando o oponente jogar");
   net.send("submit",mySub);
   maybeReveal();
-};
+}
+function autoSubmitTimeout(){
+  if(!sel.moveId) sel.moveId="defesa";            // padrão seguro: Defesa Simples
+  if(!sel.speed){ const av=myF().speeds; sel.speed=av[Math.floor(Math.random()*av.length)]; }
+  doSubmit(true);
+}
+$("#btnSubmit").onclick=()=>doSubmit(false);
 
 function subBySeat(seat){ if(mySub&&mySub.seat===seat)return mySub; if(peerSub&&peerSub.seat===seat)return peerSub; return null; }
 
@@ -700,14 +746,18 @@ function openBid(subA,subB){
   const maxBid=Math.max(0, myF().ki-(mMy.ki||0));
   $("#bidMax").textContent=maxBid; $("#bidInput").max=maxBid; $("#bidInput").value=0;
   $("#bidWait").textContent="";
+  runTimer(BID_SECONDS, $("#bidTimerNum"), $("#bidTimerBar"), autoBidTimeout);
 }
-$("#btnBid").onclick=()=>{
+function doBid(){
+  clearTimer();
   myBid=Math.max(0,parseInt($("#bidInput").value||"0",10));
   $("#bidPane").classList.add("hidden");
-  $("#bidWait").innerHTML='Esperando o choque do oponente<span class="waitdot"></span>';
+  $("#bidWait").innerHTML = waitHtml("Choque enviado","esperando o KI do oponente");
   net.send("bid",{bid:myBid,seat:ME.seat});
   maybeResolveBid();
-};
+}
+function autoBidTimeout(){ $("#bidInput").value=0; doBid(); }
+$("#btnBid").onclick=()=>doBid();
 function maybeResolveBid(){
   if(myBid==null||peerBid==null||!pendingSubs) return;
   const bids = ME.seat==="p1" ? {a:myBid,b:peerBid} : {a:peerBid,b:myBid};
@@ -733,6 +783,7 @@ function narrChoice(sub,seat){
 }
 
 function endGame(){
+  clearTimer();
   $("#selectPane").classList.add("hidden"); $("#bidPane").classList.add("hidden");
   $("#koPane").classList.remove("hidden");
   let txt;
@@ -758,6 +809,7 @@ function playSfx(type){
   else if(type==="heal"){ o.type="sine"; o.frequency.setValueAtTime(440,now); o.frequency.linearRampToValueAtTime(720,now+.18); g.gain.setValueAtTime(.001,now); g.gain.linearRampToValueAtTime(.1,now+.05); g.gain.exponentialRampToValueAtTime(.001,now+.25); o.start(now); o.stop(now+.27); }
   else if(type==="charge"){ o.type="sine"; o.frequency.setValueAtTime(130,now); o.frequency.exponentialRampToValueAtTime(520,now+.3); g.gain.setValueAtTime(.001,now); g.gain.linearRampToValueAtTime(.09,now+.1); g.gain.exponentialRampToValueAtTime(.001,now+.35); o.start(now); o.stop(now+.37); }
   else if(type==="ko"){ o.type="sawtooth"; o.frequency.setValueAtTime(220,now); o.frequency.exponentialRampToValueAtTime(40,now+.6); g.gain.setValueAtTime(.2,now); g.gain.exponentialRampToValueAtTime(.001,now+.7); o.start(now); o.stop(now+.72); }
+  else if(type==="tick"){ o.type="triangle"; o.frequency.setValueAtTime(880,now); g.gain.setValueAtTime(.045,now); g.gain.exponentialRampToValueAtTime(.001,now+.06); o.start(now); o.stop(now+.07); }
 }
 function hueFromName(name){ let h=0; for(const c of (name||"x")) h=(h*31+c.charCodeAt(0))%360; return h; }
 function orbColors(name){ const h=hueFromName(name); return { c:`hsl(${h} 85% 60%)`, glow:`hsla(${h},90%,60%,.6)` }; }
@@ -778,6 +830,26 @@ function playFx(before){
     if(dKi>0){ floatText(c,"+"+dKi+" KI","ki"); if(dHp>=0) playSfx("charge"); }
   });
 }
+/* ---- timer de jogada ---- */
+let timerInt=null;
+function clearTimer(){ if(timerInt){ clearInterval(timerInt); timerInt=null; } }
+function runTimer(seconds, numEl, barEl, onExpire){
+  clearTimer(); if(!numEl||!barEl) return;
+  let left=seconds; render();
+  timerInt=setInterval(()=>{
+    left--;
+    if(left<=0){ render(); clearTimer(); onExpire&&onExpire(); return; }
+    if(left<=5) playSfx("tick");
+    render();
+  },1000);
+  function render(){
+    const v=Math.max(0,left); numEl.textContent=v;
+    barEl.style.width=(v/seconds*100)+"%";
+    const low=left<=5; numEl.classList.toggle("low",low); barEl.classList.toggle("low",low);
+  }
+}
+function waitHtml(title, sub){ return `<div class="waitbox"><div class="waitorb"></div><div class="waittext">${title}<small>${sub||""}</small></div></div>`; }
+
 const _sfxBtn=document.querySelector("#btnSfx");
 if(_sfxBtn) _sfxBtn.onclick=()=>{ sfxOn=!sfxOn; _sfxBtn.textContent="som: "+(sfxOn?"on":"off"); if(sfxOn) playSfx("charge"); };
 
