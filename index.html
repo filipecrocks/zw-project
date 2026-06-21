@@ -147,6 +147,31 @@
   .spinner{ width:42px;height:42px;border-radius:50%;border:4px solid var(--line);border-top-color:var(--gold);animation:spin 1s linear infinite;margin:60px auto }
   @keyframes spin{to{transform:rotate(360deg)}}
 
+  /* chat em destaque na home (Guardião Z) */
+  .ghero{ position:relative; overflow:hidden; border:1px solid rgba(78,195,255,.35); border-radius:20px; padding:22px;
+    background:radial-gradient(500px 220px at 80% -20%,rgba(78,195,255,.16),transparent),radial-gradient(420px 200px at 0 120%,rgba(255,157,46,.14),transparent),var(--panel); margin:0 0 26px }
+  .ghero .gaura{ position:absolute; right:-60px; top:-60px; width:260px; height:260px; border-radius:50%;
+    background:radial-gradient(circle,rgba(78,195,255,.4),transparent 65%); filter:blur(20px); animation:pulse 4s ease-in-out infinite; pointer-events:none }
+  .ghero .gorbs span{ position:absolute; border-radius:50%; filter:blur(10px); opacity:.6; pointer-events:none }
+  .ghero .gorbs span:nth-child(1){ width:70px;height:70px; left:8%; bottom:-20px; background:radial-gradient(circle,rgba(255,206,77,.6),transparent 70%); animation:gfloat 7s ease-in-out infinite }
+  .ghero .gorbs span:nth-child(2){ width:46px;height:46px; left:42%; top:-14px; background:radial-gradient(circle,rgba(160,123,255,.6),transparent 70%); animation:gfloat 9s ease-in-out infinite 1s }
+  .ghero .gorbs span:nth-child(3){ width:54px;height:54px; right:18%; bottom:6px; background:radial-gradient(circle,rgba(78,195,255,.6),transparent 70%); animation:gfloat 8s ease-in-out infinite .5s }
+  @keyframes gfloat{ 50%{ transform:translateY(-22px) scale(1.12) } }
+  .ghero .ghead{ position:relative; display:flex; gap:12px; align-items:center; margin-bottom:14px }
+  .ghero .gicon{ width:46px;height:46px;border-radius:50%;display:grid;place-items:center;font-size:24px;
+    background:radial-gradient(circle at 35% 30%,#fff8,transparent 45%),radial-gradient(circle at 60% 65%,var(--gold),#5a2e00 82%); box-shadow:0 0 22px 4px rgba(255,157,46,.5) }
+  .ghero .gtitle{ font-family:var(--display); letter-spacing:.5px; font-size:22px; color:var(--gold) }
+  .ghero .gsub{ color:#c2c9d8; font-size:13px }
+  .ghero .gmsgs{ position:relative; display:flex; flex-direction:column; gap:8px; max-height:220px; overflow-y:auto; margin-bottom:12px }
+  .ghero .gmsgs:empty{ display:none }
+  .ghero .gform{ position:relative; display:flex; gap:8px }
+  .ghero .ginput{ flex:1; background:var(--panel2); border:1px solid var(--line); border-radius:12px; color:var(--txt); padding:13px 15px; font-family:var(--body); font-size:15px }
+  .ghero .ginput:focus{ outline:none; border-color:var(--ki); box-shadow:0 0 0 3px rgba(78,195,255,.18) }
+  .ghero .gbtn{ background:linear-gradient(135deg,var(--gold),var(--gold-2)); color:#2a1800; border:none; border-radius:12px; padding:0 18px; font-weight:800; cursor:pointer; font-family:var(--body) }
+  .ghero .gchips{ position:relative; display:flex; gap:7px; flex-wrap:wrap; margin-top:12px }
+  .ghero .gchip{ background:rgba(78,195,255,.1); border:1px solid rgba(78,195,255,.35); color:#bfe6ff; border-radius:99px; padding:6px 12px; font-size:12.5px; font-weight:600; cursor:pointer; font-family:var(--body) }
+  .ghero .gchip:hover{ background:rgba(78,195,255,.2) }
+
   /* chat widget */
   #chatFab{ position:fixed; right:18px; bottom:18px; z-index:90; background:linear-gradient(135deg,var(--gold),var(--gold-2)); color:#2a1800;
     border:none; border-radius:99px; padding:13px 18px; font-weight:800; font-family:var(--body); cursor:pointer; box-shadow:0 8px 26px rgba(255,157,46,.4); font-size:14px }
@@ -226,6 +251,7 @@
 const SUPA="https://xrddqixvhmtertcsevtz.supabase.co";
 const ANON="sb_publishable_d9EX10TeLmg_8U3ApqNgZQ_s0DsPiwV";
 const ARENA_URL="/arena";
+const GH_EXAMPLES=["Quem é o Goku?","O que é o Ultra Instinto?","Como funciona a fusão?","O que é o Genki Dama?","Quem é mais forte: Goku ou Vegeta?"];
 const $=s=>document.querySelector(s);
 function esc(s){return (s==null?"":String(s)).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
 
@@ -294,6 +320,15 @@ function viewInicio(){
     <p>O universo Dragon Ball num lugar só: séries, sagas, episódios, personagens, técnicas, curiosidades e quiz. E o jogo de luta do clã, a <b>ZW Arena</b>.</p>
     <div class="ctas"><a class="btn" href="#/personagens">Explorar o portal</a><a class="btn ghost" href="${ARENA_URL}">⚔️ Jogar a Arena</a></div>
   </div>
+
+  <div class="ghero">
+    <div class="gaura"></div><div class="gorbs"><span></span><span></span><span></span></div>
+    <div class="ghead"><span class="gicon">🐉</span><div><div class="gtitle">Pergunte ao Guardião Z</div><div class="gsub">O sábio do clã responde sobre todo o universo Dragon Ball — em PT-BR.</div></div></div>
+    <div class="gmsgs" id="ghMsgs"></div>
+    <form class="gform" id="ghForm"><input id="ghInput" class="ginput" autocomplete="off" maxlength="1000"><button class="gbtn" type="submit">Perguntar</button></form>
+    <div class="gchips">${GH_EXAMPLES.map(q=>`<button class="gchip" type="button" onclick="ghAsk(this.textContent)">${esc(q)}</button>`).join("")}</div>
+  </div>
+
   <div class="section-title">Em destaque<span class="more" onclick="location.hash='#/personagem/${esc(feat.id)}'">ver ficha →</span></div>
   <div class="feature">
     <div class="bigorb">${esc((feat.n||"?")[0])}</div>
@@ -400,6 +435,7 @@ function render(){
   else html=viewInicio();
   view.innerHTML=html;
   if(route==="quiz") renderQuiz();
+  if($("#ghForm")) initFeaturedChat();
   document.querySelectorAll("#nav a").forEach(a=>{const t=a.getAttribute("href");a.classList.toggle("active",t==="#/"+route||(route===""&&t==="#/inicio"));});
   const cs=$("#charSearch"); if(cs){ cs.oninput=()=>{ charQuery=cs.value; $("#view").innerHTML=viewPersonagens(); const c2=$("#charSearch"); if(c2){ c2.focus(); c2.setSelectionRange(c2.value.length,c2.value.length); } cs.oninput && bindSearch(); }; }
   window.scrollTo(0,0);
@@ -428,6 +464,37 @@ async function sendChat(q){
 }
 $("#chatFab").onclick=()=>toggleChat();
 $("#chatForm").addEventListener("submit",e=>{ e.preventDefault(); const i=$("#chatInput"); const q=(i.value||"").trim(); if(!q) return; i.value=""; sendChat(q); });
+
+/* ============ CHAT EM DESTAQUE (home) ============ */
+let ghTimer=null, ghBusy=false;
+function initFeaturedChat(){
+  const input=$("#ghInput"), form=$("#ghForm"); if(!input||!form) return;
+  if(ghTimer){ clearInterval(ghTimer); ghTimer=null; }
+  let qi=0;
+  function typePlaceholder(){
+    if(document.activeElement===input || input.value) return;
+    const q=GH_EXAMPLES[qi%GH_EXAMPLES.length]; qi++; let i=0; input.setAttribute("placeholder","");
+    const typer=setInterval(()=>{
+      if(document.activeElement===input||input.value){ clearInterval(typer); return; }
+      input.setAttribute("placeholder", q.slice(0,++i)+" ?");
+      if(i>=q.length) clearInterval(typer);
+    },45);
+  }
+  typePlaceholder(); ghTimer=setInterval(typePlaceholder, 3400);
+  form.onsubmit=(e)=>{ e.preventDefault(); const q=(input.value||"").trim(); if(!q) return; input.value=""; ghAsk(q); };
+}
+function ghAsk(q){
+  q=(q||"").trim(); if(!q||ghBusy) return;
+  const box=$("#ghMsgs"); if(!box) return;
+  ghBusy=true;
+  const me=document.createElement("div"); me.className="cmsg me"; me.textContent=q; box.appendChild(me);
+  const bot=document.createElement("div"); bot.className="cmsg bot"; bot.textContent="…"; box.appendChild(bot);
+  box.scrollTop=box.scrollHeight;
+  fetch(`${SUPA}/functions/v1/chat`,{method:"POST",headers:{apikey:ANON,Authorization:`Bearer ${ANON}`,"Content-Type":"application/json"},body:JSON.stringify({question:q,session_id:chatSession()})})
+    .then(r=>r.json()).catch(()=>({}))
+    .then(d=>{ bot.textContent=d.answer||d.error||"O Guardião está meditando (chat ainda não publicado). Tenta mais tarde, guerreiro."; box.scrollTop=box.scrollHeight; })
+    .finally(()=>{ ghBusy=false; });
+}
 
 window.addEventListener("hashchange", render);
 render();
