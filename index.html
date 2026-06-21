@@ -360,7 +360,7 @@
   <div id="battle" class="card hidden">
     <div class="arena" id="arena"></div>
 
-    <div class="stat" style="margin-top:14px"><span class="pill">Turno <b id="turnNo">1</b></span><span style="display:flex;gap:8px;align-items:center"><span id="phaseLabel" class="tag"></span><button id="btnSfx" class="sfxbtn">som: on</button></span></div>
+    <div class="stat" style="margin-top:14px"><span class="pill">Turno <b id="turnNo">1</b></span><span style="display:flex;gap:8px;align-items:center"><span id="phaseLabel" class="tag"></span><button id="btnMusic" class="sfxbtn">🎵 on</button><button id="btnSfx" class="sfxbtn">som: on</button></span></div>
 
     <div class="battlebody">
       <!-- chat / narração (esquerda) -->
@@ -748,7 +748,7 @@ let phase="home";
 let MODE="pvp";           // "pvp" | "tutorial"
 let coachFlags={};        // dicas do tutorial (uma vez cada)
 
-function show(id){ ["home","draft","battle"].forEach(x=>$("#"+x).classList.toggle("hidden",x!==id)); }
+function show(id){ ["home","draft","battle"].forEach(x=>$("#"+x).classList.toggle("hidden",x!==id)); if(id==="home") stopMusic(); }
 
 /* ---- HOME / SAGUÃO ---- */
 function enterLobby(){
@@ -809,6 +809,7 @@ function joinZW(){
   net.send("hello",{id:ME.id, nick:ME.nick});
   buildDraft(); show("draft");
   $("#draftWait").innerHTML = waitHtml("Sala ZW · teste", "esperando outro guerreiro — peça pro Rafael e o Clebler abrirem o link e clicarem em 'Sala ZW'");
+  startMusic();
 }
 function negotiateSeat(){ if(ME.seat==null && peer.id){ ME.seat = (ME.id < peer.id) ? "p1" : "p2"; } }
 function peerArrived(){
@@ -934,7 +935,7 @@ function foeKey(){ return ME.seat==="p1"?"p2":"p1"; }
 function myF(){ return state[meKey()]; }
 function foeF(){ return state[foeKey()]; }
 
-function startBattle(){ show("battle"); logTurnSep(); renderArena(); buildSelection(); buildChat(); }
+function startBattle(){ show("battle"); logTurnSep(); renderArena(); buildSelection(); buildChat(); startMusic(); }
 
 function renderArena(){
   const a=$("#arena"); a.innerHTML="";
@@ -1134,6 +1135,7 @@ function narrChoice(sub,seat){
 
 function endGame(){
   clearTimer();
+  stopMusic();
   $("#selectPane").classList.add("hidden"); $("#bidPane").classList.add("hidden");
   $("#koPane").classList.remove("hidden");
   let txt;
@@ -1185,6 +1187,39 @@ function playSfx(type){
   else if(type==="ko"){ o.type="sawtooth"; o.frequency.setValueAtTime(220,now); o.frequency.exponentialRampToValueAtTime(40,now+.6); g.gain.setValueAtTime(.2,now); g.gain.exponentialRampToValueAtTime(.001,now+.7); o.start(now); o.stop(now+.72); }
   else if(type==="tick"){ o.type="triangle"; o.frequency.setValueAtTime(880,now); g.gain.setValueAtTime(.045,now); g.gain.exponentialRampToValueAtTime(.001,now+.06); o.start(now); o.stop(now+.07); }
 }
+
+/* ---- TRILHA DE BATALHA (original, sintetizada — sem copyright) ---- */
+let musicOn=true, _mGain=null, _mTimer=null, _mStep=0;
+function mGain(){ const ac=actx(); if(!ac) return null; if(!_mGain){ _mGain=ac.createGain(); _mGain.gain.value=0.10; _mGain.connect(ac.destination); } return _mGain; }
+const MN={ A2:110, F2:87.31, G2:98, C3:130.81, A3:220, B3:246.94, C4:261.63, D4:293.66, E4:329.63, F4:349.23, G4:392, A4:440, C5:523.25 };
+// progressão heroica em Lá menor (1 compasso cada): Am · F · C · G
+const PROG=[
+  {bass:MN.A2, arp:[MN.A3,MN.C4,MN.E4,MN.A4]},
+  {bass:MN.F2, arp:[MN.F4,MN.A3,MN.C4,MN.F4]},
+  {bass:MN.C3, arp:[MN.C4,MN.E4,MN.G4,MN.C5]},
+  {bass:MN.G2, arp:[MN.G4,MN.B3,MN.D4,MN.G4]}
+];
+function mVoice(freq,dur,type,vol){ const ac=actx(),out=mGain(); if(!ac||!out) return; const t=ac.currentTime;
+  const o=ac.createOscillator(),g=ac.createGain(); o.type=type; o.frequency.value=freq;
+  g.gain.setValueAtTime(0.0001,t); g.gain.linearRampToValueAtTime(vol,t+0.01); g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+  o.connect(g); g.connect(out); o.start(t); o.stop(t+dur+0.02); }
+function mDrum(kind){ const ac=actx(),out=mGain(); if(!ac||!out) return; const t=ac.currentTime;
+  if(kind==="kick"){ const o=ac.createOscillator(),g=ac.createGain(); o.type="sine"; o.frequency.setValueAtTime(140,t); o.frequency.exponentialRampToValueAtTime(45,t+0.12); g.gain.setValueAtTime(0.45,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.16); o.connect(g); g.connect(out); o.start(t); o.stop(t+0.18); }
+  else { const n=ac.createBufferSource(), buf=ac.createBuffer(1,Math.floor(ac.sampleRate*0.15),ac.sampleRate), d=buf.getChannelData(0); for(let i=0;i<d.length;i++) d[i]=Math.random()*2-1; n.buffer=buf;
+    const f=ac.createBiquadFilter(); f.type="highpass"; f.frequency.value=(kind==="hat")?7000:2500; const g=ac.createGain(); const vol=(kind==="hat")?0.05:0.22, dur=(kind==="hat")?0.03:0.12;
+    g.gain.setValueAtTime(vol,t); g.gain.exponentialRampToValueAtTime(0.0001,t+dur); n.connect(f); f.connect(g); g.connect(out); n.start(t); n.stop(t+dur+0.02); } }
+function mTick(){
+  const bar=Math.floor(_mStep/16)%4, s=_mStep%16, ch=PROG[bar];
+  if(s%8===0) mDrum("kick");
+  if(s%8===4) mDrum("snare");
+  if(s%2===0) mDrum("hat");
+  if(s%2===0) mVoice(ch.bass,0.18,"sawtooth",0.20);
+  mVoice(ch.arp[s%4],0.10,"square",0.075);
+  _mStep=(_mStep+1)%64;
+}
+function startMusic(){ if(!musicOn||_mTimer) return; if(!actx()) return; _mStep=0; _mTimer=setInterval(mTick,109); } // ~138 BPM
+function stopMusic(){ if(_mTimer){ clearInterval(_mTimer); _mTimer=null; } }
+function toggleMusic(){ musicOn=!musicOn; const b=$("#btnMusic"); if(b) b.textContent="🎵 "+(musicOn?"on":"off"); if(musicOn) startMusic(); else stopMusic(); }
 function hueFromName(name){ let h=0; for(const c of (name||"x")) h=(h*31+c.charCodeAt(0))%360; return h; }
 function orbColors(name){ const h=hueFromName(name); return { c:`hsl(${h} 85% 60%)`, glow:`hsla(${h},90%,60%,.6)` }; }
 function floatText(card,txt,cls){ if(!card)return; const d=document.createElement("div"); d.className="floatnum "+cls; d.textContent=txt; card.appendChild(d); setTimeout(()=>d.remove(),1000); }
@@ -1373,6 +1408,8 @@ async function toggleRank(){
 
 const _sfxBtn=document.querySelector("#btnSfx");
 if(_sfxBtn) _sfxBtn.onclick=()=>{ sfxOn=!sfxOn; _sfxBtn.textContent="som: "+(sfxOn?"on":"off"); if(sfxOn) playSfx("charge"); };
+const _musBtn=document.querySelector("#btnMusic");
+if(_musBtn) _musBtn.onclick=toggleMusic;
 
 show("home");
 initAuth();
