@@ -26,10 +26,9 @@
   .wrap{max-width:980px;margin:0 auto;padding:22px 16px 60px}
   h1,h2,h3{margin:0 0 .4em}
   h1{font-size:30px;letter-spacing:.5px}
-  .brand{display:flex;align-items:center;gap:12px;margin-bottom:6px}
-  .logo{width:42px;height:42px;border-radius:11px;display:grid;place-items:center;
-    background:linear-gradient(135deg,var(--gold),var(--gold-2));color:#1a1206;font-weight:900;font-size:20px;
-    box-shadow:0 6px 20px rgba(255,160,40,.4)}
+  .hero{margin-bottom:14px;text-align:center}
+  .hero-img{width:100%;max-width:780px;height:auto;display:block;margin:0 auto;border-radius:12px;
+    border:1px solid var(--line);box-shadow:0 12px 44px rgba(0,0,0,.55), 0 0 0 1px rgba(78,195,255,.12) inset}
   .tag{color:var(--muted);font-size:13px}
   .card{background:linear-gradient(180deg,var(--panel),var(--panel-2));border:1px solid var(--line);
     border-radius:var(--r);padding:18px;box-shadow:var(--shadow);margin-bottom:16px}
@@ -90,42 +89,51 @@
   @keyframes dots{0%{content:""}25%{content:"."}50%{content:".."}75%{content:"..."}}
   .big{font-size:22px;font-weight:900}
   .kobanner{font-size:34px;font-weight:900;text-align:center;padding:20px;background:linear-gradient(135deg,var(--gold),var(--gold-2));color:#1a1206;border-radius:var(--r)}
+  .roomitem{display:flex;justify-content:space-between;align-items:center;background:#0c0f17;border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:8px}
+  .roomitem .ri-name{font-weight:700}
+  .roomitem .ri-code{color:var(--muted);font-size:12px}
+  .roomitem button{flex:0 0 auto;padding:8px 14px}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <div class="portal-header" style="text-align:center;margin-bottom:16px">
-    <img src="header.png" alt="ZW Arena"
-         style="display:block;width:100%;max-width:780px;height:auto;margin:0 auto;border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow)" />
+  <div class="hero">
+    <img class="hero-img" src="header.png" alt="Z Warriors — Only the Best Will Survive" />
     <div class="tag" style="margin-top:8px">ZW Arena · protótipo v0.1 — Regras de Luta Z Warriors. O computador é o juiz. Demo 1×1.</div>
   </div>
 
-  <!-- ===== HOME ===== -->
+  <!-- ===== HOME / SAGUÃO ===== -->
   <div id="home" class="card">
-    <label>Seu nick de guerreiro</label>
-    <input id="nick" placeholder="ex.: Goku ZW" maxlength="20" />
-    <div class="row" style="margin-top:12px">
-      <div>
-        <label>Código da sala</label>
-        <input id="room" placeholder="ex.: kame123" maxlength="16" />
+    <!-- entrada -->
+    <div id="entry">
+      <label>Seu nick de guerreiro</label>
+      <input id="nick" placeholder="ex.: Goku ZW" maxlength="20" />
+      <div class="row" style="margin-top:14px"><button id="btnEnter">Entrar no saguão</button></div>
+      <div class="hint" id="netStatus"></div>
+    </div>
+    <!-- saguão -->
+    <div id="lobby" class="hidden">
+      <div class="row" style="align-items:center">
+        <div style="flex:1"><h2 style="margin:0">Saguão</h2><div class="tag" id="lobbyWho"></div></div>
+        <div style="flex:0 0 auto"><button id="btnNewRoom">+ Criar sala</button></div>
       </div>
-    </div>
-    <div class="row" style="margin-top:14px">
-      <button id="btnCreate">Criar sala</button>
-      <button id="btnJoin" class="ghost">Entrar na sala</button>
-    </div>
-    <div class="hint" id="netStatus"></div>
-    <div class="hint">
-      <b>Como testar agora (sem servidor):</b> abra este arquivo em <b>duas abas</b>. Numa, crie uma sala;
-      na outra, entre com o <b>mesmo código</b>. As duas abas conversam via BroadcastChannel.
-      Para jogar de verdade pela internet (Filipe × Rafael × Clebler), basta colar as chaves do Supabase no topo do código (ver <code>ZW-PLAN.md</code>).
+      <label style="margin-top:16px">Salas abertas</label>
+      <div id="roomList"></div>
+      <div class="hint" id="lobbyStatus"></div>
+      <details style="margin-top:8px">
+        <summary class="tag" style="cursor:pointer">entrar por código</summary>
+        <div class="row" style="margin-top:8px">
+          <input id="room" placeholder="código da sala" maxlength="16" />
+          <button id="btnJoinCode" class="ghost" style="flex:0 0 auto">Entrar</button>
+        </div>
+      </details>
     </div>
   </div>
 
   <!-- ===== DRAFT ===== -->
   <div id="draft" class="card hidden">
-    <h2>Escolha seus <span id="pickTarget">3</span> golpes <span class="pill" id="draftCount">0/3</span></h2>
-    <div class="hint">Sempre disponíveis (não contam nos 5): <b>Soco, Chute, Concentrar KI, Defesa Simples</b>.
+    <h2>Escolha seus golpes <span class="pill" id="draftCount">0/3</span></h2>
+    <div class="hint">Sempre disponíveis (não contam no limite): <b>Soco, Chute, Concentrar KI, Defesa Simples</b>.
       Golpes de carga (T.E.>1) chegam na próxima versão.</div>
     <div id="moveGrid" class="moves"></div>
     <div class="row" style="margin-top:14px">
@@ -145,8 +153,8 @@
 
     <!-- selection -->
     <div id="selectPane" style="margin-top:14px">
+      <div id="myStatus" class="pill" style="display:block;margin-bottom:10px;font-size:13px"></div>
       <label>1) Escolha sua ação</label>
-      <div id="myStatusLine" class="hint" style="margin:0 0 8px;color:var(--txt)"></div>
       <div id="actionGrid" class="moves"></div>
       <label style="margin-top:12px">2) Número de velocidade <span class="tag">(maior = mais rápido; não repete até zerar)</span></label>
       <div id="speedGrid" class="speeds"></div>
@@ -247,8 +255,8 @@ const DEFESA = reg({id:"defesa",name:"Defesa Simples",kind:"defesa_simples",ki:0
   desc:"Metade do dano recebido (vence/empata)."});
 
 const DRAFTABLE = Object.values(MOVES).filter(m=>!m.free);
-const KI_CAP = 100; // nível 0
-const PICK_COUNT = 3; // quantos golpes o jogador escolhe no draft (fora os sempre disponíveis)
+const KI_CAP = 100;   // nível 0
+const PICK_COUNT = 3; // golpes escolhidos no início (demo). No RZW são 5 (6 no nv3, 7 no nv4).
 
 /* ---------------------------------------------------------------------------
    ENGINE  (puro / determinístico) — o coração do jogo.
@@ -379,6 +387,15 @@ function consumeSpeed(f,n){ f.speeds=f.speeds.filter(x=>x!==n); if(f.speeds.leng
    Supabase entra sozinho se CONFIG tiver chaves. Mesma interface dos dois.
    send(type,payload) / onMessage(cb)
 --------------------------------------------------------------------------- */
+const ONLINE = !!(CONFIG.supabaseUrl && CONFIG.supabaseAnonKey);
+let _sbClient=null;
+async function getSupabase(){
+  if(_sbClient) return _sbClient;
+  const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2");
+  _sbClient = createClient(CONFIG.supabaseUrl, CONFIG.supabaseAnonKey);
+  return _sbClient;
+}
+
 class LocalTransport{
   constructor(room){ this.ch=new BroadcastChannel("zw-"+room); this.cbs=[];
     this.ch.onmessage=e=>this.cbs.forEach(cb=>cb(e.data)); }
@@ -389,8 +406,7 @@ class SupabaseTransport{
   constructor(room){ this.room=room; this.cbs=[]; this.ready=false; this.queue=[]; this._init(); }
   async _init(){
     try{
-      const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2");
-      this.sb=createClient(CONFIG.supabaseUrl,CONFIG.supabaseAnonKey);
+      this.sb=await getSupabase();
       this.chan=this.sb.channel("zw-"+this.room,{config:{broadcast:{self:false}}});
       this.chan.on("broadcast",{event:"msg"},({payload})=>this.cbs.forEach(cb=>cb(payload)));
       await this.chan.subscribe(s=>{ if(s==="SUBSCRIBED"){ this.ready=true; this.queue.forEach(m=>this._raw(m)); this.queue=[]; } });
@@ -400,9 +416,51 @@ class SupabaseTransport{
   send(type,payload){ const m={type,payload,from:ME.id}; if(this.ready) this._raw(m); else this.queue.push(m); }
   onMessage(cb){ this.cbs.push(cb); }
 }
-function makeTransport(room){
-  return (CONFIG.supabaseUrl && CONFIG.supabaseAnonKey) ? new SupabaseTransport(room) : new LocalTransport(room);
+function makeTransport(room){ return ONLINE ? new SupabaseTransport(room) : new LocalTransport(room); }
+
+/* ---------------------------------------------------------------------------
+   LOBBY  — registro de salas abertas (lista do saguão).
+   Online: Presence num canal "zw:lobby" (host se anuncia, todos veem).
+   Local: BroadcastChannel com anúncio + heartbeat (testar em 2 abas).
+   onChange(cb) recebe a lista [{room,nick}]. announce/unannounce do host.
+--------------------------------------------------------------------------- */
+class LocalLobby{
+  constructor(){ this.ch=new BroadcastChannel("zw:lobby"); this.cbs=[]; this.rooms={}; this.mine=null;
+    this.ch.onmessage=e=>this._on(e.data);
+    this.ch.postMessage({t:"list?"});
+    this._hb=setInterval(()=>{ if(this.mine) this.ch.postMessage({t:"room",info:this.mine}); this._sweep(); },2000);
+  }
+  _on(m){
+    if(m.t==="room"){ this.rooms[m.info.room]={...m.info,ts:Date.now()}; this._emit(); }
+    else if(m.t==="close"){ delete this.rooms[m.room]; this._emit(); }
+    else if(m.t==="list?"){ if(this.mine) this.ch.postMessage({t:"room",info:this.mine}); }
+  }
+  _sweep(){ const now=Date.now(); let ch=false; for(const k in this.rooms){ if(now-this.rooms[k].ts>6000){ delete this.rooms[k]; ch=true; } } if(ch) this._emit(); }
+  _emit(){ const l=Object.values(this.rooms); this.cbs.forEach(cb=>cb(l)); }
+  announce(info){ this.mine=info; this.ch.postMessage({t:"room",info}); }
+  unannounce(){ if(this.mine){ this.ch.postMessage({t:"close",room:this.mine.room}); this.mine=null; } }
+  onChange(cb){ this.cbs.push(cb); cb(Object.values(this.rooms)); }
 }
+class SupabaseLobby{
+  constructor(){ this.cbs=[]; this.ready=false; this.pending=null; this._init(); }
+  async _init(){
+    try{
+      const sb=await getSupabase();
+      this.chan=sb.channel("zw:lobby",{config:{presence:{key:ME.id}}});
+      this.chan.on("presence",{event:"sync"},()=>this._emit());
+      this.chan.on("presence",{event:"join"},()=>this._emit());
+      this.chan.on("presence",{event:"leave"},()=>this._emit());
+      await this.chan.subscribe(async s=>{ if(s==="SUBSCRIBED"){ this.ready=true; if(this.pending) await this.chan.track(this.pending); this._emit(); } });
+    }catch(err){ console.error("Lobby Supabase indisponível:",err); }
+  }
+  _emit(){ if(!this.chan) return; const st=this.chan.presenceState(); const rooms=[];
+    Object.values(st).forEach(arr=>arr.forEach(p=>{ if(p && p.room) rooms.push({room:p.room,nick:p.nick}); }));
+    this.cbs.forEach(cb=>cb(rooms)); }
+  async announce(info){ this.pending=info; if(this.ready) await this.chan.track(info); }
+  async unannounce(){ this.pending=null; if(this.ready&&this.chan) await this.chan.untrack(); }
+  onChange(cb){ this.cbs.push(cb); }
+}
+function makeLobby(){ return ONLINE ? new SupabaseLobby() : new LocalLobby(); }
 
 /* ---------------------------------------------------------------------------
    CONTROLLER / UI
@@ -410,6 +468,7 @@ function makeTransport(room){
 const $=s=>document.querySelector(s);
 const ME={ id:Math.random().toString(36).slice(2), nick:"", seat:null }; // seat: "p1"|"p2"
 let net=null, room="", peer={ nick:null, ready:false, moves:null };
+let lobby=null, lobbyRooms=[];
 let state=null;          // estado global da luta {p1,p2,turn,over,winner}
 let sel={ moveId:null, speed:null };
 let mySub=null, peerSub=null;     // submissões do turno atual
@@ -418,26 +477,61 @@ let phase="home";
 
 function show(id){ ["home","draft","battle"].forEach(x=>$("#"+x).classList.toggle("hidden",x!==id)); }
 
-/* ---- HOME ---- */
-$("#btnCreate").onclick=()=>start("p1");
-$("#btnJoin").onclick=()=>start("p2");
-function start(seat){
-  const nick=$("#nick").value.trim(); room=$("#room").value.trim();
-  if(!nick||!room){ $("#netStatus").textContent="Preencha nick e código da sala."; return; }
-  ME.nick=nick; ME.seat=seat;
+/* ---- HOME / SAGUÃO ---- */
+$("#btnEnter").onclick=()=>{
+  const nick=$("#nick").value.trim();
+  if(!nick){ $("#netStatus").textContent="Digite seu nick."; return; }
+  ME.nick=nick;
+  $("#entry").classList.add("hidden");
+  $("#lobby").classList.remove("hidden");
+  $("#lobbyWho").textContent = "Você: "+nick+(ONLINE? " · online" : " · local (teste em 2 abas)");
+  $("#lobbyStatus").textContent = ONLINE? "" : "Modo local: abra outra aba no mesmo navegador pra ver/entrar nas salas.";
+  lobby=makeLobby();
+  lobby.onChange(renderRoomList);
+};
+$("#btnNewRoom").onclick=()=>createRoom();
+$("#btnJoinCode").onclick=()=>joinRoom($("#room").value.trim());
+
+function genCode(){ return Math.random().toString(36).slice(2,6); }
+function createRoom(){
+  const code=genCode();
+  if(lobby) lobby.announce({room:code, nick:ME.nick});
+  start("p1", code);
+}
+function joinRoom(code){
+  if(!code) return;
+  if(lobby) lobby.unannounce();
+  start("p2", code);
+}
+function renderRoomList(rooms){
+  lobbyRooms=rooms;
+  const box=$("#roomList"); if(!box) return; box.innerHTML="";
+  const others=rooms.filter(r=>r.room!==room);
+  if(!others.length){ box.innerHTML='<div class="hint">Nenhuma sala aberta ainda. Clique em “+ Criar sala”.</div>'; return; }
+  others.forEach(r=>{
+    const el=document.createElement("div"); el.className="roomitem";
+    el.innerHTML=`<div><div class="ri-name">${esc(r.nick||"?")}</div><div class="ri-code">sala ${esc(r.room)}</div></div>`;
+    const b=document.createElement("button"); b.textContent="Entrar"; b.onclick=()=>joinRoom(r.room);
+    el.appendChild(b); box.appendChild(el);
+  });
+}
+function esc(s){ return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+function start(seat, roomCode){
+  ME.seat=seat; room=roomCode;
   net=makeTransport(room);
   net.onMessage(onNet);
-  net.send("hello",{nick, seat});
-  $("#netStatus").innerHTML = (CONFIG.supabaseUrl? "Conectando ao Supabase…" : "Modo local (2 abas).")+" Você é <b>"+(seat==="p1"?"Jogador 1":"Jogador 2")+"</b>.";
+  net.send("hello",{nick:ME.nick, seat});
   buildDraft(); show("draft");
+  $("#draftWait").innerHTML = `Sala <b>${esc(room)}</b> · esperando oponente<span class="waitdot"></span>`;
 }
 
 /* ---- NET ---- */
 function onNet(msg){
   if(msg.from===ME.id) return;
   const {type,payload}=msg;
-  if(type==="hello"){ peer.nick=payload.nick; net.send("hello-ack",{nick:ME.nick,seat:ME.seat}); }
-  if(type==="hello-ack"){ peer.nick=payload.nick; }
+  if(type==="hello"){ peer.nick=payload.nick; if(lobby) lobby.unannounce(); net.send("hello-ack",{nick:ME.nick,seat:ME.seat}); }
+  if(type==="hello-ack"){ peer.nick=payload.nick; if(lobby) lobby.unannounce(); }
   if(type==="ready"){ peer.ready=true; peer.moves=payload.moves; peer.nick=payload.nick; $("#draftWait").innerHTML = `<b>${peer.nick}</b> está pronto.`; tryStartBattle(); }
   if(type==="submit"){ peerSub=payload; maybeReveal(); }
   if(type==="bid"){ peerBid=payload.bid; maybeResolveBid(); }
@@ -445,9 +539,6 @@ function onNet(msg){
 
 /* ---- DRAFT ---- */
 function buildDraft(){
-  $("#pickTarget").textContent=PICK_COUNT;
-  $("#draftCount").textContent=draftSel.length+"/"+PICK_COUNT;
-  $("#btnReady").disabled = draftSel.length!==PICK_COUNT;
   const grid=$("#moveGrid"); grid.innerHTML="";
   DRAFTABLE.forEach(m=>{
     const el=document.createElement("div");
@@ -518,8 +609,8 @@ function buildSelection(){
   $("#koPane").classList.add("hidden");
   $("#selWait").textContent="";
   $("#phaseLabel").textContent="escolha sua ação em segredo";
+  $("#myStatus").innerHTML = `Seu status — HP <b>${myF().hp}/50</b> · KI <b>${myF().ki}/${KI_CAP}</b>`;
   sel={moveId:null,speed:null}; mySub=null; peerSub=null; myBid=null; peerBid=null;
-  $("#myStatusLine").innerHTML = `Seu status — HP <b>${myF().hp}</b>/50 · KI <b>${myF().ki}</b>/${KI_CAP}`;
   // ações: golpes escolhidos + soco/chute/concentrar/defesa
   const ids=[...myF().moves, "soco","chute","concentrar","defesa"];
   const grid=$("#actionGrid"); grid.innerHTML="";
