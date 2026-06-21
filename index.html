@@ -94,12 +94,10 @@
 </head>
 <body>
 <div class="wrap">
-  <div class="brand">
-    <div class="logo">ZW</div>
-    <div>
-      <h1>ZW Arena <span class="pill">protótipo v0.1</span></h1>
-      <div class="tag">Regras de Luta Z Warriors — o computador é o juiz. Demo 1×1.</div>
-    </div>
+  <div class="portal-header" style="text-align:center;margin-bottom:16px">
+    <img src="header.png" alt="ZW Arena"
+         style="display:block;width:100%;max-width:780px;height:auto;margin:0 auto;border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow)" />
+    <div class="tag" style="margin-top:8px">ZW Arena · protótipo v0.1 — Regras de Luta Z Warriors. O computador é o juiz. Demo 1×1.</div>
   </div>
 
   <!-- ===== HOME ===== -->
@@ -126,7 +124,7 @@
 
   <!-- ===== DRAFT ===== -->
   <div id="draft" class="card hidden">
-    <h2>Escolha seus 5 golpes <span class="pill" id="draftCount">0/5</span></h2>
+    <h2>Escolha seus <span id="pickTarget">3</span> golpes <span class="pill" id="draftCount">0/3</span></h2>
     <div class="hint">Sempre disponíveis (não contam nos 5): <b>Soco, Chute, Concentrar KI, Defesa Simples</b>.
       Golpes de carga (T.E.>1) chegam na próxima versão.</div>
     <div id="moveGrid" class="moves"></div>
@@ -148,6 +146,7 @@
     <!-- selection -->
     <div id="selectPane" style="margin-top:14px">
       <label>1) Escolha sua ação</label>
+      <div id="myStatusLine" class="hint" style="margin:0 0 8px;color:var(--txt)"></div>
       <div id="actionGrid" class="moves"></div>
       <label style="margin-top:12px">2) Número de velocidade <span class="tag">(maior = mais rápido; não repete até zerar)</span></label>
       <div id="speedGrid" class="speeds"></div>
@@ -249,6 +248,7 @@ const DEFESA = reg({id:"defesa",name:"Defesa Simples",kind:"defesa_simples",ki:0
 
 const DRAFTABLE = Object.values(MOVES).filter(m=>!m.free);
 const KI_CAP = 100; // nível 0
+const PICK_COUNT = 3; // quantos golpes o jogador escolhe no draft (fora os sempre disponíveis)
 
 /* ---------------------------------------------------------------------------
    ENGINE  (puro / determinístico) — o coração do jogo.
@@ -445,6 +445,9 @@ function onNet(msg){
 
 /* ---- DRAFT ---- */
 function buildDraft(){
+  $("#pickTarget").textContent=PICK_COUNT;
+  $("#draftCount").textContent=draftSel.length+"/"+PICK_COUNT;
+  $("#btnReady").disabled = draftSel.length!==PICK_COUNT;
   const grid=$("#moveGrid"); grid.innerHTML="";
   DRAFTABLE.forEach(m=>{
     const el=document.createElement("div");
@@ -459,9 +462,9 @@ let draftSel=[];
 function toggleDraft(id,el){
   const i=draftSel.indexOf(id);
   if(i>=0){ draftSel.splice(i,1); el.classList.remove("sel"); }
-  else { if(draftSel.length>=5){ return; } draftSel.push(id); el.classList.add("sel"); }
-  $("#draftCount").textContent=draftSel.length+"/5";
-  $("#btnReady").disabled = draftSel.length!==5;
+  else { if(draftSel.length>=PICK_COUNT){ return; } draftSel.push(id); el.classList.add("sel"); }
+  $("#draftCount").textContent=draftSel.length+"/"+PICK_COUNT;
+  $("#btnReady").disabled = draftSel.length!==PICK_COUNT;
 }
 $("#btnReady").onclick=()=>{
   $("#btnReady").disabled=true;
@@ -516,6 +519,7 @@ function buildSelection(){
   $("#selWait").textContent="";
   $("#phaseLabel").textContent="escolha sua ação em segredo";
   sel={moveId:null,speed:null}; mySub=null; peerSub=null; myBid=null; peerBid=null;
+  $("#myStatusLine").innerHTML = `Seu status — HP <b>${myF().hp}</b>/50 · KI <b>${myF().ki}</b>/${KI_CAP}`;
   // ações: golpes escolhidos + soco/chute/concentrar/defesa
   const ids=[...myF().moves, "soco","chute","concentrar","defesa"];
   const grid=$("#actionGrid"); grid.innerHTML="";
