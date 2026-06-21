@@ -1347,6 +1347,7 @@ function traduzErro(m){
   if(/at least 6|password should be/i.test(m)) return "A senha precisa de pelo menos 6 caracteres.";
   if(/valid email|invalid format/i.test(m)) return "E-mail inválido.";
   if(/Email not confirmed/i.test(m)) return "Confirme seu e-mail pelo link que enviamos e tente entrar de novo.";
+  if(/rate limit|too many|429/i.test(m)) return "Limite de e-mails do Supabase atingido (uns 4/hora). Desligue a confirmação de e-mail no painel (ou configure SMTP) e tente com um e-mail novo.";
   return m;
 }
 async function doAuth(){
