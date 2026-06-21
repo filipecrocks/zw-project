@@ -3,7 +3,10 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>ZW Arena 7.0</title>
+<title>ZW Arena</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg:#0a0c12; --panel:#11141c; --panel-2:#171b26; --line:#222838;
@@ -98,6 +101,9 @@
   .move.hot .mn{color:var(--gold)}
   .move.hot .badge{background:var(--ki);color:#04212f}
   .speeds.disabled{opacity:.35;pointer-events:none;filter:grayscale(.7)}
+  .move.tf{border-color:#ff9d2e;background:linear-gradient(135deg,rgba(255,157,46,.18),rgba(255,206,77,.06));
+    box-shadow:0 0 0 1px rgba(255,157,46,.4),0 0 20px rgba(255,157,46,.3)}
+  .move.tf .mn{color:#ffc24d}
   .center{text-align:center}
   .waitdot::after{content:"";animation:dots 1.2s steps(4,end) infinite}
   @keyframes dots{0%{content:""}25%{content:"."}50%{content:".."}75%{content:"..."}}
@@ -193,6 +199,27 @@
   .coach .cbody{font-size:14px;line-height:1.5}
   .coach button{margin-top:10px;padding:8px 16px}
   .acctbar{background:#0c0f17;border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:14px}
+  /* ---- landing ---- */
+  .wordmark{ font-family:"Anton",Impact,system-ui,sans-serif; font-weight:400;
+    font-size:clamp(42px,12vw,88px); line-height:.9; letter-spacing:2px; text-align:center; margin:16px 0 8px;
+    background:linear-gradient(180deg,#ffffff 2%,var(--gold) 36%,var(--gold-2) 76%,#c25212 100%);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    filter:drop-shadow(0 2px 0 rgba(0,0,0,.45)) drop-shadow(0 0 28px rgba(255,157,46,.45));
+    -webkit-text-stroke:1px rgba(0,0,0,.22) }
+  .lede{ max-width:620px; margin:0 auto; text-align:center; color:#c5ccdb;
+    font-size:clamp(14px,2.6vw,17px); line-height:1.55 }
+  .acctline{ text-align:center; color:var(--muted); font-size:13px; margin:18px auto 14px; max-width:560px; line-height:1.45 }
+  .cta{ display:flex; gap:10px; flex-wrap:wrap; justify-content:center; max-width:520px; margin:0 auto }
+  .cta>button{ flex:1 1 150px }
+  .cta-primary{ background:linear-gradient(135deg,var(--gold),var(--gold-2)); color:#2a1c00; font-weight:800;
+    box-shadow:0 6px 22px rgba(255,157,46,.35); border:none }
+  .linklike{ display:block; margin:14px auto 0; background:none; border:none; color:var(--ki);
+    font-size:13px; cursor:pointer; text-decoration:underline; width:auto; padding:4px }
+  .features{ display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-top:24px }
+  .feat{ background:#0c0f17; border:1px solid var(--line); border-radius:12px; padding:13px 14px }
+  .feat-k{ display:block; font-weight:800; color:var(--gold); font-size:12px; text-transform:uppercase; letter-spacing:.6px; margin-bottom:4px }
+  .feat-d{ display:block; color:#aeb6c7; font-size:13px; line-height:1.45 }
+  @media(max-width:560px){ .features{ grid-template-columns:1fr } }
   .rankrow{display:flex;justify-content:space-between;padding:7px 10px;border-radius:8px;background:#0c0f17;border:1px solid var(--line);margin-bottom:6px;font-size:14px}
   .rankrow b{color:var(--gold)}
   .rankrow .lvl{color:var(--muted);font-size:12px}
@@ -202,7 +229,8 @@
 <div class="wrap">
   <div class="hero">
     <img class="hero-img" src="header.png" alt="Z Warriors — Only the Best Will Survive" />
-    <div class="tag" style="margin-top:8px">ZW Arena <b style="color:var(--gold)">7.0</b> — Regras de Luta Z Warriors. O computador é o juiz. Demo 1×1 com timer.</div>
+    <h1 class="wordmark">ZW&nbsp;ARENA</h1>
+    <p class="lede">O lendário sistema de luta do clã <b>Z Warriors</b>, recriado do zero. Combate por turnos — sem dado, sem sorte. Quem ler melhor o oponente, vence.</p>
   </div>
 
   <div id="coachBox" class="coach hidden"></div>
@@ -211,22 +239,56 @@
   <div id="home" class="card">
     <!-- entrada -->
     <div id="entry">
-      <div id="accountBar" class="acctbar">
-        <div id="accountLine" class="hint" style="margin:0">Carregando…</div>
-        <div class="row" style="margin-top:8px;gap:8px">
-          <button id="btnGoogle" class="ghost" style="flex:1">Entrar com Google</button>
-          <button id="btnRank" class="ghost" style="flex:0 0 auto">Ranking</button>
+
+      <!-- LANDING -->
+      <div id="landingView">
+        <div id="accountLine" class="acctline">Carregando…</div>
+        <div class="cta">
+          <button id="btnSignup" class="cta-primary">Criar conta</button>
+          <button id="btnLogin" class="ghost">Entrar</button>
+          <button id="btnGuest" class="ghost">Jogar sem conta</button>
+          <button id="btnPlay" class="cta-primary hidden">Jogar agora</button>
+          <button id="btnLogout" class="ghost hidden">Sair</button>
+        </div>
+        <button id="btnRank" class="linklike">Ver ranking do clã</button>
+        <div id="rankPane" class="hidden" style="margin:12px auto;max-width:520px"></div>
+        <div class="features">
+          <div class="feat"><span class="feat-k">Turnos secretos</span><span class="feat-d">Os dois jogam ao mesmo tempo, escondido. Quem disser a velocidade maior age primeiro.</span></div>
+          <div class="feat"><span class="feat-k">Choque de KI</span><span class="feat-d">Golpe contra golpe no mesmo número? Uma aposta secreta de KI decide quem passa.</span></div>
+          <div class="feat"><span class="feat-k">Transformações</span><span class="feat-d">Suba de SSJ até SSJ4 no meio da luta e vire o jogo na hora certa.</span></div>
+          <div class="feat"><span class="feat-k">Ranking do clã</span><span class="feat-d">Cada vitória conta. Evolua de nível e suba no placar dos Z Warriors.</span></div>
         </div>
       </div>
-      <div id="rankPane" class="hidden" style="margin:12px 0"></div>
-      <label>Seu nick de guerreiro</label>
-      <input id="nick" placeholder="ex.: Goku ZW" maxlength="20" />
-      <div class="row" style="margin-top:14px">
-        <button id="btnTutorial">Sou novo — me ensina a jogar</button>
-        <button id="btnVeteran" class="ghost">Já jogo — ir pro saguão</button>
+
+      <!-- CRIAR CONTA / ENTRAR -->
+      <div id="authView" class="hidden">
+        <h2 id="authTitle">Criar conta</h2>
+        <div id="authNick"><label>Nick de guerreiro</label><input id="suNick" placeholder="ex.: Goku ZW" maxlength="20" /></div>
+        <label style="margin-top:12px">E-mail</label>
+        <input id="auEmail" type="email" autocomplete="email" placeholder="voce@email.com" />
+        <label style="margin-top:12px">Senha</label>
+        <input id="auPass" type="password" autocomplete="current-password" placeholder="mínimo 6 caracteres" />
+        <div id="authMsg" class="hint" style="min-height:18px;margin-top:8px"></div>
+        <button id="btnAuthGo" style="width:100%">Criar conta</button>
+        <div class="row" style="margin-top:10px">
+          <button id="btnAuthSwap" class="ghost">Já tenho conta — entrar</button>
+          <button id="btnAuthBack" class="ghost">Voltar</button>
+        </div>
       </div>
-      <button id="btnZW" style="width:100%;margin-top:10px;background:linear-gradient(135deg,#4ec3ff,#7c5cff);color:#04121f">Entrar na Sala ZW (teste rápido — todo mundo aqui)</button>
-      <div class="hint" id="netStatus">No tutorial você treina contra um boneco. Pra jogar com os amigos agora, todos clicam em <b>Sala ZW</b>.</div>
+
+      <!-- JOGAR (após login ou convidado) -->
+      <div id="playView" class="hidden">
+        <div id="playWho" class="acctline" style="margin-top:0"></div>
+        <label>Seu nick de guerreiro</label>
+        <input id="nick" placeholder="ex.: Goku ZW" maxlength="20" />
+        <div class="row" style="margin-top:14px">
+          <button id="btnTutorial">Sou novo — me ensina a jogar</button>
+          <button id="btnVeteran" class="ghost">Já jogo — ir pro saguão</button>
+        </div>
+        <button id="btnZW" style="width:100%;margin-top:10px;background:linear-gradient(135deg,#4ec3ff,#7c5cff);color:#04121f">Entrar na Sala ZW (todo mundo aqui)</button>
+        <div class="hint" id="netStatus">No tutorial você treina contra um boneco. Pra jogar com os amigos agora, todos entram na <b>Sala ZW</b>.</div>
+        <button id="btnPlayBack" class="linklike">← voltar</button>
+      </div>
     </div>
     <!-- saguão -->
     <div id="lobby" class="hidden">
@@ -250,9 +312,17 @@
   <!-- ===== DRAFT ===== -->
   <div id="draft" class="card hidden">
     <h2>Escolha seus golpes <span class="pill" id="draftCount">0/3</span></h2>
-    <div class="hint">Sempre disponíveis (não contam no limite): <b>Soco, Chute, Concentrar KI, Defesa Simples</b>.
+    <div class="hint">Sempre disponíveis (não contam no limite): <b>Soco, Chute, Carregar KI, Defesa Simples</b>.
       Golpes de carga (T.E.>1) chegam na próxima versão.</div>
     <div id="moveGrid" class="moves"></div>
+    <label style="margin-top:14px">Nível máximo de transformação <span class="tag">· sandbox pra testar SSJ — depois vai ser pelas suas vitórias</span></label>
+    <select id="maxLevelSel" style="width:100%;margin-top:6px;padding:11px;border-radius:10px;background:#0c0f17;color:var(--ink);border:1px solid var(--line);font-size:15px">
+      <option value="0">Base / Saiyajin (sem transformação)</option>
+      <option value="1">Até SSJ (nível 1)</option>
+      <option value="2">Até SSJ2 (nível 2)</option>
+      <option value="3">Até SSJ3 (nível 3)</option>
+      <option value="4">Até SSJ4 (nível 4)</option>
+    </select>
     <div class="row" style="margin-top:14px">
       <button id="btnReady" disabled>Pronto para lutar</button>
     </div>
@@ -392,10 +462,19 @@ const CONCENTRAR = reg({id:"concentrar",name:"Carregar KI",kind:"concentra",ki:0
   desc:"+10 KI · não usa velocidade · mas fica sem defesa o turno todo"});
 const DEFESA = reg({id:"defesa",name:"Defesa Simples",kind:"defesa_simples",ki:0,te:1,free:true,
   desc:"Metade do dano recebido (vence/empata)."});
+const TRANSFORMAR = reg({id:"transformar",name:"Transformar ▲",kind:"transforma",ki:0,te:1,free:true,
+  desc:"Sobe 1 nível (+1 no seu número) · ganha HP, KI, velocidade e dano"});
 
 const DRAFTABLE = Object.values(MOVES).filter(m=>!m.free);
 const KI_CAP = 100;   // nível 0
 const PICK_COUNT = 3; // golpes escolhidos no início (demo). No RZW são 5 (6 no nv3, 7 no nv4).
+// --- níveis / transformações (RZW: HP e KI somam entre níveis; velocidade e dano são os do nível atual) ---
+const LVL_HP  = {1:80, 2:100, 3:110, 4:130};
+const LVL_KI  = {1:80, 2:90,  3:100, 4:110};
+const LVL_VEL = {0:0, 1:1, 2:2, 3:3, 4:4};
+const LVL_DANO= {0:0, 1:5, 2:10, 3:15, 4:20};
+const LVL_CAP = {0:100, 1:220, 2:320, 3:430, 4:99999};
+const LVL_NAME= {0:"Base", 1:"SSJ", 2:"SSJ2", 3:"SSJ3", 4:"SSJ4"};
 const TURN_SECONDS = 30; // tempo pra escolher ação + velocidade
 const BID_SECONDS  = 20; // tempo pra resolver o choque de KI
 const NO_SPEED = new Set(["concentrar"]); // ações que NÃO exigem número de velocidade (regra). Carregar KI é a única em jogo hoje.
@@ -405,14 +484,18 @@ const NO_SPEED = new Set(["concentrar"]); // ações que NÃO exigem número de 
    resolveTurn(state, subA, subB, bids?) -> { state, events, needBid }
    "A" é sempre p1, "B" sempre p2 (ambos os clientes calculam igual).
 --------------------------------------------------------------------------- */
-function newFighter(name){
-  return { name, hp:50, ki:50, speeds:[1,2,3,4,5,6,7,8,9,10],
-           moves:[], effects:{ kaioken:false, speedBonusNext:0 } };
+function newFighter(name, maxLevel){
+  return { name, hp:50, maxHp:50, ki:50, speeds:[1,2,3,4,5,6,7,8,9,10],
+           level:0, maxLevel:(maxLevel||0), kiCap:100,
+           moves:[], effects:{ kaioken:false, speedBonusNext:0, lvlSpeed:0, lvlDano:0 } };
 }
-function clampKi(v){ return Math.max(0, Math.min(KI_CAP, v)); }
+function clampF(f,v){ return Math.max(0, Math.min(f.kiCap||KI_CAP, v)); }
 function dmgOf(move, fighter){
   let d = move.dano||0;
-  if(move.kind==="golpe" && fighter.effects.kaioken && d>0) d += 5;
+  if(move.kind==="golpe" && d>0){
+    if(fighter.effects.kaioken) d += 5;
+    d += (fighter.effects.lvlDano||0);
+  }
   return d;
 }
 function classify(move){
@@ -423,8 +506,8 @@ function classify(move){
   return "UTIL";
 }
 
-// sub = { moveId, speed }
-function effSpeed(sub, f){ return sub.speed + (f.effects.speedBonusNext||0); }
+// sub = { moveId, speed, xbonus? }
+function effSpeed(sub, f){ return sub.speed + (sub.xbonus||0) + (f.effects.lvlSpeed||0) + (f.effects.speedBonusNext||0); }
 
 function resolveTurn(state, subA, subB, bids){
   // clona
@@ -445,8 +528,8 @@ function resolveTurn(state, subA, subB, bids){
     if(!bids) return { needBid:true };
     const bidA=Math.max(0,Math.min(bids.a||0, a.ki - (mA.ki||0)));
     const bidB=Math.max(0,Math.min(bids.b||0, b.ki - (mB.ki||0)));
-    a.ki=clampKi(a.ki-(mA.ki||0)-bidA);
-    b.ki=clampKi(b.ki-(mB.ki||0)-bidB);
+    a.ki=clampF(a, a.ki-(mA.ki||0)-bidA);
+    b.ki=clampF(b, b.ki-(mB.ki||0)-bidB);
     ev.push({t:"info",x:`Choque de KI! ${a.name} investe ${bidA} · ${b.name} investe ${bidB}.`});
     if(bidA>bidB){ apply(b,a,mA,ev); ev.push({t:"info",x:`O golpe de ${b.name} foi anulado.`}); }
     else if(bidB>bidA){ apply(a,b,mB,ev); ev.push({t:"info",x:`O golpe de ${a.name} foi anulado.`}); }
@@ -472,7 +555,7 @@ function resolveSide(self, foe, sub, move, cls, qualifies, foeDef, ev){
   // ATAQUE: precisa vencer estrito (empate vira choque, já tratado).
   if(cls==="ATAQUE"){
     if((self.ki) < (move.ki||0)){ ev.push({t:"info",x:`${self.name} não tinha KI pra ${move.name}.`}); return; }
-    self.ki=clampKi(self.ki-(move.ki||0));  // regra do juiz: todo golpe gasta KI SEMPRE, mesmo perdendo/errando
+    self.ki=clampF(self, self.ki-(move.ki||0));  // regra do juiz: todo golpe gasta KI SEMPRE, mesmo perdendo/errando
     if(!qualifies){ ev.push({t:"info",x:`${self.name} foi mais lento — ${move.name} não saiu, mas gastou ${move.ki||0} de KI.`}); return; }
     // defesa do oponente?
     if(foeDef && foeDef.kind==="barrier"){ ev.push({t:"info",x:`${foe.name} ergue o Barrier e absorve o ${move.name} por inteiro!`}); return; }
@@ -485,10 +568,23 @@ function resolveSide(self, foe, sub, move, cls, qualifies, foeDef, ev){
   }
   // ações não-ataque resolvem com vencer/empatar (concentrar sempre resolve)
   if(cls==="UTIL"){
-    if(move.kind==="concentra"){ const before=self.ki; self.ki=clampKi(self.ki+10); ev.push({t:"info",x:`${self.name} concentra KI (+${self.ki-before}). Fica vulnerável.`}); return; }
+    if(move.kind==="transforma"){
+      if(!qualifies){ ev.push({t:"info",x:`${self.name} tentou se transformar mas foi mais lento.`}); return; }
+      if((self.level||0) >= (self.maxLevel||0)){ ev.push({t:"info",x:`${self.name} já está no nível máximo.`}); return; }
+      const L = self.level = (self.level||0)+1;
+      self.hp += (LVL_HP[L]||0);
+      self.maxHp = (self.maxHp||50) + (LVL_HP[L]||0);
+      self.kiCap = LVL_CAP[L] || self.kiCap;
+      self.ki = clampF(self, self.ki + (LVL_KI[L]||0));
+      self.effects.lvlSpeed = LVL_VEL[L]||0;   // não soma: é o valor do nível atual
+      self.effects.lvlDano  = LVL_DANO[L]||0;
+      ev.push({t:"heal",x:`${self.name} explode em ${LVL_NAME[L]}! +${LVL_HP[L]} HP, +${LVL_KI[L]} KI, velocidade +${LVL_VEL[L]}, dano +${LVL_DANO[L]}.`});
+      return;
+    }
+    if(move.kind==="concentra"){ const before=self.ki; self.ki=clampF(self, self.ki+10); ev.push({t:"info",x:`${self.name} concentra KI (+${self.ki-before}). Fica vulnerável.`}); return; }
     if(!qualifies){ ev.push({t:"info",x:`${self.name} foi mais lento e não conseguiu usar ${move.name}.`}); return; }
     if(self.ki<(move.ki||0)){ ev.push({t:"info",x:`${self.name} sem KI pra ${move.name}.`}); return; }
-    self.ki=clampKi(self.ki-(move.ki||0));
+    self.ki=clampF(self, self.ki-(move.ki||0));
     if(move.kind==="cura"){ self.hp+=move.hp; ev.push({t:"heal",x:`${self.name} usa Regeneration (+${move.hp} HP).`}); }
     if(move.kind==="buff"){ self.effects.kaioken=true; ev.push({t:"info",x:`${self.name} ativa Kaioken! +5 em todos os danos.`}); }
     return;
@@ -497,7 +593,7 @@ function resolveSide(self, foe, sub, move, cls, qualifies, foeDef, ev){
   if(cls==="DEFESA"||cls==="ESQUIVA"){
     if(qualifies){
       if(self.ki<(move.ki||0)){ ev.push({t:"info",x:`${self.name} sem KI pra ${move.name}.`}); return; }
-      self.ki=clampKi(self.ki-(move.ki||0));
+      self.ki=clampF(self, self.ki-(move.ki||0));
       if(move.kind==="esquiva"){ self.effects.speedBonusNext=1; ev.push({t:"info",x:`${self.name} usa Shunkanido (+1 de velocidade no próximo turno).`}); }
       else ev.push({t:"info",x:`${self.name} fica em guarda (${move.name}).`});
     } else {
@@ -709,11 +805,13 @@ function showIntro(){
 }
 function goTutorialDraft(){
   buildDraft(); show("draft");
-  coachBox("Escolha 3 golpes — eles ficam fixos até o fim da luta. Soco, Chute, Concentrar KI e Defesa Simples são sempre grátis. Quando escolher, clique em 'Pronto para lutar'.", null, null, "Monte seu set");
+  coachBox("Escolha 3 golpes — eles ficam fixos até o fim da luta. Soco, Chute, Carregar KI e Defesa Simples são sempre grátis. Quando escolher, clique em 'Pronto para lutar'.", null, null, "Monte seu set");
 }
+function myMaxLevel(){ const s=$("#maxLevelSel"); return s ? (parseInt(s.value,10)||0) : 0; }
 function startTutorialBattle(){
-  const meF=newFighter(ME.nick); meF.moves=draftSel.slice();
-  const botF=newFighter("Boneco de Treino"); botF.moves=botDraft();
+  const ml=myMaxLevel();
+  const meF=newFighter(ME.nick, ml); meF.moves=draftSel.slice();
+  const botF=newFighter("Boneco de Treino", ml); botF.moves=botDraft();
   state={p1:meF,p2:botF,turn:1}; myReady=true; peer.ready=true;
   startBattle();
   coachBox("Sua vez! Escolha uma ação e um número de velocidade. Maior número age primeiro — confirme antes do tempo acabar.", null, null, "Lute!");
@@ -730,10 +828,14 @@ function findMove(name){ const m=Object.values(MOVES).find(x=>x.name===name); re
 function botDraft(){ return ["Kame Hame Ha","Galick Ho","Masenko"].map(findMove).filter(Boolean); }
 function botSubmit(){
   const f=state.p2;
-  const pool=[...f.moves,"soco","chute","concentrar","defesa"].filter(id=>{ const m=MOVES[id]; return (m.ki||0)<=f.ki; });
-  const moveId=pool[Math.floor(Math.random()*pool.length)]||"defesa";
+  const pool=[...f.moves,"soco","chute","concentrar","defesa"];
+  if((f.level||0) < (f.maxLevel||0)) pool.push("transformar");
+  const aff=pool.filter(id=>{ const m=MOVES[id]; return (m.ki||0)<=f.ki; });
+  const moveId=aff[Math.floor(Math.random()*aff.length)]||"defesa";
   const speed = NO_SPEED.has(moveId) ? 0 : f.speeds[Math.floor(Math.random()*f.speeds.length)];
-  return {moveId,speed,seat:"p2"};
+  const sub={moveId,speed,seat:"p2"};
+  if(moveId==="transformar") sub.xbonus=1;
+  return sub;
 }
 function botBidValue(){
   if(!pendingSubs) return 0;
@@ -747,7 +849,7 @@ function onNet(msg){
   const {type,payload}=msg;
   if(type==="hello"){ peer.nick=payload.nick; peer.id=payload.id; negotiateSeat(); if(lobby) lobby.unannounce(); net.send("hello-ack",{id:ME.id,nick:ME.nick,seat:ME.seat}); peerArrived(); }
   if(type==="hello-ack"){ peer.nick=payload.nick; peer.id=payload.id; negotiateSeat(); if(lobby) lobby.unannounce(); peerArrived(); }
-  if(type==="ready"){ peer.ready=true; peer.moves=payload.moves; peer.nick=payload.nick; $("#draftWait").innerHTML = waitHtml(`${esc(peer.nick)} está pronto!`, "termine de escolher seus golpes"); tryStartBattle(); }
+  if(type==="ready"){ peer.ready=true; peer.moves=payload.moves; peer.nick=payload.nick; peer.maxLevel=payload.maxLevel||0; $("#draftWait").innerHTML = waitHtml(`${esc(peer.nick)} está pronto!`, "termine de escolher seus golpes"); tryStartBattle(); }
   if(type==="submit"){ peerSub=payload; if(!mySub){ const e=$("#oppStatus"); if(e) e.innerHTML='<span class="eff">Oponente já jogou — sua vez!</span>'; } maybeReveal(); }
   if(type==="bid"){ peerBid=payload.bid; maybeResolveBid(); }
 }
@@ -775,7 +877,7 @@ function toggleDraft(id,el){
 $("#btnReady").onclick=()=>{
   $("#btnReady").disabled=true;
   if(MODE==="tutorial"){ startTutorialBattle(); return; }
-  net.send("ready",{moves:draftSel,nick:ME.nick});
+  net.send("ready",{moves:draftSel,nick:ME.nick,maxLevel:myMaxLevel()});
   $("#draftWait").innerHTML=waitHtml("Você está pronto", "esperando o oponente escolher os golpes");
   myReady=true; peer.moves=peer.moves; tryStartBattle();
 };
@@ -783,8 +885,8 @@ let myReady=false;
 function tryStartBattle(){
   if(myReady && peer.ready && peer.moves){
     // monta estado: p1/p2 determinístico independente do assento
-    const meF=newFighter(ME.nick); meF.moves=draftSel.slice();
-    const peF=newFighter(peer.nick||"Oponente"); peF.moves=peer.moves.slice();
+    const meF=newFighter(ME.nick, myMaxLevel()); meF.moves=draftSel.slice();
+    const peF=newFighter(peer.nick||"Oponente", peer.maxLevel||0); peF.moves=peer.moves.slice();
     state = ME.seat==="p1" ? {p1:meF,p2:peF,turn:1} : {p1:peF,p2:meF,turn:1};
     state.turn=1;
     startBattle();
@@ -802,23 +904,25 @@ function startBattle(){ show("battle"); logTurnSep(); renderArena(); buildSelect
 function renderArena(){
   const a=$("#arena"); a.innerHTML="";
   [ [myF(),true],[foeF(),false] ].forEach(([f,mine])=>{
-    const hpPct=Math.max(0,Math.min(100,f.hp/50*100));
-    const kiPct=Math.max(0,Math.min(100,f.ki/KI_CAP*100));
+    const hpPct=Math.max(0,Math.min(100,f.hp/(f.maxHp||50)*100));
+    const kiPct=Math.max(0,Math.min(100,f.ki/(f.kiCap||KI_CAP)*100));
     const effs=[]; if(f.effects.kaioken)effs.push("Kaioken"); if(f.effects.speedBonusNext)effs.push("+1 veloc.");
-    const buffed = f.effects.kaioken || f.effects.speedBonusNext;
+    const buffed = f.effects.kaioken || f.effects.speedBonusNext || (f.level>0);
     const oc=orbColors(f.name);
+    const lowHp = f.hp <= (f.maxHp||50)*0.3;
+    const lvlPill = f.level>0 ? `<span class="pill" style="background:rgba(255,206,77,.18);color:var(--gold);border-color:rgba(255,206,77,.5)">${LVL_NAME[f.level]}</span>` : '';
     const el=document.createElement("div");
     el.className="fighter"+(mine?" me":"")+(buffed?" aura":"");
     el.dataset.seat = mine?meKey():foeKey();
     el.innerHTML=`
       <div class="fhead">
         <div class="orb" style="--orb:${oc.c};--orb-glow:${oc.glow}"></div>
-        <div class="fname">${f.name||"?"} ${mine?'<span class="pill">você</span>':''}</div>
+        <div class="fname">${f.name||"?"} ${lvlPill} ${mine?'<span class="pill">você</span>':''}</div>
       </div>
-      <div class="bar ${f.hp<=15?'low':''}"><i class="hpfill" style="width:${hpPct}%;background:${f.hp<=15?'linear-gradient(90deg,#c0263b,var(--hp-low))':''}"></i></div>
-      <div class="stat"><span>HP</span><span>${f.hp}/50</span></div>
+      <div class="bar ${lowHp?'low':''}"><i class="hpfill" style="width:${hpPct}%;background:${lowHp?'linear-gradient(90deg,#c0263b,var(--hp-low))':''}"></i></div>
+      <div class="stat"><span>HP</span><span>${f.hp}/${f.maxHp||50}</span></div>
       <div class="bar"><i class="kifill" style="width:${kiPct}%"></i></div>
-      <div class="stat"><span>KI</span><span>${f.ki}/${KI_CAP}</span></div>
+      <div class="stat"><span>KI</span><span>${f.ki}/${f.kiCap||KI_CAP}</span></div>
       <div class="effects">${effs.map(e=>`<span class="eff">${e}</span>`).join("")}</div>`;
     a.appendChild(el);
   });
@@ -832,10 +936,13 @@ function buildSelection(){
   $("#selWait").textContent="";
   $("#oppStatus").innerHTML="";
   $("#phaseLabel").textContent="escolha sua ação em segredo";
-  $("#myStatus").innerHTML = `Seu status — HP <b>${myF().hp}/50</b> · KI <b>${myF().ki}/${KI_CAP}</b>`;
+  const f=myF();
+  $("#myStatus").innerHTML = `Seu status — HP <b>${f.hp}/${f.maxHp||50}</b> · KI <b>${f.ki}/${f.kiCap||KI_CAP}</b>`+(f.level>0?` · <b style="color:var(--gold)">${LVL_NAME[f.level]}</b>`:"");
   sel={moveId:null,speed:null}; mySub=null; peerSub=null; myBid=null; peerBid=null;
   // comandos básicos (sempre, grátis) e poderes (golpes escolhidos)
-  fillMoves($("#basicGrid"), ["soco","chute","concentrar","defesa"]);
+  const basics=["soco","chute","concentrar","defesa"];
+  if((f.level||0) < (f.maxLevel||0)) basics.push("transformar");
+  fillMoves($("#basicGrid"), basics);
   fillMoves($("#powerGrid"), myF().moves);
   // velocidades
   const sg=$("#speedGrid"); sg.innerHTML=""; sg.classList.remove("disabled"); if($("#speedNote")) $("#speedNote").textContent="";
@@ -860,9 +967,11 @@ function fillMoves(grid, ids){
     const el=document.createElement("div");
     const unaffordable = (m.ki||0) > myF().ki;   // sem KI -> não dá pra escolher
     const hot = (id==="concentrar");
-    el.className="move"+(unaffordable?" dis":"")+(hot?" hot":"");
+    const tf  = (id==="transformar");
+    el.className="move"+(unaffordable?" dis":"")+(hot?" hot":"")+(tf?" tf":"");
     const sub = m.kind==="golpe" ? `Dano ${m.dano} · KI ${m.ki}` : (m.desc || (m.ki?`KI ${m.ki}`:"grátis"));
-    const badge = unaffordable ? `<span class="badge" style="background:#e0354f;color:#fff">sem KI</span>` : (hot?`<span class="badge">sem vel.</span>`:"");
+    let badge = unaffordable ? `<span class="badge" style="background:#e0354f;color:#fff">sem KI</span>` : (hot?`<span class="badge">sem vel.</span>`:"");
+    if(tf){ const nx=(myF().level||0)+1; badge=`<span class="badge" style="background:var(--gold);color:#3a2600">→ ${LVL_NAME[nx]||("nv"+nx)}</span>`; }
     el.innerHTML=`<div class="mn">${m.name}</div><div class="ms">${sub}</div>`+badge;
     if(!unaffordable) el.onclick=()=>pickMove(id, el);
     grid.appendChild(el);
@@ -889,6 +998,7 @@ function doSubmit(auto){
   clearTimer();
   const speed = (sel.moveId && NO_SPEED.has(sel.moveId)) ? 0 : sel.speed;
   mySub={ moveId:sel.moveId, speed, seat:ME.seat };
+  if(sel.moveId==="transformar") mySub.xbonus=1;
   $("#selectPane").classList.add("hidden");
   $("#phaseLabel").textContent = MODE==="tutorial" ? "o juiz resolve…" : "aguardando oponente";
   $("#selWait").innerHTML = waitHtml(auto?"Tempo esgotado — você carregou KI!":"Confirmado em segredo", MODE==="tutorial"?"o boneco responde…":"esperando o oponente jogar");
@@ -1046,35 +1156,13 @@ function runTimer(seconds, numEl, barEl, onExpire){
 }
 function waitHtml(title, sub){ return `<div class="waitbox"><div class="waitorb"></div><div class="waittext">${title}<small>${sub||""}</small></div></div>`; }
 
-/* ---- CONTA (Google) + PERFIL + CACHE + RANKING ---- */
+/* ---- CONTA (e-mail/senha) + PERFIL + CACHE + RANKING ---- */
 let supa=null, session=null, profile=null;
 const cache={ leaderboard:null, leaderboardAt:0 };
-
-/* ---- LOGIN MANUAL (demo) — provisório até ligarmos o Google ---- */
-const DEMO_USERS = { rafael:"Rafael", cleber:"Cleber" };
-const DEMO_PASS  = "chupa";
-let manualUser = null;
-try{ manualUser = JSON.parse(localStorage.getItem("zw_manual")||"null"); }catch(e){}
-function loginManual(){
-  const u = (prompt("Usuário (rafael ou cleber):")||"").trim().toLowerCase();
-  if(!u) return;
-  const p = (prompt("Senha:")||"");
-  if(!DEMO_USERS[u] || p!==DEMO_PASS){ alert("Usuário ou senha inválidos."); return; }
-  manualUser = { id:u, nick:DEMO_USERS[u] };
-  localStorage.setItem("zw_manual", JSON.stringify(manualUser));
-  ME.nick = manualUser.nick; const ni=$("#nick"); if(ni) ni.value=manualUser.nick;
-  renderAccount();
-}
-function logoutManual(){ manualUser=null; localStorage.removeItem("zw_manual"); renderAccount(); }
-/* placar local do demo (por navegador) */
-function localScores(){ try{ return JSON.parse(localStorage.getItem("zw_scores")||"{}"); }catch(e){ return {}; } }
-function saveLocalWin(nick){ if(!nick) return; const s=localScores(); s[nick]=(s[nick]||0)+1; localStorage.setItem("zw_scores", JSON.stringify(s)); }
-
 function levelFromWins(w){ return w>=200?4 : w>=150?3 : w>=100?2 : w>=25?1 : 0; } // 25→nv1,100→nv2,150→nv3,200→nv4
 function levelLabel(l){ return ["Nível 0 / Saiyajin","Nível 1 / SSJ","Nível 2 / SSJ2","Nível 3 / SSJ3","Nível 4 / SSJ4"][l]||("Nível "+l); }
 
 async function initAuth(){
-  if(manualUser){ ME.nick=manualUser.nick; const ni=$("#nick"); if(ni) ni.value=manualUser.nick; }
   renderAccount();
   if(!ONLINE) return;
   try{
@@ -1086,16 +1174,62 @@ async function initAuth(){
   }catch(e){ console.error("auth init:",e); renderAccount(); }
 }
 async function afterAuth(){ if(session?.user) await loadProfile(); else profile=null; renderAccount(); }
-async function loginGoogle(){
-  if(!supa){ alert("Login indisponível neste ambiente. Rode o site publicado (zwarriors.xyz) com o provedor Google ativado no Supabase."); return; }
-  await supa.auth.signInWithOAuth({ provider:"google", options:{ redirectTo: location.origin+location.pathname } });
+
+let authMode="signup";
+function entryShow(which){ ["landingView","authView","playView"].forEach(id=>{ const e=$("#"+id); if(e) e.classList.toggle("hidden", id!==which); }); }
+function openAuthUI(mode){
+  authMode=mode; entryShow("authView");
+  $("#authTitle").textContent = mode==="signup"?"Criar conta":"Entrar";
+  $("#btnAuthGo").textContent = mode==="signup"?"Criar conta":"Entrar";
+  $("#btnAuthSwap").textContent = mode==="signup"?"Já tenho conta — entrar":"Não tenho conta — criar";
+  $("#authNick").classList.toggle("hidden", mode!=="signup");
+  $("#auPass").setAttribute("autocomplete", mode==="signup"?"new-password":"current-password");
+  $("#authMsg").textContent="";
 }
-async function logout(){ try{ if(supa) await supa.auth.signOut(); }catch(e){} session=null; profile=null; renderAccount(); }
+function traduzErro(m){
+  m=m||"";
+  if(/already registered|already exists|User already/i.test(m)) return "Esse e-mail já tem conta. Tente entrar.";
+  if(/Invalid login|invalid credentials/i.test(m)) return "E-mail ou senha incorretos.";
+  if(/at least 6|password should be/i.test(m)) return "A senha precisa de pelo menos 6 caracteres.";
+  if(/valid email|invalid format/i.test(m)) return "E-mail inválido.";
+  if(/Email not confirmed/i.test(m)) return "Confirme seu e-mail pelo link que enviamos e tente entrar de novo.";
+  return m;
+}
+async function doAuth(){
+  const msg=$("#authMsg");
+  if(!supa){ msg.textContent="Login só funciona no site publicado (zwarriors.xyz). Por aqui, use 'Jogar sem conta'."; return; }
+  const email=$("#auEmail").value.trim(), pass=$("#auPass").value;
+  if(!email||!pass){ msg.textContent="Preencha e-mail e senha."; return; }
+  $("#btnAuthGo").disabled=true; msg.textContent="Um instante…";
+  try{
+    if(authMode==="signup"){
+      const nick=($("#suNick").value.trim()||email.split("@")[0]);
+      const { data, error } = await supa.auth.signUp({ email, password:pass, options:{ data:{ nick } } });
+      if(error){ msg.textContent=traduzErro(error.message); return; }
+      if(!data.session){ msg.textContent="Conta criada! Confirme pelo link no seu e-mail e depois entre."; openAuthUI("login"); return; }
+      session=data.session; await afterAuth(); enterPlay();
+    } else {
+      const { data, error } = await supa.auth.signInWithPassword({ email, password:pass });
+      if(error){ msg.textContent=traduzErro(error.message); return; }
+      session=data.session; await afterAuth(); enterPlay();
+    }
+  }catch(e){ msg.textContent="Deu erro: "+(e.message||e); }
+  finally{ $("#btnAuthGo").disabled=false; }
+}
+function enterPlay(){
+  entryShow("playView");
+  const f=$("#nick"); if(f){ if(profile?.nick) f.value=profile.nick; else if(ME.nick) f.value=ME.nick; }
+  const who=$("#playWho");
+  if(who) who.innerHTML = session?.user
+    ? `Logado como <b style="color:var(--gold)">${esc(profile?.nick||"?")}</b> — suas vitórias contam no ranking.`
+    : `Jogando como <b>convidado</b> — crie uma conta depois pra salvar suas vitórias.`;
+}
+async function logout(){ try{ if(supa) await supa.auth.signOut(); }catch(e){} session=null; profile=null; renderAccount(); entryShow("landingView"); }
 async function loadProfile(){
   if(!supa||!session) return;
   const uid=session.user.id;
   const meta=session.user.user_metadata||{};
-  const fallback=(meta.full_name||meta.name||("Guerreiro "+uid.slice(0,4)));
+  const fallback=(meta.nick||meta.full_name||meta.name||("Guerreiro "+uid.slice(0,4)));
   try{
     let { data } = await supa.from("profiles").select("*").eq("id",uid).maybeSingle();
     if(!data){ const ins=await supa.from("profiles").insert({ id:uid, nick:fallback }).select().maybeSingle(); data=ins.data; }
@@ -1104,8 +1238,6 @@ async function loadProfile(){
   }catch(e){ console.error("perfil:",e); }
 }
 async function recordResult(iWon){
-  // demo: login manual usa placar local (sem Supabase auth)
-  if(manualUser && !session){ if(iWon) saveLocalWin(manualUser.nick); cache.leaderboard=null; renderAccount(); return; }
   if(!supa||!session||!profile) return;
   try{
     if(iWon){
@@ -1122,32 +1254,29 @@ async function recordResult(iWon){
   }catch(e){ console.error("registrar resultado:",e); }
 }
 async function getLeaderboard(){
-  // base: placar local do demo
-  const localList = Object.entries(localScores()).map(([nick,wins])=>({nick,wins,level:levelFromWins(wins)}));
-  let remote=[];
-  if(supa){
-    try{ const { data } = await supa.from("profiles").select("nick,wins,level").order("wins",{ascending:false}).limit(50); remote=data||[]; }
-    catch(e){ console.error("ranking:",e); }
-  }
-  const map={};
-  [...remote, ...localList].forEach(r=>{ const k=r.nick||"?"; if(!map[k]) map[k]={nick:k,wins:0,level:0}; map[k].wins+=(r.wins||0); map[k].level=Math.max(map[k].level||0, r.level||0); });
-  return Object.values(map).sort((a,b)=>b.wins-a.wins).slice(0,10);
+  if(!supa) return [];
+  if(cache.leaderboard && Date.now()-cache.leaderboardAt<30000) return cache.leaderboard;
+  try{
+    const { data } = await supa.from("profiles").select("nick,wins,level").order("wins",{ascending:false}).limit(10);
+    cache.leaderboard=data||[]; cache.leaderboardAt=Date.now(); return cache.leaderboard;
+  }catch(e){ console.error("ranking:",e); return []; }
 }
+function toggleHidden(sel,hide){ const e=$(sel); if(e) e.classList.toggle("hidden",!!hide); }
 function renderAccount(){
-  const line=$("#accountLine"), gb=$("#btnGoogle");
-  if(!line) return;
-  if(session?.user){
-    const w=profile?.wins||0, l=profile?.level||0;
-    line.innerHTML = `Logado como <b>${esc(profile?.nick||ME.nick||"?")}</b> · ${esc(levelLabel(l))} · ${w} vitória(s)`;
-    if(gb){ gb.textContent="Sair"; gb.onclick=logout; }
-  } else if(manualUser){
-    const w=(localScores()[manualUser.nick]||0), l=levelFromWins(w);
-    line.innerHTML = `Logado como <b>${esc(manualUser.nick)}</b> · ${esc(levelLabel(l))} · ${w} vitória(s) <span class="tag">(demo)</span>`;
-    if(gb){ gb.textContent="Sair"; gb.onclick=logoutManual; }
-  } else {
-    line.innerHTML = "Entre pra salvar vitórias e subir no ranking — ou jogue como convidado.";
-    if(gb){ gb.textContent="Entrar (demo)"; gb.onclick=loginManual; }
+  const line=$("#accountLine");
+  const logged=!!(session&&session.user);
+  if(line){
+    line.innerHTML = logged
+      ? `Logado como <b style="color:var(--gold)">${esc(profile?.nick||"?")}</b> · ${esc(levelLabel(profile?.level||0))} · ${profile?.wins||0} vitória(s)`
+      : (ONLINE
+          ? "Crie sua conta ou entre pra salvar vitórias e subir no ranking — ou caia na porrada agora, sem conta."
+          : "Modo local (sem servidor). Publicado com Supabase, as contas e o ranking ligam sozinhos.");
   }
+  toggleHidden("#btnSignup", logged);
+  toggleHidden("#btnLogin", logged);
+  toggleHidden("#btnGuest", logged);
+  toggleHidden("#btnPlay", !logged);
+  toggleHidden("#btnLogout", !logged);
 }
 async function toggleRank(){
   const pane=$("#rankPane"); if(!pane) return;
@@ -1158,7 +1287,21 @@ async function toggleRank(){
   if(!list.length){ pane.innerHTML='<div class="hint">Ranking vazio (ou Supabase não configurado ainda). Os primeiros a logar e vencer aparecem aqui!</div>'; return; }
   pane.innerHTML='<div class="collabel">Top guerreiros</div>'+list.map((p,i)=>`<div class="rankrow"><span><b>${i+1}.</b> ${esc(p.nick)} <span class="lvl">· ${esc(levelLabel(p.level||0))}</span></span><span>${p.wins||0} V</span></div>`).join("");
 }
-const _rankBtn=$("#btnRank"); if(_rankBtn) _rankBtn.onclick=toggleRank;
+/* fiação dos botões de conta / jogar */
+(function wireAuthUI(){
+  const on=(id,fn)=>{ const e=$("#"+id); if(e) e.onclick=fn; };
+  on("btnSignup", ()=>openAuthUI("signup"));
+  on("btnLogin",  ()=>openAuthUI("login"));
+  on("btnGuest",  ()=>enterPlay());
+  on("btnPlay",   ()=>enterPlay());
+  on("btnLogout", logout);
+  on("btnAuthGo", doAuth);
+  on("btnAuthSwap", ()=>openAuthUI(authMode==="signup"?"login":"signup"));
+  on("btnAuthBack", ()=>entryShow("landingView"));
+  on("btnPlayBack", ()=>entryShow("landingView"));
+  on("btnRank", toggleRank);
+  const pass=$("#auPass"); if(pass) pass.addEventListener("keydown",e=>{ if(e.key==="Enter") doAuth(); });
+})();
 
 const _sfxBtn=document.querySelector("#btnSfx");
 if(_sfxBtn) _sfxBtn.onclick=()=>{ sfxOn=!sfxOn; _sfxBtn.textContent="som: "+(sfxOn?"on":"off"); if(sfxOn) playSfx("charge"); };
