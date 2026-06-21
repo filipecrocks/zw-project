@@ -987,7 +987,7 @@ function foeKey(){ return ME.seat==="p1"?"p2":"p1"; }
 function myF(){ return state[meKey()]; }
 function foeF(){ return state[foeKey()]; }
 
-function startBattle(){ show("battle"); logTurnSep(); renderArena(); buildSelection(); buildChat(); startMusic(); }
+function startBattle(){ show("battle"); logTurnSep(); renderArena(); buildSelection(); buildChat(); startMusic(); syncNick(); }
 
 function renderArena(){
   const a=$("#arena"); a.innerHTML="";
@@ -1394,6 +1394,12 @@ async function loadProfile(){
     profile=data;
     if(profile?.nick){ ME.nick=profile.nick; const ni=$("#nick"); if(ni) ni.value=profile.nick; }
   }catch(e){ console.error("perfil:",e); }
+}
+async function syncNick(){
+  if(!supa||!session||!profile) return;
+  const n=(ME.nick||"").trim();
+  if(!n || n===profile.nick) return;
+  try{ await supa.from("profiles").update({ nick:n, updated_at:new Date().toISOString() }).eq("id",session.user.id); profile.nick=n; cache.leaderboard=null; }catch(e){}
 }
 async function recordResult(iWon){
   if(!supa||!session||!profile) return;
