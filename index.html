@@ -1,40 +1,621 @@
 <!doctype html>
 <html lang="pt-BR">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>zw-project</title>
-    <style>
-      :root { color-scheme: dark; }
-      * { box-sizing: border-box; }
-      body {
-        margin: 0;
-        min-height: 100vh;
-        display: grid;
-        place-items: center;
-        font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-        background: radial-gradient(circle at 50% 30%, #1e293b, #0f172a 70%);
-        color: #e2e8f0;
-      }
-      .card { text-align: center; padding: 2rem; }
-      h1 { font-size: clamp(2rem, 6vw, 3.5rem); margin: 0 0 .5rem; }
-      p { color: #94a3b8; margin: 0; }
-      .badge {
-        display: inline-block;
-        margin-top: 1.5rem;
-        padding: .4rem 1rem;
-        border: 1px solid #334155;
-        border-radius: 999px;
-        font-size: .85rem;
-        color: #cbd5e1;
-      }
-    </style>
-  </head>
-  <body>
-    <main class="card">
-      <h1>zw-project</h1>
-      <p>Em construção — multiplayer online em breve.</p>
-      <span class="badge">🚧 placeholder inicial</span>
-    </main>
-  </body>
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>ZW Arena — protótipo v0.1</title>
+<style>
+  :root{
+    --bg:#0a0c12; --panel:#11141c; --panel-2:#171b26; --line:#222838;
+    --txt:#e9edf6; --muted:#8b93a7; --gold:#ffce4d; --gold-2:#ff9d2e;
+    --ki:#4ec3ff; --hp:#46e08a; --hp-low:#ff5566; --aura:#7c5cff;
+    --shadow:0 10px 40px rgba(0,0,0,.45);
+    --r:14px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{
+    background:
+      radial-gradient(1200px 600px at 50% -10%, #1a2030 0%, transparent 60%),
+      radial-gradient(800px 500px at 90% 110%, #1b1530 0%, transparent 55%),
+      var(--bg);
+    color:var(--txt);
+    font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:980px;margin:0 auto;padding:22px 16px 60px}
+  h1,h2,h3{margin:0 0 .4em}
+  h1{font-size:30px;letter-spacing:.5px}
+  .brand{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+  .logo{width:42px;height:42px;border-radius:11px;display:grid;place-items:center;
+    background:linear-gradient(135deg,var(--gold),var(--gold-2));color:#1a1206;font-weight:900;font-size:20px;
+    box-shadow:0 6px 20px rgba(255,160,40,.4)}
+  .tag{color:var(--muted);font-size:13px}
+  .card{background:linear-gradient(180deg,var(--panel),var(--panel-2));border:1px solid var(--line);
+    border-radius:var(--r);padding:18px;box-shadow:var(--shadow);margin-bottom:16px}
+  label{display:block;font-size:12px;color:var(--muted);margin:0 0 6px;text-transform:uppercase;letter-spacing:.6px}
+  input,select{width:100%;background:#0c0f17;border:1px solid var(--line);color:var(--txt);
+    border-radius:10px;padding:11px 12px;font-size:15px;outline:none}
+  input:focus,select:focus{border-color:var(--gold-2)}
+  .row{display:flex;gap:10px;flex-wrap:wrap}
+  .row>*{flex:1;min-width:120px}
+  button{cursor:pointer;border:0;border-radius:11px;padding:12px 16px;font-weight:700;font-size:15px;
+    background:linear-gradient(135deg,var(--gold),var(--gold-2));color:#1a1206;transition:.12s transform}
+  button:hover{transform:translateY(-1px)}
+  button:disabled{opacity:.4;cursor:not-allowed;transform:none}
+  button.ghost{background:#0c0f17;color:var(--txt);border:1px solid var(--line)}
+  button.danger{background:linear-gradient(135deg,#ff6a6a,#e0354f);color:#fff}
+  .hidden{display:none!important}
+  .hint{color:var(--muted);font-size:13px;margin-top:8px}
+  .pill{display:inline-block;font-size:11px;padding:3px 8px;border-radius:999px;background:#0c0f17;border:1px solid var(--line);color:var(--muted)}
+
+  /* battle */
+  .arena{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:680px){.arena{grid-template-columns:1fr}}
+  .fighter{background:#0c0f17;border:1px solid var(--line);border-radius:var(--r);padding:14px}
+  .fighter.me{border-color:var(--gold-2);box-shadow:0 0 0 1px rgba(255,157,46,.25) inset}
+  .fname{font-weight:800;font-size:17px;display:flex;justify-content:space-between;align-items:center}
+  .bar{height:12px;border-radius:999px;background:#1c2130;overflow:hidden;margin:5px 0 2px}
+  .bar>i{display:block;height:100%;border-radius:999px;transition:width .5s}
+  .hpfill{background:linear-gradient(90deg,#2fae67,var(--hp))}
+  .kifill{background:linear-gradient(90deg,#2a8fd1,var(--ki))}
+  .stat{display:flex;justify-content:space-between;font-size:12px;color:var(--muted)}
+  .effects{margin-top:8px;min-height:20px;display:flex;gap:6px;flex-wrap:wrap}
+  .eff{font-size:11px;padding:2px 8px;border-radius:999px;background:rgba(124,92,255,.18);border:1px solid rgba(124,92,255,.4);color:#c7bbff}
+
+  .log{background:#080a10;border:1px solid var(--line);border-radius:var(--r);padding:14px;
+    height:230px;overflow:auto;font-size:14px}
+  .log p{margin:0 0 8px}
+  .log .turnsep{color:var(--gold);font-weight:700;border-top:1px dashed var(--line);padding-top:8px;margin-top:10px}
+  .log .dmg{color:#ff8a8a}
+  .log .heal{color:#7ef0a8}
+  .log .info{color:var(--muted)}
+
+  .moves{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-top:6px}
+  .move{background:#0c0f17;border:1px solid var(--line);border-radius:10px;padding:9px 10px;cursor:pointer;font-size:13px;position:relative}
+  .move:hover{border-color:var(--gold-2)}
+  .move.sel{border-color:var(--gold);background:rgba(255,206,77,.08)}
+  .move.dis{opacity:.35;cursor:not-allowed}
+  .move .mn{font-weight:700}
+  .move .ms{color:var(--muted);font-size:11px;margin-top:2px}
+  .move .badge{position:absolute;top:6px;right:6px;font-size:9px;color:#1a1206;background:var(--gold);border-radius:6px;padding:1px 5px;font-weight:800}
+
+  .speeds{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+  .spd{width:42px;height:42px;border-radius:10px;border:1px solid var(--line);background:#0c0f17;
+    color:var(--txt);font-weight:800;font-size:16px;display:grid;place-items:center;cursor:pointer}
+  .spd.sel{background:var(--ki);color:#04212f;border-color:var(--ki)}
+  .spd.used{opacity:.25;cursor:not-allowed;text-decoration:line-through}
+  .center{text-align:center}
+  .waitdot::after{content:"";animation:dots 1.2s steps(4,end) infinite}
+  @keyframes dots{0%{content:""}25%{content:"."}50%{content:".."}75%{content:"..."}}
+  .big{font-size:22px;font-weight:900}
+  .kobanner{font-size:34px;font-weight:900;text-align:center;padding:20px;background:linear-gradient(135deg,var(--gold),var(--gold-2));color:#1a1206;border-radius:var(--r)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand">
+    <div class="logo">ZW</div>
+    <div>
+      <h1>ZW Arena <span class="pill">protótipo v0.1</span></h1>
+      <div class="tag">Regras de Luta Z Warriors — o computador é o juiz. Demo 1×1.</div>
+    </div>
+  </div>
+
+  <!-- ===== HOME ===== -->
+  <div id="home" class="card">
+    <label>Seu nick de guerreiro</label>
+    <input id="nick" placeholder="ex.: Goku ZW" maxlength="20" />
+    <div class="row" style="margin-top:12px">
+      <div>
+        <label>Código da sala</label>
+        <input id="room" placeholder="ex.: kame123" maxlength="16" />
+      </div>
+    </div>
+    <div class="row" style="margin-top:14px">
+      <button id="btnCreate">Criar sala</button>
+      <button id="btnJoin" class="ghost">Entrar na sala</button>
+    </div>
+    <div class="hint" id="netStatus"></div>
+    <div class="hint">
+      <b>Como testar agora (sem servidor):</b> abra este arquivo em <b>duas abas</b>. Numa, crie uma sala;
+      na outra, entre com o <b>mesmo código</b>. As duas abas conversam via BroadcastChannel.
+      Para jogar de verdade pela internet (Filipe × Rafael × Clebler), basta colar as chaves do Supabase no topo do código (ver <code>ZW-PLAN.md</code>).
+    </div>
+  </div>
+
+  <!-- ===== DRAFT ===== -->
+  <div id="draft" class="card hidden">
+    <h2>Escolha seus 5 golpes <span class="pill" id="draftCount">0/5</span></h2>
+    <div class="hint">Sempre disponíveis (não contam nos 5): <b>Soco, Chute, Concentrar KI, Defesa Simples</b>.
+      Golpes de carga (T.E.>1) chegam na próxima versão.</div>
+    <div id="moveGrid" class="moves"></div>
+    <div class="row" style="margin-top:14px">
+      <button id="btnReady" disabled>Pronto para lutar</button>
+    </div>
+    <div class="hint" id="draftWait"></div>
+  </div>
+
+  <!-- ===== BATTLE ===== -->
+  <div id="battle" class="card hidden">
+    <div class="arena" id="arena"></div>
+
+    <div style="margin-top:14px">
+      <div class="stat"><span class="pill">Turno <b id="turnNo">1</b></span><span id="phaseLabel" class="tag"></span></div>
+      <div class="log" id="log"></div>
+    </div>
+
+    <!-- selection -->
+    <div id="selectPane" style="margin-top:14px">
+      <label>1) Escolha sua ação</label>
+      <div id="actionGrid" class="moves"></div>
+      <label style="margin-top:12px">2) Número de velocidade <span class="tag">(maior = mais rápido; não repete até zerar)</span></label>
+      <div id="speedGrid" class="speeds"></div>
+      <div class="row" style="margin-top:14px">
+        <button id="btnSubmit" disabled>Confirmar (em segredo)</button>
+      </div>
+      <div class="hint" id="selWait"></div>
+    </div>
+
+    <!-- ki clash -->
+    <div id="bidPane" class="hidden" style="margin-top:14px">
+      <div class="card" style="background:#0c0f17">
+        <h3>⚡ Choque de KI!</h3>
+        <div class="hint">Empate de velocidade entre dois golpes. Quem investir mais KI vence e anula o golpe do oponente. Empate de KI → os dois acertam.</div>
+        <label style="margin-top:10px">KI extra para potencializar (você tem <b id="bidMax">0</b>)</label>
+        <input id="bidInput" type="number" min="0" value="0" />
+        <div class="row" style="margin-top:12px"><button id="btnBid">Confirmar choque</button></div>
+        <div class="hint" id="bidWait"></div>
+      </div>
+    </div>
+
+    <!-- result / ko -->
+    <div id="koPane" class="hidden" style="margin-top:14px">
+      <div class="kobanner" id="koText"></div>
+      <div class="row" style="margin-top:14px"><button class="ghost" onclick="location.reload()">Nova luta</button></div>
+    </div>
+  </div>
+
+  <div class="tag center" style="margin-top:10px">Projeto de fã, sem fins comerciais — Filipe, Rafael &amp; Clebler · regras © clã Z Warriors</div>
+</div>
+
+<script>
+/* ============================================================================
+   ZW ARENA — protótipo v0.1
+   Tudo num arquivo só, de propósito (fácil de testar e de versionar como semente
+   do repo). A intenção é portar o ENGINE (puro, determinístico) pro stack Expo
+   depois SEM reescrever a lógica. Seções marcadas para o Claude Code refatorar.
+   ========================================================================== */
+
+/* ---------------------------------------------------------------------------
+   CONFIG — cole aqui as chaves do Supabase para jogar pela internet.
+   Deixe vazio para usar o modo local (2 abas via BroadcastChannel).
+   A "anon/publishable key" é pública por design (vai no client), então pode
+   ficar aqui sem problema. NUNCA cole a service_role/secret key no client.
+--------------------------------------------------------------------------- */
+const CONFIG = {
+  supabaseUrl: "",       // ex.: "https://xxxx.supabase.co"
+  supabaseAnonKey: "",   // ex.: "sb_publishable_xxx" ou a anon key (jwt)
+};
+
+/* ---------------------------------------------------------------------------
+   DADOS DE GOLPES  (extraídos do RZW 5.0)
+   Em v0.1 só habilitamos T.E.=1 para a resolução ficar 100% correta.
+   Os de carga ficam listados como referência (charge:true) e desabilitados.
+--------------------------------------------------------------------------- */
+const GOLPES = [
+  // nome, dano, ki, te
+  ["Ashikara Kame Hame Ha",12,14,1],["Big Bang Attack",18,20,1],["Burning Attack",16,18,1],
+  ["Cho Kame Hame Ha",26,40,1],["Daichiretsuzan",20,30,1],["Dodonpa",6,6,1],
+  ["Dragon Fist",100,130,1],["Dragon Thunder",70,90,1],["Energy Spartor",6,6,1],
+  ["Eraser Cannon",16,18,1],["Eye Beam",8,8,1],["Final Flash",20,30,1],["Galick Ho",16,18,1],
+  ["Kame Hame Ha",18,20,1],["Kienzan",12,14,1],["Kikoha",8,10,1],["Kikoho",14,16,1],
+  ["Makankosappo",16,18,1],["Masenko",14,16,1],["Riogafuufuken",8,10,1],["Solar Attack",50,75,1],
+  ["Super Dodonpa",10,12,1],["Strange Fire",40,60,1],["Super Kame Hame Ha",80,100,1],
+  // carga (referência — desabilitados em v0.1)
+  ["Barekutsuhama",20,10,2],["Chame Saikoda",45,30,2],["Crasher Ball",36,24,2],
+  ["Death Ball",90,36,3],["Genki Dama",70,30,3],["Honoo",26,12,2],["Power Ball (7 esferas)",300,200,3],
+  ["Revenge Death Ball",180,150,2],
+];
+
+// monta lista de moves "draftáveis" + livres + habilidades
+const MOVES = {};
+function reg(m){ MOVES[m.id]=m; return m; }
+let _id=0; const nid=()=>"m"+(_id++);
+
+GOLPES.forEach(([name,dano,ki,te])=>{
+  reg({id:nid(),name,kind:"golpe",dano,ki,te,charge:te>1});
+});
+
+// golpes sempre disponíveis
+const SOCO = reg({id:"soco",name:"Soco",kind:"golpe",dano:1,ki:0,te:1,free:true});
+const CHUTE= reg({id:"chute",name:"Chute",kind:"golpe",dano:1,ki:0,te:1,free:true});
+
+// habilidades (draftáveis) — handlers customizados
+reg({id:"shunkanido",name:"Shunkanido",kind:"esquiva",ki:10,te:1,
+  desc:"Esquiva de 1 ataque (vence/empata) e +1 de velocidade no próximo turno."});
+reg({id:"barrier",name:"Barrier",kind:"defesa",ki:15,te:1,
+  desc:"Bloqueia 1 técnica por inteiro (vence/empata). Não toma dano nenhum."});
+reg({id:"regeneration",name:"Regeneration",kind:"cura",ki:15,te:1,hp:15,
+  desc:"+15 HP (vence/empata)."});
+reg({id:"kaioken",name:"Kaioken",kind:"buff",ki:15,te:1,
+  desc:"+5 em todos os danos até o fim da luta (vence/empata)."});
+
+// habilidades sempre disponíveis (livres)
+const CONCENTRAR = reg({id:"concentrar",name:"Concentrar KI",kind:"concentra",ki:0,te:1,free:true,
+  desc:"+10 KI agora. Fica vulnerável (sem defesa)."});
+const DEFESA = reg({id:"defesa",name:"Defesa Simples",kind:"defesa_simples",ki:0,te:1,free:true,
+  desc:"Metade do dano recebido (vence/empata)."});
+
+const DRAFTABLE = Object.values(MOVES).filter(m=>!m.free);
+const KI_CAP = 100; // nível 0
+
+/* ---------------------------------------------------------------------------
+   ENGINE  (puro / determinístico) — o coração do jogo.
+   resolveTurn(state, subA, subB, bids?) -> { state, events, needBid }
+   "A" é sempre p1, "B" sempre p2 (ambos os clientes calculam igual).
+--------------------------------------------------------------------------- */
+function newFighter(name){
+  return { name, hp:50, ki:50, speeds:[1,2,3,4,5,6,7,8,9,10],
+           moves:[], effects:{ kaioken:false, speedBonusNext:0 } };
+}
+function clampKi(v){ return Math.max(0, Math.min(KI_CAP, v)); }
+function dmgOf(move, fighter){
+  let d = move.dano||0;
+  if(move.kind==="golpe" && fighter.effects.kaioken && d>0) d += 5;
+  return d;
+}
+function classify(move){
+  if(["golpe"].includes(move.kind)) return "ATAQUE";
+  if(["defesa","defesa_simples"].includes(move.kind)) return "DEFESA";
+  if(move.kind==="esquiva") return "ESQUIVA";
+  if(move.kind==="cura"||move.kind==="buff"||move.kind==="concentra") return "UTIL";
+  return "UTIL";
+}
+
+// sub = { moveId, speed }
+function effSpeed(sub, f){ return sub.speed + (f.effects.speedBonusNext||0); }
+
+function resolveTurn(state, subA, subB, bids){
+  // clona
+  const S = JSON.parse(JSON.stringify(state));
+  const a=S.p1, b=S.p2;
+  const mA=MOVES[subA.moveId], mB=MOVES[subB.moveId];
+  const ev=[];
+  const sa=effSpeed(subA,a), sb=effSpeed(subB,b);
+
+  // consumir bônus de velocidade (foi usado este turno)
+  a.effects.speedBonusNext=0; b.effects.speedBonusNext=0;
+
+  const cA=classify(mA), cB=classify(mB);
+  const aWins = sa>sb, bWins = sb>sa, tie = sa===sb;
+
+  // ---- choque de KI (dois ataques empatados) ----
+  if(tie && cA==="ATAQUE" && cB==="ATAQUE"){
+    if(!bids) return { needBid:true };
+    const bidA=Math.max(0,Math.min(bids.a||0, a.ki - (mA.ki||0)));
+    const bidB=Math.max(0,Math.min(bids.b||0, b.ki - (mB.ki||0)));
+    a.ki=clampKi(a.ki-(mA.ki||0)-bidA);
+    b.ki=clampKi(b.ki-(mB.ki||0)-bidB);
+    ev.push({t:"info",x:`Choque de KI! ${a.name} investe ${bidA} · ${b.name} investe ${bidB}.`});
+    if(bidA>bidB){ apply(b,a,mA,ev); ev.push({t:"info",x:`O golpe de ${b.name} foi anulado.`}); }
+    else if(bidB>bidA){ apply(a,b,mB,ev); ev.push({t:"info",x:`O golpe de ${a.name} foi anulado.`}); }
+    else { apply(b,a,mA,ev); apply(a,b,mB,ev); ev.push({t:"info",x:`KI empatou — os dois golpes acertam!`}); }
+    finishTurn(S,subA,subB,ev); return { state:S, events:ev };
+  }
+
+  // ---- resolução padrão ----
+  // defesas/esquivas resolvem com vencer OU empatar (exceção da regra)
+  const aDefends = (cA==="DEFESA"||cA==="ESQUIVA") && (sa>=sb);
+  const bDefends = (cB==="DEFESA"||cB==="ESQUIVA") && (sb>=sa);
+
+  // ações de A
+  resolveSide(a,b,subA,mA,cA,aWins||tie, bDefends?mB:null, ev);
+  // ações de B
+  resolveSide(b,a,subB,mB,cB,bWins||tie, aDefends?mA:null, ev);
+
+  finishTurn(S,subA,subB,ev);
+  return { state:S, events:ev };
+}
+
+function resolveSide(self, foe, sub, move, cls, qualifies, foeDef, ev){
+  // ATAQUE: precisa vencer estrito (empate vira choque, já tratado).
+  if(cls==="ATAQUE"){
+    if(!qualifies){ ev.push({t:"info",x:`${self.name} foi mais lento — ${move.name} não saiu (não gasta KI).`}); return; }
+    if((self.ki) < (move.ki||0)){ ev.push({t:"info",x:`${self.name} não tinha KI pra ${move.name}.`}); return; }
+    self.ki=clampKi(self.ki-(move.ki||0));
+    // defesa do oponente?
+    if(foeDef && foeDef.kind==="barrier"){ ev.push({t:"info",x:`${foe.name} ergue o Barrier e absorve o ${move.name} por inteiro!`}); return; }
+    if(foeDef && foeDef.kind==="esquiva"){ ev.push({t:"info",x:`${foe.name} usa Shunkanido e some — o ${move.name} passa direto!`}); foe.effects.speedBonusNext=1; return; }
+    let d=dmgOf(move,self);
+    if(foeDef && (foeDef.kind==="defesa"||foeDef.kind==="defesa_simples")){ d=Math.floor(d/2); ev.push({t:"info",x:`${foe.name} se defende — dano pela metade.`}); }
+    foe.hp=Math.max(0,foe.hp-d);
+    ev.push({t:"dmg",x:`${self.name} acerta ${move.name} em ${foe.name} — ${d} de dano!`});
+    return;
+  }
+  // ações não-ataque resolvem com vencer/empatar (concentrar sempre resolve)
+  if(cls==="UTIL"){
+    if(move.kind==="concentra"){ const before=self.ki; self.ki=clampKi(self.ki+10); ev.push({t:"info",x:`${self.name} concentra KI (+${self.ki-before}). Fica vulnerável.`}); return; }
+    if(!qualifies){ ev.push({t:"info",x:`${self.name} foi mais lento e não conseguiu usar ${move.name}.`}); return; }
+    if(self.ki<(move.ki||0)){ ev.push({t:"info",x:`${self.name} sem KI pra ${move.name}.`}); return; }
+    self.ki=clampKi(self.ki-(move.ki||0));
+    if(move.kind==="cura"){ self.hp+=move.hp; ev.push({t:"heal",x:`${self.name} usa Regeneration (+${move.hp} HP).`}); }
+    if(move.kind==="buff"){ self.effects.kaioken=true; ev.push({t:"info",x:`${self.name} ativa Kaioken! +5 em todos os danos.`}); }
+    return;
+  }
+  // DEFESA/ESQUIVA sem ataque pra defender
+  if(cls==="DEFESA"||cls==="ESQUIVA"){
+    if(qualifies){
+      if(self.ki<(move.ki||0)){ ev.push({t:"info",x:`${self.name} sem KI pra ${move.name}.`}); return; }
+      self.ki=clampKi(self.ki-(move.ki||0));
+      if(move.kind==="esquiva"){ self.effects.speedBonusNext=1; ev.push({t:"info",x:`${self.name} usa Shunkanido (+1 de velocidade no próximo turno).`}); }
+      else ev.push({t:"info",x:`${self.name} fica em guarda (${move.name}).`});
+    } else {
+      ev.push({t:"info",x:`${self.name} tentou ${move.name} mas perdeu no número.`});
+    }
+  }
+}
+
+function apply(target, attacker, move, ev){
+  if(attacker.ki<(move.ki||0)){ ev.push({t:"info",x:`${attacker.name} sem KI pra ${move.name}.`}); return; }
+  const d=dmgOf(move,attacker);
+  target.hp=Math.max(0,target.hp-d);
+  ev.push({t:"dmg",x:`${attacker.name} acerta ${move.name} em ${target.name} — ${d} de dano!`});
+}
+
+function finishTurn(S,subA,subB){
+  consumeSpeed(S.p1,subA.speed); consumeSpeed(S.p2,subB.speed);
+  S.turn=(S.turn||1)+1;
+  S.over = S.p1.hp<=0 || S.p2.hp<=0;
+  if(S.over){
+    if(S.p1.hp<=0 && S.p2.hp<=0) S.winner="empate";
+    else S.winner = S.p1.hp<=0 ? "p2" : "p1";
+  }
+}
+function consumeSpeed(f,n){ f.speeds=f.speeds.filter(x=>x!==n); if(f.speeds.length===0) f.speeds=[1,2,3,4,5,6,7,8,9,10]; }
+
+/* ---------------------------------------------------------------------------
+   TRANSPORT  — abstração de rede. Local (BroadcastChannel) já funciona.
+   Supabase entra sozinho se CONFIG tiver chaves. Mesma interface dos dois.
+   send(type,payload) / onMessage(cb)
+--------------------------------------------------------------------------- */
+class LocalTransport{
+  constructor(room){ this.ch=new BroadcastChannel("zw-"+room); this.cbs=[];
+    this.ch.onmessage=e=>this.cbs.forEach(cb=>cb(e.data)); }
+  send(type,payload){ this.ch.postMessage({type,payload,from:ME.id}); }
+  onMessage(cb){ this.cbs.push(cb); }
+}
+class SupabaseTransport{
+  constructor(room){ this.room=room; this.cbs=[]; this.ready=false; this.queue=[]; this._init(); }
+  async _init(){
+    try{
+      const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2");
+      this.sb=createClient(CONFIG.supabaseUrl,CONFIG.supabaseAnonKey);
+      this.chan=this.sb.channel("zw-"+this.room,{config:{broadcast:{self:false}}});
+      this.chan.on("broadcast",{event:"msg"},({payload})=>this.cbs.forEach(cb=>cb(payload)));
+      await this.chan.subscribe(s=>{ if(s==="SUBSCRIBED"){ this.ready=true; this.queue.forEach(m=>this._raw(m)); this.queue=[]; } });
+    }catch(err){ console.error("Supabase indisponível, caindo pro modo local:",err); alert("Não consegui conectar no Supabase neste ambiente. Use o modo local (2 abas) ou rode fora do sandbox."); }
+  }
+  _raw(m){ this.chan.send({type:"broadcast",event:"msg",payload:m}); }
+  send(type,payload){ const m={type,payload,from:ME.id}; if(this.ready) this._raw(m); else this.queue.push(m); }
+  onMessage(cb){ this.cbs.push(cb); }
+}
+function makeTransport(room){
+  return (CONFIG.supabaseUrl && CONFIG.supabaseAnonKey) ? new SupabaseTransport(room) : new LocalTransport(room);
+}
+
+/* ---------------------------------------------------------------------------
+   CONTROLLER / UI
+--------------------------------------------------------------------------- */
+const $=s=>document.querySelector(s);
+const ME={ id:Math.random().toString(36).slice(2), nick:"", seat:null }; // seat: "p1"|"p2"
+let net=null, room="", peer={ nick:null, ready:false, moves:null };
+let state=null;          // estado global da luta {p1,p2,turn,over,winner}
+let sel={ moveId:null, speed:null };
+let mySub=null, peerSub=null;     // submissões do turno atual
+let myBid=null, peerBid=null;
+let phase="home";
+
+function show(id){ ["home","draft","battle"].forEach(x=>$("#"+x).classList.toggle("hidden",x!==id)); }
+
+/* ---- HOME ---- */
+$("#btnCreate").onclick=()=>start("p1");
+$("#btnJoin").onclick=()=>start("p2");
+function start(seat){
+  const nick=$("#nick").value.trim(); room=$("#room").value.trim();
+  if(!nick||!room){ $("#netStatus").textContent="Preencha nick e código da sala."; return; }
+  ME.nick=nick; ME.seat=seat;
+  net=makeTransport(room);
+  net.onMessage(onNet);
+  net.send("hello",{nick, seat});
+  $("#netStatus").innerHTML = (CONFIG.supabaseUrl? "Conectando ao Supabase…" : "Modo local (2 abas).")+" Você é <b>"+(seat==="p1"?"Jogador 1":"Jogador 2")+"</b>.";
+  buildDraft(); show("draft");
+}
+
+/* ---- NET ---- */
+function onNet(msg){
+  if(msg.from===ME.id) return;
+  const {type,payload}=msg;
+  if(type==="hello"){ peer.nick=payload.nick; net.send("hello-ack",{nick:ME.nick,seat:ME.seat}); }
+  if(type==="hello-ack"){ peer.nick=payload.nick; }
+  if(type==="ready"){ peer.ready=true; peer.moves=payload.moves; peer.nick=payload.nick; $("#draftWait").innerHTML = `<b>${peer.nick}</b> está pronto.`; tryStartBattle(); }
+  if(type==="submit"){ peerSub=payload; maybeReveal(); }
+  if(type==="bid"){ peerBid=payload.bid; maybeResolveBid(); }
+}
+
+/* ---- DRAFT ---- */
+function buildDraft(){
+  const grid=$("#moveGrid"); grid.innerHTML="";
+  DRAFTABLE.forEach(m=>{
+    const el=document.createElement("div");
+    el.className="move"+(m.charge?" dis":"");
+    const sub = m.kind==="golpe" ? `Dano ${m.dano} · KI ${m.ki} · T.E.${m.te}` : (m.desc||`KI ${m.ki}`);
+    el.innerHTML=`<div class="mn">${m.name}</div><div class="ms">${sub}</div>`+(m.charge?`<span class="badge">carga</span>`:"");
+    if(!m.charge) el.onclick=()=>toggleDraft(m.id,el);
+    grid.appendChild(el);
+  });
+}
+let draftSel=[];
+function toggleDraft(id,el){
+  const i=draftSel.indexOf(id);
+  if(i>=0){ draftSel.splice(i,1); el.classList.remove("sel"); }
+  else { if(draftSel.length>=5){ return; } draftSel.push(id); el.classList.add("sel"); }
+  $("#draftCount").textContent=draftSel.length+"/5";
+  $("#btnReady").disabled = draftSel.length!==5;
+}
+$("#btnReady").onclick=()=>{
+  $("#btnReady").disabled=true;
+  net.send("ready",{moves:draftSel,nick:ME.nick});
+  $("#draftWait").innerHTML='Esperando o oponente<span class="waitdot"></span>';
+  myReady=true; peer.moves=peer.moves; tryStartBattle();
+};
+let myReady=false;
+function tryStartBattle(){
+  if(myReady && peer.ready && peer.moves){
+    // monta estado: p1/p2 determinístico independente do assento
+    const meF=newFighter(ME.nick); meF.moves=draftSel.slice();
+    const peF=newFighter(peer.nick||"Oponente"); peF.moves=peer.moves.slice();
+    state = ME.seat==="p1" ? {p1:meF,p2:peF,turn:1} : {p1:peF,p2:meF,turn:1};
+    state.turn=1;
+    startBattle();
+  }
+}
+
+/* ---- BATTLE ---- */
+function meKey(){ return ME.seat; }
+function foeKey(){ return ME.seat==="p1"?"p2":"p1"; }
+function myF(){ return state[meKey()]; }
+function foeF(){ return state[foeKey()]; }
+
+function startBattle(){ show("battle"); logTurnSep(); renderArena(); buildSelection(); }
+
+function renderArena(){
+  const a=$("#arena"); a.innerHTML="";
+  [ [myF(),true],[foeF(),false] ].forEach(([f,mine])=>{
+    const hpPct=Math.max(0,Math.min(100,f.hp/50*100));
+    const kiPct=Math.max(0,Math.min(100,f.ki/KI_CAP*100));
+    const effs=[]; if(f.effects.kaioken)effs.push("Kaioken"); if(f.effects.speedBonusNext)effs.push("+1 veloc.");
+    const el=document.createElement("div");
+    el.className="fighter"+(mine?" me":"");
+    el.innerHTML=`
+      <div class="fname">${f.name||"?"} ${mine?'<span class="pill">você</span>':''}</div>
+      <div class="bar"><i class="hpfill" style="width:${hpPct}%;background:${f.hp<=15?'linear-gradient(90deg,#c0263b,var(--hp-low))':''}"></i></div>
+      <div class="stat"><span>HP</span><span>${f.hp}/50</span></div>
+      <div class="bar"><i class="kifill" style="width:${kiPct}%"></i></div>
+      <div class="stat"><span>KI</span><span>${f.ki}/${KI_CAP}</span></div>
+      <div class="effects">${effs.map(e=>`<span class="eff">${e}</span>`).join("")}</div>`;
+    a.appendChild(el);
+  });
+  $("#turnNo").textContent=state.turn;
+}
+
+function buildSelection(){
+  $("#selectPane").classList.remove("hidden");
+  $("#bidPane").classList.add("hidden");
+  $("#koPane").classList.add("hidden");
+  $("#selWait").textContent="";
+  $("#phaseLabel").textContent="escolha sua ação em segredo";
+  sel={moveId:null,speed:null}; mySub=null; peerSub=null; myBid=null; peerBid=null;
+  // ações: golpes escolhidos + soco/chute/concentrar/defesa
+  const ids=[...myF().moves, "soco","chute","concentrar","defesa"];
+  const grid=$("#actionGrid"); grid.innerHTML="";
+  ids.forEach(id=>{
+    const m=MOVES[id]; const el=document.createElement("div");
+    const tooKi = (m.ki||0)>myF().ki && m.kind!=="concentra" && m.kind!=="defesa_simples" && m.kind!=="golpe" ? false : (m.ki||0)>myF().ki;
+    const unaffordable = (m.ki||0)>myF().ki && m.kind!=="golpe" ; // golpe sem KI simplesmente não sai; bloqueio leve só p/ habilidades
+    el.className="move"+(unaffordable?" dis":"");
+    const sub = m.kind==="golpe" ? `Dano ${m.dano} · KI ${m.ki}` : (m.desc||`KI ${m.ki}`);
+    el.innerHTML=`<div class="mn">${m.name}</div><div class="ms">${sub}</div>`;
+    if(!unaffordable) el.onclick=()=>{ sel.moveId=id; [...grid.children].forEach(c=>c.classList.remove("sel")); el.classList.add("sel"); checkSubmit(); };
+    grid.appendChild(el);
+  });
+  // velocidades
+  const sg=$("#speedGrid"); sg.innerHTML="";
+  for(let n=1;n<=10;n++){
+    const used=!myF().speeds.includes(n);
+    const el=document.createElement("div");
+    el.className="spd"+(used?" used":"");
+    el.textContent=n;
+    if(!used) el.onclick=()=>{ sel.speed=n; [...sg.children].forEach(c=>c.classList.remove("sel")); el.classList.add("sel"); checkSubmit(); };
+    sg.appendChild(el);
+  }
+}
+function checkSubmit(){ $("#btnSubmit").disabled = !(sel.moveId && sel.speed); }
+
+$("#btnSubmit").onclick=()=>{
+  mySub={ moveId:sel.moveId, speed:sel.speed, seat:ME.seat };
+  $("#selectPane").classList.add("hidden");
+  $("#phaseLabel").textContent="aguardando oponente";
+  $("#selWait").innerHTML='Confirmado em segredo. Esperando o oponente<span class="waitdot"></span>';
+  net.send("submit",mySub);
+  maybeReveal();
+};
+
+function subBySeat(seat){ if(mySub&&mySub.seat===seat)return mySub; if(peerSub&&peerSub.seat===seat)return peerSub; return null; }
+
+function maybeReveal(){
+  if(!(mySub&&peerSub)) return;
+  const subA=subBySeat("p1"), subB=subBySeat("p2");
+  const r=resolveTurn(state,subA,subB,null);
+  if(r.needBid){ openBid(subA,subB); return; }
+  commit(r,subA,subB);
+}
+
+/* ---- choque de KI ---- */
+let pendingSubs=null;
+function openBid(subA,subB){
+  pendingSubs={subA,subB};
+  $("#bidPane").classList.remove("hidden");
+  $("#phaseLabel").textContent="choque de KI";
+  const mMy=MOVES[(ME.seat==="p1"?subA:subB).moveId];
+  const maxBid=Math.max(0, myF().ki-(mMy.ki||0));
+  $("#bidMax").textContent=maxBid; $("#bidInput").max=maxBid; $("#bidInput").value=0;
+  $("#bidWait").textContent="";
+}
+$("#btnBid").onclick=()=>{
+  myBid=Math.max(0,parseInt($("#bidInput").value||"0",10));
+  $("#bidPane").classList.add("hidden");
+  $("#bidWait").innerHTML='Esperando o choque do oponente<span class="waitdot"></span>';
+  net.send("bid",{bid:myBid,seat:ME.seat});
+  maybeResolveBid();
+};
+function maybeResolveBid(){
+  if(myBid==null||peerBid==null||!pendingSubs) return;
+  const bids = ME.seat==="p1" ? {a:myBid,b:peerBid} : {a:peerBid,b:myBid};
+  const r=resolveTurn(state,pendingSubs.subA,pendingSubs.subB,bids);
+  commit(r,pendingSubs.subA,pendingSubs.subB); pendingSubs=null;
+}
+
+/* ---- commit do turno ---- */
+function commit(r,subA,subB){
+  state=r.state;
+  logTurnSep();
+  logLine("info", narrChoice(subA,"p1")+" | "+narrChoice(subB,"p2"));
+  r.events.forEach(e=>logLine(e.t,e.x));
+  renderArena();
+  if(state.over){ endGame(); return; }
+  buildSelection();
+}
+function narrChoice(sub,seat){
+  const f=state[seat]; const m=MOVES[sub.moveId];
+  return `${f.name}: ${m.name} (vel ${sub.speed})`;
+}
+
+function endGame(){
+  $("#selectPane").classList.add("hidden"); $("#bidPane").classList.add("hidden");
+  $("#koPane").classList.remove("hidden");
+  let txt;
+  if(state.winner==="empate") txt="DUPLO K.O. — Empate!";
+  else { const w=state[state.winner]; txt=`K.O.! ${w.name} venceu!`; }
+  $("#koText").textContent=txt;
+  $("#phaseLabel").textContent="fim de luta";
+}
+
+/* ---- LOG ---- */
+function logLine(type,text){ const p=document.createElement("p"); if(type==="dmg")p.className="dmg"; if(type==="heal")p.className="heal"; if(type==="info")p.className="info"; p.textContent=text; $("#log").appendChild(p); $("#log").scrollTop=$("#log").scrollHeight; }
+function logTurnSep(){ const p=document.createElement("p"); p.className="turnsep"; p.textContent="— Turno "+ (state?state.turn:1) +" —"; $("#log").appendChild(p); $("#log").scrollTop=$("#log").scrollHeight; }
+
+show("home");
+</script>
+</body>
 </html>
