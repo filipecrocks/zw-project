@@ -38,6 +38,13 @@ const EMBED_DIMS = 1536;
 const MATCH_COUNT = 6;
 const CORPUS_TTL_MS = 10 * 60 * 1000; // cache do corpus entre invocações quentes
 
+// Proteções de endpoint público
+const MAX_QUESTION_CHARS = 1000;       // teto de tamanho da pergunta
+const MAX_MESSAGES = 15;               // por janela de 1h, por sessão
+const WINDOW_MS = 60 * 60 * 1000;      // janela do rate limit
+const COOLDOWN_MS = 3000;              // intervalo mínimo entre mensagens
+const CACHE_TTL_HOURS = 24;            // validade do chat_cache
+
 const CORS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -143,6 +150,23 @@ async function callGroq(messages: { role: string; content: string }[]): Promise<
   return String(data?.choices?.[0]?.message?.content ?? '').trim();
 }
 
+// Remove caracteres de controle, colapsa espaços, corta no teto. (Defesa-em-
+// profundidade contra payloads de prompt injection multilinha + higiene.)
+function sanitizeQuestion(raw: unknown): string {
+  const src = String(raw ?? '');
+  let out = '';
+  for (const ch of src) {
+    const c = ch.codePointAt(0) ?? 0;
+    out += (c <= 0x1f || (c >= 0x7f && c <= 0x9f)) ? ' ' : ch; // descarta controle (C0/C1/DEL)
+  }
+  return out.split(' ').filter(Boolean).join(' ').slice(0, MAX_QUESTION_CHARS);
+}
+
+async function sha256hex(s: string): Promise<string> {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
+  return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS });
   const json = (b: unknown, status = 200) =>
@@ -158,10 +182,66 @@ Deno.serve(async (req) => {
 
   try {
     const body = await req.json().catch(() => ({}));
-    const question: string = String(body?.question ?? body?.pergunta ?? body?.mensagem ?? '').trim();
+    const question = sanitizeQuestion(body?.question ?? body?.pergunta ?? body?.mensagem);
     const userId: string | null = body?.user_id ?? null;
     const history: { role: string; content: string }[] = Array.isArray(body?.history) ? body.history.slice(-6) : [];
-    if (!question) return json({ error: 'question (pergunta) obrigatória' }, 400);
+    const sessionId: string = (body?.session_id && String(body.session_id)) || crypto.randomUUID();
+
+    // Pergunta vazia / só espaços → recusa leve (200, não erro cru)
+    if (!question) {
+      return json({
+        session_id: sessionId,
+        answer: 'Manda a pergunta, guerreiro! 🐉 Posso falar de personagens, sagas, episódios, técnicas e transformações de Dragon Ball.',
+        sources: [], matched: 0,
+      });
+    }
+
+    // ── Rate limit por sessão (antes de Groq/Gemini) — fail-open se a tabela não existir ──
+    const now = Date.now();
+    try {
+      const { data: rl, error: rlErr } = await supabase
+        .from('portal_rate_limit').select('*').eq('session_id', sessionId).maybeSingle();
+      if (rlErr) throw rlErr;
+      let count = 1;
+      let windowStart = now;
+      if (rl) {
+        const la = new Date(rl.last_at).getTime();
+        const ws = new Date(rl.window_start).getTime();
+        if (now - la < COOLDOWN_MS) {
+          return json({ session_id: sessionId, answer: 'Calma, guerreiro! ⚡ Respira o KI e tenta de novo num instante.', sources: [], matched: 0, limited: true });
+        }
+        if (now - ws > WINDOW_MS) { count = 1; windowStart = now; }
+        else { count = rl.count + 1; windowStart = ws; }
+        if (count > MAX_MESSAGES) {
+          return json({ session_id: sessionId, answer: 'Você treinou bastante por agora! 🐉 Volta daqui a pouco que a gente continua a saga.', sources: [], matched: 0, limited: true });
+        }
+      }
+      await supabase.from('portal_rate_limit').upsert({
+        session_id: sessionId, count,
+        window_start: new Date(windowStart).toISOString(),
+        last_at: new Date(now).toISOString(),
+      });
+    } catch (e) {
+      console.error('rate limit indisponível (criar tabela portal_rate_limit?):', e instanceof Error ? e.message : String(e));
+    }
+
+    // ── Cache de respostas (só sem histórico) — economiza Groq nas repetidas. Fail-open. ──
+    const cacheable = history.length === 0;
+    const qhash = await sha256hex(`${RAG_MODE}:${question.toLowerCase()}`);
+    if (cacheable) {
+      try {
+        const sinceIso = new Date(now - CACHE_TTL_HOURS * 3600 * 1000).toISOString();
+        const { data: hit, error: cErr } = await supabase
+          .from('chat_cache').select('answer').eq('question_hash', qhash).gte('created_at', sinceIso).maybeSingle();
+        if (cErr) throw cErr;
+        if (hit?.answer) {
+          try { await supabase.from('chat_logs').insert({ question, answer: hit.answer, user_id: userId }); } catch (_e) { /* noop */ }
+          return json({ session_id: sessionId, answer: hit.answer, mode: RAG_MODE === 'vector' ? 'vector' : 'full', sources: [], matched: 0, cached: true });
+        }
+      } catch (e) {
+        console.error('chat_cache lookup indisponível (criar tabela chat_cache?):', e instanceof Error ? e.message : String(e));
+      }
+    }
 
     // Monta o CONTEXTO conforme o modo
     let contextText = '';
@@ -219,14 +299,17 @@ Deno.serve(async (req) => {
     }
     if (!answer) answer = 'Hmm, a energia oscilou aqui. Pode repetir a pergunta, guerreiro?';
 
-    // Log best-effort (nunca derruba a resposta)
+    // Guarda no cache (best-effort) e loga (best-effort) — nunca derruba a resposta
+    if (cacheable) {
+      try { await supabase.from('chat_cache').upsert({ question_hash: qhash, question, answer, mode: RAG_MODE }); } catch (_e) { /* noop */ }
+    }
     try {
       await supabase.from('chat_logs').insert({ question, answer, user_id: userId });
     } catch (e) {
       console.error('chat_logs insert falhou:', e instanceof Error ? e.message : String(e));
     }
 
-    return json({ answer, mode: RAG_MODE === 'vector' ? 'vector' : 'full', sources, matched });
+    return json({ session_id: sessionId, answer, mode: RAG_MODE === 'vector' ? 'vector' : 'full', sources, matched });
   } catch (err) {
     return json({ error: err instanceof Error ? err.message : String(err) }, 500);
   }

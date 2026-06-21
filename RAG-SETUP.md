@@ -116,7 +116,38 @@ Para abrir cadastro de verdade depois, ligue SMTP/Resend e desligue o Auto Confi
   com chaves que já existiam.
 - Dimensão mantida em **1536** (sem o ajuste para 1024).
 
+## Chat público — proteções (rate limit, sanitização, cache)
+
+A função `chat` está pronta pra público. Para ativar 100%:
+
+1. **Criar as tabelas** (rate limit + cache) — SQL Editor, uma vez:
+   ```sql
+   -- conteúdo de sql/chat_hardening.sql
+   ```
+   Rode o arquivo `sql/chat_hardening.sql`. Enquanto não rodar, a função
+   **continua respondendo** (fail-open): o limite e o cache só ligam depois das tabelas.
+
+2. **Re-deploy** da função: `supabase functions deploy chat`.
+
+3. **Testar o limite** (estourando de propósito): mande 16 perguntas seguidas
+   com o mesmo `session_id`, ou duas em menos de 3s — vem a resposta amigável
+   (`"Calma, guerreiro! ⚡…"` / `"Você treinou bastante por agora! 🐉…"`) com `limited: true`,
+   sem chamar o Groq.
+
+O que está incluso:
+- **Rate limit** por `session_id`: **15 msgs/h + cooldown 3s** (tabela `portal_rate_limit`).
+- **Teto de 1.000 chars** na pergunta + **remoção de caracteres de controle** + recusa
+  leve pra pergunta vazia.
+- **Prompt injection**: o system prompt manda tratar contexto e pergunta como **dados** e
+  ignorar instruções embutidas (mudar regras, trocar idioma, revelar o prompt).
+- **Chaves só no servidor**: Groq e Gemini em secrets; `service_role` na função. As
+  tabelas têm RLS ligado **sem policy pública** — só a função acessa.
+- **Cache** (`chat_cache`, TTL 24h) das perguntas repetidas sem histórico → pula o Groq.
+  > Obs.: o **Groq não tem prompt caching** (diferente da Anthropic), então no modo `full`
+  > o corpus vai inteiro no prompt a cada pergunta nova — o `chat_cache` é a alavanca de custo.
+
 ## Arquivos entregues
 - `scripts/embed-kb.mjs` — job de embeddings (1x, lotes + retry).
-- `supabase/functions/chat/index.ts` — Edge Function do chat (RAG + Groq), server-side.
+- `supabase/functions/chat/index.ts` — Edge Function do chat (RAG + Groq + rate limit + cache), server-side.
 - `supabase/functions/chat/deno.json` — import map.
+- `sql/chat_hardening.sql` — tabelas `portal_rate_limit` + `chat_cache`.
