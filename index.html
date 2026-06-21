@@ -19,7 +19,6 @@
   html,body{margin:0;padding:0}
   body{background:var(--bg); color:var(--txt); font-family:var(--body); line-height:1.55; overflow-x:hidden}
   a{color:inherit;text-decoration:none}
-
   .bgfx{position:fixed; inset:0; z-index:-1; overflow:hidden; pointer-events:none}
   .bgfx::before, .bgfx::after, .bgfx i{content:""; position:absolute; border-radius:50%; filter:blur(60px); opacity:.5}
   .bgfx::before{width:480px;height:480px; left:-120px; top:-100px; background:radial-gradient(circle,rgba(255,157,46,.45),transparent 70%); animation:drift1 24s ease-in-out infinite}
@@ -34,7 +33,6 @@
     padding:7px 12px; font-weight:800; font-size:13px; box-shadow:0 2px 20px rgba(255,157,46,.4) }
   .promostrip b{font-family:var(--display); letter-spacing:1px}
   .promostrip a.cta{ background:#1a1000; color:var(--gold); padding:5px 13px; border-radius:99px; font-weight:800; white-space:nowrap }
-  .promostrip a.cta:hover{ background:#000 }
 
   header.top{ display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;
     max-width:1180px; margin:0 auto; padding:16px 18px }
@@ -44,23 +42,29 @@
     -webkit-background-clip:text; background-clip:text; color:transparent; filter:drop-shadow(0 0 14px rgba(255,157,46,.45)) }
   .brand small{ display:block; color:var(--muted); font-size:10px; letter-spacing:2px; text-transform:uppercase }
   nav.main{ display:flex; gap:2px; flex-wrap:wrap; align-items:center }
-  nav.main a{ padding:8px 11px; border-radius:9px; color:var(--muted); font-weight:700; font-size:14px }
+  nav.main a{ padding:8px 11px; border-radius:9px; color:var(--muted); font-weight:700; font-size:14px; cursor:pointer }
   nav.main a:hover{ color:var(--txt); background:var(--panel) }
   nav.main a.arena{ color:#2a1800; background:linear-gradient(135deg,var(--gold),var(--gold-2)) }
   nav.main a.active{ color:var(--gold) }
+  .authslot{ display:flex; align-items:center; gap:8px }
+  .loginbtn{ background:linear-gradient(135deg,var(--gold),var(--gold-2)); color:#2a1800; font-weight:800; border:none; border-radius:10px; padding:9px 16px; cursor:pointer; font-family:var(--body); font-size:14px }
+  .usermenu{ position:relative }
+  .userbtn{ display:flex; align-items:center; gap:8px; background:var(--panel); border:1px solid var(--line); border-radius:99px; padding:5px 12px 5px 6px; cursor:pointer; color:var(--txt); font-weight:700; font-size:14px; font-family:var(--body) }
+  .userbtn .ua{ width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-family:var(--display);color:#2a1500;font-size:14px;background:radial-gradient(circle at 35% 30%,#fff8,transparent 45%),radial-gradient(circle at 60% 65%,var(--gold),#5a2e00 82%) }
+  .userbtn .uz{ color:var(--gold); font-size:12px }
+  .udrop{ position:absolute; right:0; top:46px; background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:6px; min-width:160px; display:none; box-shadow:0 14px 40px rgba(0,0,0,.5); z-index:70 }
+  .udrop.open{ display:block }
+  .udrop a{ display:block; padding:10px 12px; border-radius:8px; color:var(--txt); font-size:14px; cursor:pointer }
+  .udrop a:hover{ background:var(--panel2) }
 
   .wrap{ max-width:1180px; margin:0 auto; padding:8px 18px 30px; display:grid; grid-template-columns:1fr 310px; gap:26px }
   @media(max-width:900px){ .wrap{ grid-template-columns:1fr } aside{ order:2 } }
   main{ min-width:0 }
 
-  .hero{ position:relative; text-align:center; padding:48px 16px 40px; border:1px solid var(--line); border-radius:22px;
-    background:var(--panel); overflow:hidden; margin:10px 0 26px }
-  .hero .aura{ position:absolute; left:50%; top:42%; width:520px; height:520px; transform:translate(-50%,-50%);
-    background:radial-gradient(circle,rgba(255,157,46,.22),transparent 60%); border-radius:50%; animation:pulse 4s ease-in-out infinite }
+  .hero{ position:relative; text-align:center; padding:48px 16px 40px; border:1px solid var(--line); border-radius:22px; background:var(--panel); overflow:hidden; margin:10px 0 26px }
+  .hero .aura{ position:absolute; left:50%; top:42%; width:520px; height:520px; transform:translate(-50%,-50%); background:radial-gradient(circle,rgba(255,157,46,.22),transparent 60%); border-radius:50%; animation:pulse 4s ease-in-out infinite }
   @keyframes pulse{50%{transform:translate(-50%,-50%) scale(1.18); opacity:.7}}
-  .hero h1{ position:relative; font-family:var(--display); font-size:clamp(40px,9vw,76px); margin:0 0 10px; letter-spacing:1px;
-    background:linear-gradient(180deg,#fff 4%,var(--gold) 42%,#c25212);
-    -webkit-background-clip:text; background-clip:text; color:transparent; filter:drop-shadow(0 0 30px rgba(255,157,46,.45)) }
+  .hero h1{ position:relative; font-family:var(--display); font-size:clamp(40px,9vw,76px); margin:0 0 10px; letter-spacing:1px; background:linear-gradient(180deg,#fff 4%,var(--gold) 42%,#c25212); -webkit-background-clip:text; background-clip:text; color:transparent; filter:drop-shadow(0 0 30px rgba(255,157,46,.45)) }
   .hero p{ position:relative; color:#c9d0df; max-width:600px; margin:0 auto 18px; font-size:clamp(14px,2.5vw,17px) }
   .hero .ctas{ position:relative; display:flex; gap:10px; justify-content:center; flex-wrap:wrap }
 
@@ -68,12 +72,10 @@
   .section-title:before{ content:""; width:7px; height:24px; border-radius:4px; background:linear-gradient(var(--gold),var(--gold-2)); box-shadow:0 0 12px var(--gold-2) }
   .section-title .more{ margin-left:auto; font-family:var(--body); font-size:13px; font-weight:700; color:var(--ki); cursor:pointer }
   .lead{ color:var(--muted); margin:8px 0 16px }
-
   .grid{ display:grid; gap:14px }
   .g4{ grid-template-columns:repeat(4,1fr) } .g3{ grid-template-columns:repeat(3,1fr) } .g2{ grid-template-columns:repeat(2,1fr) }
   @media(max-width:760px){ .g4,.g3,.g2{ grid-template-columns:1fr 1fr } }
   @media(max-width:480px){ .g4,.g3,.g2{ grid-template-columns:1fr } }
-
   .card{ position:relative; background:var(--panel); border:1px solid var(--line); border-radius:15px; padding:16px; transition:.18s; overflow:hidden }
   a.card:hover{ border-color:var(--gold-2); transform:translateY(-3px); box-shadow:0 10px 30px rgba(255,157,46,.12) }
   .card h3{ margin:.25em 0 .3em; font-size:17px }
@@ -81,41 +83,37 @@
   .card p{ color:#c2c9d8; font-size:13.5px; margin:.4em 0 0 }
   .accent{ position:absolute; left:0; top:0; bottom:0; width:4px; background:var(--ac,var(--gold)) }
   .tagline{ display:inline-block; font-size:11px; color:var(--gold); border:1px solid rgba(255,206,77,.4); border-radius:99px; padding:2px 9px; margin-top:8px }
-
-  .feature{ display:grid; grid-template-columns:150px 1fr; gap:18px; align-items:center; padding:20px;
-    border:1px solid rgba(255,206,77,.3); border-radius:18px; background:radial-gradient(400px 200px at 0 0,rgba(255,157,46,.14),transparent),var(--panel) }
+  .feature{ display:grid; grid-template-columns:150px 1fr; gap:18px; align-items:center; padding:20px; border:1px solid rgba(255,206,77,.3); border-radius:18px; background:radial-gradient(400px 200px at 0 0,rgba(255,157,46,.14),transparent),var(--panel) }
   @media(max-width:560px){ .feature{ grid-template-columns:1fr; text-align:center } }
-  .feature .bigorb{ width:130px;height:130px; border-radius:50%; margin:0 auto;
-    background:radial-gradient(circle at 35% 30%,#fff9,transparent 45%),radial-gradient(circle at 60% 65%,var(--gold),#5a2e00 82%);
-    box-shadow:0 0 40px 8px rgba(255,157,46,.5); display:grid; place-items:center; font-family:var(--display); font-size:42px; color:#2a1500 }
+  .feature .bigorb{ width:130px;height:130px; border-radius:50%; margin:0 auto; background:radial-gradient(circle at 35% 30%,#fff9,transparent 45%),radial-gradient(circle at 60% 65%,var(--gold),#5a2e00 82%); box-shadow:0 0 40px 8px rgba(255,157,46,.5); display:grid; place-items:center; font-family:var(--display); font-size:42px; color:#2a1500 }
   .feature h2{ font-family:var(--display); letter-spacing:.5px; margin:0 0 6px; font-size:28px }
-
-  .orb{ width:60px; height:60px; border-radius:50%; flex:0 0 auto;
-    background:radial-gradient(circle at 35% 30%,#fff8,transparent 45%),radial-gradient(circle at 60% 65%,var(--c1),var(--c2) 82%);
-    box-shadow:0 0 16px 2px var(--glow); display:grid; place-items:center; font-family:var(--display); color:#0a0a0a; font-size:20px }
+  .orb{ width:60px; height:60px; border-radius:50%; flex:0 0 auto; background:radial-gradient(circle at 35% 30%,#fff8,transparent 45%),radial-gradient(circle at 60% 65%,var(--c1),var(--c2) 82%); box-shadow:0 0 16px 2px var(--glow); display:grid; place-items:center; font-family:var(--display); color:#0a0a0a; font-size:20px }
   .charrow{ display:flex; gap:13px; align-items:center }
   .chip{ display:inline-block; font-size:11px; color:var(--muted); border:1px solid var(--line); border-radius:99px; padding:2px 9px; margin:3px 4px 0 0 }
-
   .ep{ display:flex; gap:14px; padding:13px 14px; border:1px solid var(--line); border-radius:12px; background:var(--panel); margin-bottom:10px }
   .ep .n{ font-family:var(--display); color:var(--gold); font-size:22px; min-width:40px; text-align:center }
   .ep h4{ margin:0 0 4px; font-size:15px } .ep p{ margin:0; color:#c2c9d8; font-size:13.5px }
-
+  .ep .epbody{ flex:1; min-width:0 }
   .powerbar{ height:7px; background:#1a2030; border-radius:99px; overflow:hidden; margin-top:10px }
   .powerbar i{ display:block; height:100%; background:linear-gradient(90deg,var(--gold),var(--gold-2)); border-radius:99px }
-
   input.search{ width:100%; padding:12px 14px; border-radius:11px; background:var(--panel); border:1px solid var(--line); color:var(--txt); font-size:15px; margin-bottom:12px; font-family:var(--body) }
   input.search::placeholder{ color:var(--muted) }
   .filters{ display:flex; gap:6px; flex-wrap:wrap; margin-bottom:16px }
   .filters button{ background:var(--panel); border:1px solid var(--line); color:var(--muted); border-radius:99px; padding:6px 12px; font-size:13px; font-weight:700; cursor:pointer; font-family:var(--body) }
   .filters button.on{ color:#2a1800; background:linear-gradient(135deg,var(--gold),var(--gold-2)); border-color:transparent }
-
   .curio{ border-left:3px solid var(--ki); padding:13px 15px; background:var(--panel); border-radius:0 12px 12px 0; margin-bottom:10px }
   .curio b{ color:var(--ki) }
 
+  /* joia / salvar */
+  .ibar{ display:flex; gap:8px; margin-top:10px; align-items:center }
+  .ibtn{ display:inline-flex; align-items:center; gap:6px; background:var(--panel2); border:1px solid var(--line); color:#c2c9d8; border-radius:99px; padding:6px 12px; font-size:13px; font-weight:700; cursor:pointer; font-family:var(--body) }
+  .ibtn:hover{ border-color:var(--gold-2) }
+  .ibtn.on{ color:#2a1800; background:linear-gradient(135deg,var(--gold),var(--gold-2)); border-color:transparent }
+  .ibtn.save.on{ background:linear-gradient(135deg,#bfe6ff,var(--ki)); }
+
   .quizbox{ border:1px solid var(--line); border-radius:16px; background:var(--panel); padding:22px }
   .quizq{ font-size:19px; font-weight:700; margin:6px 0 16px }
-  .quizopt{ display:block; width:100%; text-align:left; background:var(--panel2); border:1px solid var(--line); color:var(--txt);
-    border-radius:11px; padding:13px 15px; margin-bottom:10px; cursor:pointer; font-size:15px; font-family:var(--body); transition:.12s }
+  .quizopt{ display:block; width:100%; text-align:left; background:var(--panel2); border:1px solid var(--line); color:var(--txt); border-radius:11px; padding:13px 15px; margin-bottom:10px; cursor:pointer; font-size:15px; font-family:var(--body); transition:.12s }
   .quizopt:hover{ border-color:var(--gold-2) }
   .quizopt.right{ border-color:var(--hp); background:rgba(70,224,138,.12) }
   .quizopt.wrong{ border-color:var(--red); background:rgba(224,53,79,.12) }
@@ -124,42 +122,44 @@
 
   aside .panel{ background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:16px; margin-bottom:16px }
   aside .sticky{ position:sticky; top:64px }
-  .arena-banner{ text-align:center; border:1px solid rgba(255,206,77,.4); border-radius:16px; padding:22px 16px;
-    background:radial-gradient(300px 160px at 50% 0,rgba(255,157,46,.2),transparent),var(--panel) }
-  .arena-banner .k{ font-family:var(--display); font-size:32px; letter-spacing:1px;
-    background:linear-gradient(180deg,#fff,var(--gold) 60%,#c25212); -webkit-background-clip:text; background-clip:text; color:transparent }
+  .arena-banner{ text-align:center; border:1px solid rgba(255,206,77,.4); border-radius:16px; padding:22px 16px; background:radial-gradient(300px 160px at 50% 0,rgba(255,157,46,.2),transparent),var(--panel) }
+  .arena-banner .k{ font-family:var(--display); font-size:32px; letter-spacing:1px; background:linear-gradient(180deg,#fff,var(--gold) 60%,#c25212); -webkit-background-clip:text; background-clip:text; color:transparent }
   .arena-banner p{ color:#c2c9d8; font-size:13px; margin:8px 0 12px }
   .btn{ display:inline-block; background:linear-gradient(135deg,var(--gold),var(--gold-2)); color:#2a1800; font-weight:800; padding:11px 18px; border-radius:11px; box-shadow:0 6px 20px rgba(255,157,46,.32); font-family:var(--body); border:none; cursor:pointer }
   .btn:hover{ filter:brightness(1.06) }
   .btn.ghost{ background:transparent; color:var(--gold); border:1px solid rgba(255,206,77,.5); box-shadow:none }
   .panel .ttl{ color:var(--muted); font-size:12px; text-transform:uppercase; letter-spacing:.6px; margin-bottom:10px }
-
-  .arena-mid{ display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;
-    border:1px solid rgba(78,195,255,.3); border-radius:16px; padding:20px 22px; margin:26px 0;
-    background:linear-gradient(135deg,rgba(78,195,255,.14),rgba(160,123,255,.1)) }
+  .arena-mid{ display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; border:1px solid rgba(78,195,255,.3); border-radius:16px; padding:20px 22px; margin:26px 0; background:linear-gradient(135deg,rgba(78,195,255,.14),rgba(160,123,255,.1)) }
   .arena-mid .t{ font-family:var(--display); font-size:24px }
   .arena-mid .s{ color:#c9d0df; font-size:14px }
-
   footer{ border-top:1px solid var(--line); margin-top:30px; padding:26px 18px; text-align:center; color:var(--muted); font-size:12px; line-height:1.7 }
   footer b{ color:var(--gold) }
   .back{ display:inline-block; color:var(--ki); font-size:13px; margin:4px 0 14px; cursor:pointer }
-
   .spinner{ width:42px;height:42px;border-radius:50%;border:4px solid var(--line);border-top-color:var(--gold);animation:spin 1s linear infinite;margin:60px auto }
   @keyframes spin{to{transform:rotate(360deg)}}
 
-  /* chat em destaque na home (Guardião Z) */
-  .ghero{ position:relative; overflow:hidden; border:1px solid rgba(78,195,255,.35); border-radius:20px; padding:22px;
-    background:radial-gradient(500px 220px at 80% -20%,rgba(78,195,255,.16),transparent),radial-gradient(420px 200px at 0 120%,rgba(255,157,46,.14),transparent),var(--panel); margin:0 0 26px }
-  .ghero .gaura{ position:absolute; right:-60px; top:-60px; width:260px; height:260px; border-radius:50%;
-    background:radial-gradient(circle,rgba(78,195,255,.4),transparent 65%); filter:blur(20px); animation:pulse 4s ease-in-out infinite; pointer-events:none }
+  /* perfil */
+  .pgrid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:12px; margin:14px 0 }
+  .ptile{ background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:14px; text-align:center }
+  .ptile .v{ font-family:var(--display); font-size:26px; color:var(--gold) }
+  .ptile .l{ color:var(--muted); font-size:11px; text-transform:uppercase; letter-spacing:.5px }
+  .badgegrid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(90px,1fr)); gap:10px; margin-top:8px }
+  .badge{ text-align:center; border:1px solid var(--line); border-radius:14px; padding:12px 6px; background:var(--panel); opacity:.4; filter:grayscale(1) }
+  .badge.on{ opacity:1; filter:none; border-color:rgba(255,206,77,.5); box-shadow:0 0 18px rgba(255,157,46,.2) }
+  .badge .bi{ font-size:30px } .badge .bn{ font-size:11px; margin-top:4px; color:#c2c9d8 }
+  .refbox{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-top:8px }
+  .refbox input{ flex:1; min-width:200px; background:var(--panel2); border:1px solid var(--line); border-radius:10px; color:var(--txt); padding:10px 12px; font-family:var(--body) }
+
+  /* chat em destaque */
+  .ghero{ position:relative; overflow:hidden; border:1px solid rgba(78,195,255,.35); border-radius:20px; padding:22px; background:radial-gradient(500px 220px at 80% -20%,rgba(78,195,255,.16),transparent),radial-gradient(420px 200px at 0 120%,rgba(255,157,46,.14),transparent),var(--panel); margin:0 0 26px }
+  .ghero .gaura{ position:absolute; right:-60px; top:-60px; width:260px; height:260px; border-radius:50%; background:radial-gradient(circle,rgba(78,195,255,.4),transparent 65%); filter:blur(20px); animation:pulse 4s ease-in-out infinite; pointer-events:none }
   .ghero .gorbs span{ position:absolute; border-radius:50%; filter:blur(10px); opacity:.6; pointer-events:none }
   .ghero .gorbs span:nth-child(1){ width:70px;height:70px; left:8%; bottom:-20px; background:radial-gradient(circle,rgba(255,206,77,.6),transparent 70%); animation:gfloat 7s ease-in-out infinite }
   .ghero .gorbs span:nth-child(2){ width:46px;height:46px; left:42%; top:-14px; background:radial-gradient(circle,rgba(160,123,255,.6),transparent 70%); animation:gfloat 9s ease-in-out infinite 1s }
   .ghero .gorbs span:nth-child(3){ width:54px;height:54px; right:18%; bottom:6px; background:radial-gradient(circle,rgba(78,195,255,.6),transparent 70%); animation:gfloat 8s ease-in-out infinite .5s }
   @keyframes gfloat{ 50%{ transform:translateY(-22px) scale(1.12) } }
   .ghero .ghead{ position:relative; display:flex; gap:12px; align-items:center; margin-bottom:14px }
-  .ghero .gicon{ width:46px;height:46px;border-radius:50%;display:grid;place-items:center;font-size:24px;
-    background:radial-gradient(circle at 35% 30%,#fff8,transparent 45%),radial-gradient(circle at 60% 65%,var(--gold),#5a2e00 82%); box-shadow:0 0 22px 4px rgba(255,157,46,.5) }
+  .ghero .gicon{ width:46px;height:46px;border-radius:50%;display:grid;place-items:center;font-size:24px; background:radial-gradient(circle at 35% 30%,#fff8,transparent 45%),radial-gradient(circle at 60% 65%,var(--gold),#5a2e00 82%); box-shadow:0 0 22px 4px rgba(255,157,46,.5) }
   .ghero .gtitle{ font-family:var(--display); letter-spacing:.5px; font-size:22px; color:var(--gold) }
   .ghero .gsub{ color:#c2c9d8; font-size:13px }
   .ghero .gmsgs{ position:relative; display:flex; flex-direction:column; gap:8px; max-height:220px; overflow-y:auto; margin-bottom:12px }
@@ -170,33 +170,40 @@
   .ghero .gbtn{ background:linear-gradient(135deg,var(--gold),var(--gold-2)); color:#2a1800; border:none; border-radius:12px; padding:0 18px; font-weight:800; cursor:pointer; font-family:var(--body) }
   .ghero .gchips{ position:relative; display:flex; gap:7px; flex-wrap:wrap; margin-top:12px }
   .ghero .gchip{ background:rgba(78,195,255,.1); border:1px solid rgba(78,195,255,.35); color:#bfe6ff; border-radius:99px; padding:6px 12px; font-size:12.5px; font-weight:600; cursor:pointer; font-family:var(--body) }
-  .ghero .gchip:hover{ background:rgba(78,195,255,.2) }
 
-  /* chat widget */
-  #chatFab{ position:fixed; right:18px; bottom:18px; z-index:90; background:linear-gradient(135deg,var(--gold),var(--gold-2)); color:#2a1800;
-    border:none; border-radius:99px; padding:13px 18px; font-weight:800; font-family:var(--body); cursor:pointer; box-shadow:0 8px 26px rgba(255,157,46,.4); font-size:14px }
-  #chatPanel{ position:fixed; right:18px; bottom:74px; z-index:90; width:min(380px,calc(100vw - 36px)); height:min(520px,70vh);
-    background:var(--panel); border:1px solid var(--line); border-radius:16px; display:none; flex-direction:column; overflow:hidden; box-shadow:0 18px 50px rgba(0,0,0,.5) }
+  .cmsg{ padding:9px 12px; border-radius:12px; font-size:14px; max-width:85% }
+  .cmsg.me{ align-self:flex-end; background:linear-gradient(135deg,var(--gold),var(--gold-2)); color:#2a1800 }
+  .cmsg.bot{ align-self:flex-start; background:var(--panel2); border:1px solid var(--line); color:#dce2ee }
+
+  /* modal login */
+  .modalbg{ position:fixed; inset:0; background:rgba(3,4,8,.7); z-index:100; display:none; align-items:center; justify-content:center; padding:18px }
+  .modalbg.open{ display:flex }
+  .modal{ width:min(400px,100%); background:var(--panel); border:1px solid var(--line); border-radius:18px; padding:22px; position:relative }
+  .modal h3{ font-family:var(--display); letter-spacing:.5px; font-size:24px; margin:0 0 4px; color:var(--gold) }
+  .modal .sub{ color:var(--muted); font-size:13px; margin-bottom:16px }
+  .modal label{ display:block; font-size:12px; color:var(--muted); margin:10px 0 5px; text-transform:uppercase; letter-spacing:.5px }
+  .modal input{ width:100%; background:var(--panel2); border:1px solid var(--line); border-radius:10px; color:var(--txt); padding:12px 13px; font-family:var(--body); font-size:15px }
+  .modal .err{ color:var(--red); font-size:13px; margin-top:10px; min-height:18px }
+  .modal .x{ position:absolute; right:16px; top:14px; color:var(--muted); cursor:pointer; font-size:18px }
+  .modal .swap{ text-align:center; margin-top:14px; font-size:13px; color:var(--muted) }
+  .modal .swap a{ color:var(--ki); cursor:pointer; font-weight:700 }
+
+  /* chat widget flutuante */
+  #chatFab{ position:fixed; right:18px; bottom:18px; z-index:90; background:linear-gradient(135deg,var(--gold),var(--gold-2)); color:#2a1800; border:none; border-radius:99px; padding:13px 18px; font-weight:800; font-family:var(--body); cursor:pointer; box-shadow:0 8px 26px rgba(255,157,46,.4); font-size:14px }
+  #chatPanel{ position:fixed; right:18px; bottom:74px; z-index:90; width:min(380px,calc(100vw - 36px)); height:min(520px,70vh); background:var(--panel); border:1px solid var(--line); border-radius:16px; display:none; flex-direction:column; overflow:hidden; box-shadow:0 18px 50px rgba(0,0,0,.5) }
   #chatPanel.open{ display:flex }
   #chatHead{ padding:12px 14px; border-bottom:1px solid var(--line); font-family:var(--display); letter-spacing:.5px; color:var(--gold); display:flex; justify-content:space-between; align-items:center }
   #chatHead .x{ cursor:pointer; color:var(--muted); font-family:var(--body) }
   #chatMsgs{ flex:1; overflow-y:auto; padding:12px; display:flex; flex-direction:column; gap:10px }
-  .cmsg{ padding:9px 12px; border-radius:12px; font-size:14px; max-width:85% }
-  .cmsg.me{ align-self:flex-end; background:linear-gradient(135deg,var(--gold),var(--gold-2)); color:#2a1800 }
-  .cmsg.bot{ align-self:flex-start; background:var(--panel2); border:1px solid var(--line); color:#dce2ee }
   #chatForm{ display:flex; gap:8px; padding:10px; border-top:1px solid var(--line) }
   #chatInput{ flex:1; background:var(--panel2); border:1px solid var(--line); border-radius:10px; color:var(--txt); padding:10px 12px; font-family:var(--body); font-size:14px }
   #chatForm button{ background:linear-gradient(135deg,var(--gold),var(--gold-2)); color:#2a1800; border:none; border-radius:10px; padding:0 14px; font-weight:800; cursor:pointer }
-  @media (prefers-reduced-motion: reduce){ .bgfx::before,.bgfx::after,.bgfx i,.hero .aura{ animation:none } }
+  @media (prefers-reduced-motion: reduce){ .bgfx::before,.bgfx::after,.bgfx i,.hero .aura,.ghero .gaura,.ghero .gorbs span{ animation:none } }
 </style>
 </head>
 <body>
 <div class="bgfx"><i></i></div>
-
-<div class="promostrip">
-  <span>⚔️ <b>ZW ARENA</b> — o jogo de luta do clã, jogável agora</span>
-  <a class="cta" href="/arena">JOGAR</a>
-</div>
+<div class="promostrip"><span>⚔️ <b>ZW ARENA</b> — o jogo de luta do clã, jogável agora</span><a class="cta" href="/arena">JOGAR</a></div>
 
 <header class="top">
   <a class="brand" href="#/inicio"><span class="mark">Z&nbsp;WARRIORS</span><small>portal dragon ball</small></a>
@@ -209,29 +216,18 @@
     <a href="#/curiosidades">Curiosidades</a>
     <a href="#/quiz">Quiz</a>
     <a class="arena" href="/arena">⚔️ Arena</a>
+    <span class="authslot" id="authSlot"></span>
   </nav>
 </header>
 
 <div class="wrap">
   <main id="view"><div class="spinner"></div></main>
-  <aside>
-    <div class="sticky">
-      <div class="panel arena-banner">
-        <div class="k">ZW ARENA</div>
-        <p>Combate por turnos, KI, choque de energia e transformações SSJ. Sem sorte — só estratégia.</p>
-        <a class="btn" href="/arena">Entrar na Arena</a>
-      </div>
-      <div class="panel" id="podPanel"></div>
-      <div class="panel">
-        <div class="ttl">Curiosidade do dia</div>
-        <div id="curioDia" style="font-size:14px;color:#c9d0df"></div>
-      </div>
-      <div class="panel">
-        <div class="ttl">Atalhos</div>
-        <div><a class="chip" href="#/series">Séries</a><a class="chip" href="#/personagens">Personagens</a><a class="chip" href="#/sagas">Sagas</a><a class="chip" href="#/tecnicas">Técnicas</a><a class="chip" href="#/quiz">Quiz</a><a class="chip" href="#/linha-do-tempo">Timeline</a></div>
-      </div>
-    </div>
-  </aside>
+  <aside><div class="sticky">
+    <div class="panel arena-banner"><div class="k">ZW ARENA</div><p>Combate por turnos, KI, choque de energia e transformações SSJ. Sem sorte — só estratégia.</p><a class="btn" href="/arena">Entrar na Arena</a></div>
+    <div class="panel" id="podPanel"></div>
+    <div class="panel"><div class="ttl">Curiosidade do dia</div><div id="curioDia" style="font-size:14px;color:#c9d0df"></div></div>
+    <div class="panel"><div class="ttl">Atalhos</div><div><a class="chip" href="#/series">Séries</a><a class="chip" href="#/personagens">Personagens</a><a class="chip" href="#/sagas">Sagas</a><a class="chip" href="#/tecnicas">Técnicas</a><a class="chip" href="#/quiz">Quiz</a><a class="chip" href="#/perfil">Meu perfil</a></div></div>
+  </div></aside>
 </div>
 
 <footer>
@@ -240,188 +236,160 @@
   Conteúdo escrito original. Ilustrações estilizadas e originais.
 </footer>
 
+<div class="modalbg" id="authModal"><div class="modal">
+  <span class="x" onclick="closeAuth()">✕</span>
+  <h3 id="amTitle">Entrar no clã</h3>
+  <div class="sub" id="amSub">Acesse pra dar joia, salvar e ganhar zenny na Arena.</div>
+  <form id="authForm">
+    <div id="nickWrap" style="display:none"><label>Nick</label><input id="amNick" autocomplete="nickname" placeholder="Seu nome de guerreiro"></div>
+    <label>Email</label><input id="amEmail" type="email" autocomplete="email" placeholder="voce@email.com">
+    <label>Senha</label><input id="amPass" type="password" autocomplete="current-password" placeholder="••••••••">
+    <div class="err" id="amErr"></div>
+    <button class="btn" type="submit" id="amSubmit" style="width:100%;margin-top:8px">Entrar</button>
+  </form>
+  <div class="swap" id="amSwap"></div>
+</div></div>
+
 <button id="chatFab">💬 Guardião Z</button>
-<div id="chatPanel">
-  <div id="chatHead"><span>Guardião do Saber Z</span><span class="x" onclick="toggleChat(false)">✕</span></div>
-  <div id="chatMsgs"></div>
-  <form id="chatForm"><input id="chatInput" placeholder="Pergunte sobre Dragon Ball…" maxlength="1000" autocomplete="off"><button>➤</button></form>
-</div>
+<div id="chatPanel"><div id="chatHead"><span>Guardião do Saber Z</span><span class="x" onclick="toggleChat(false)">✕</span></div><div id="chatMsgs"></div><form id="chatForm"><input id="chatInput" placeholder="Pergunte sobre Dragon Ball…" maxlength="1000" autocomplete="off"><button type="submit">➤</button></form></div>
 
 <script>
 const SUPA="https://xrddqixvhmtertcsevtz.supabase.co";
 const ANON="sb_publishable_d9EX10TeLmg_8U3ApqNgZQ_s0DsPiwV";
 const ARENA_URL="/arena";
 const GH_EXAMPLES=["Quem é o Goku?","O que é o Ultra Instinto?","Como funciona a fusão?","O que é o Genki Dama?","Quem é mais forte: Goku ou Vegeta?"];
+const TIER={0:"Base",1:"SSJ",2:"SSJ2",3:"SSJ3",4:"SSJ4"};
 const $=s=>document.querySelector(s);
 function esc(s){return (s==null?"":String(s)).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+async function api(path){ const r=await fetch(`${SUPA}/rest/v1/${path}`,{headers:{apikey:ANON,Authorization:`Bearer ${ANON}`}}); if(!r.ok) throw new Error(path+" "+r.status); return r.json(); }
 
-async function api(path){
-  const r=await fetch(`${SUPA}/rest/v1/${path}`,{headers:{apikey:ANON,Authorization:`Bearer ${ANON}`}});
-  if(!r.ok) throw new Error(path+" "+r.status);
-  return r.json();
-}
+/* ---- Supabase client (auth) ---- */
+let _sb=null;
+async function sb(){ if(_sb) return _sb; const {createClient}=await import("https://esm.sh/@supabase/supabase-js@2.45.4"); _sb=createClient(SUPA,ANON); return _sb; }
 
-/* ============ DADOS (do Supabase) ============ */
-let SERIES=[],CHARS=[],EPISODES=[],SAGAS=[],TECHS=[],CURIOSIDADES=[],DATA_READY=false,DATA_ERR=null;
+/* ---- estado ---- */
+let SERIES=[],CHARS=[],EPISODES=[],SAGAS=[],TECHS=[],CURIOSIDADES=[],BADGES=[],DATA_READY=false,DATA_ERR=null;
+let ME=null,ACCESS_TOKEN=null,MYPROFILE=null;
+let LIKE_COUNTS={}, MY_LIKES=new Set(), MY_SAVES=new Set(), READ_SEEN=new Set();
 const PAL={saiyajin:["#ffb24d","#7a3d00","rgba(255,157,46,.55)"],terraqueo:["#7fd0ff","#0c3a55","rgba(78,195,255,.5)"],namekuseijin:["#7af0a0","#0c4a2a","rgba(70,224,138,.5)"],vilao:["#ff6f8a","#5a0a1a","rgba(224,53,79,.5)"],divindade:["#c8a0ff","#2a1055","rgba(160,120,255,.55)"],androide:["#cfd6e6","#2a3142","rgba(200,210,230,.4)"]};
 const RACE_LABEL={saiyajin:"Saiyajin",terraqueo:"Terráqueo",namekuseijin:"Namekuseijin",vilao:"Vilão",divindade:"Divindade",androide:"Androide"};
 
 async function loadData(){
   try{
-    const [se,ch,ep,sg,te,cu]=await Promise.all([
+    const [se,ch,ep,sg,te,cu,bd]=await Promise.all([
       api("series?select=*&order=sort.asc"),
       api("characters?select=*&order=sort.asc"),
       api("episodes?select=*&order=series_id.asc,sort.asc,number.asc"),
       api("sagas?select=*&order=sort.asc"),
       api("techniques?select=*&order=sort.asc"),
       api("curiosities?select=*&order=sort.asc"),
+      api("badges?select=*&order=sort.asc").catch(()=>[]),
     ]);
     SERIES=se.map(s=>({id:s.id,name:s.name,year:s.year,eps:s.eps,ac:s.accent||"#ffce4d",blurb:s.blurb}));
     CHARS=ch.map(c=>({id:c.id,n:c.name,race:c.race,pw:c.power,series:Array.isArray(c.series)?c.series:[],bio:c.bio}));
-    EPISODES=ep.map(e=>({series_id:e.series_id,saga:e.saga,n:e.number,t:e.title,s:e.summary}));
-    SAGAS=sg.map(s=>({s:s.series_id,n:s.name,d:s.description}));
-    TECHS=te.map(t=>({tr:!!t.is_transform,n:t.name,d:t.description,arena:t.arena_note||""}));
-    CURIOSIDADES=cu.map(c=>c.body);
+    EPISODES=ep.map(e=>({id:e.id,series_id:e.series_id,saga:e.saga,n:e.number,t:e.title,s:e.summary}));
+    SAGAS=sg.map(s=>({id:s.id,s:s.series_id,n:s.name,d:s.description}));
+    TECHS=te.map(t=>({id:t.id,tr:!!t.is_transform,n:t.name,d:t.description,arena:t.arena_note||""}));
+    CURIOSIDADES=cu.map(c=>({id:c.id,body:c.body}));
+    BADGES=bd||[];
     DATA_READY=true;
   }catch(e){ DATA_ERR=e.message; DATA_READY=true; }
 }
+async function loadLikeCounts(){
+  try{ const rows=await api("content_interactions?select=source_type,source_id&kind=eq.like"); LIKE_COUNTS={}; rows.forEach(r=>{const k=r.source_type+":"+r.source_id; LIKE_COUNTS[k]=(LIKE_COUNTS[k]||0)+1;}); }catch(e){}
+}
 
-const TIMELINE=[
-  {y:"1984",t:"Nasce o mangá",d:"Akira Toriyama lança Dragon Ball na Weekly Shōnen Jump."},
-  {y:"1986",t:"Estreia o anime",d:"A série Dragon Ball chega à TV e conquista o mundo."},
-  {y:"1989",t:"Começa Dragon Ball Z",d:"A fase Z eleva o tom e nascem as batalhas que marcaram gerações."},
-  {y:"1996",t:"Dragon Ball GT",d:"A primeira sequência original em anime, com o SSJ4."},
-  {y:"2015",t:"Dragon Ball Super",d:"A franquia volta com deuses, universos e o Ultra Instinto."},
-  {y:"2024",t:"Dragon Ball Daima",d:"A série mais recente, com roteiro do próprio Toriyama."}
-];
-const QUIZ=[
-  {q:"Qual é o nome saiyajin de Goku?",o:["Kakarotto","Bardock","Turles","Raditz"],a:0},
-  {q:"Quem foi o primeiro a alcançar o Super Saiyajin 2 no anime?",o:["Vegeta","Gohan","Goku","Trunks"],a:1},
-  {q:"Quem criou o Kamehameha?",o:["Goku","Kaioh","Mestre Kame","Piccolo"],a:2},
-  {q:"Qual técnica é o disco cortante do Kuririn?",o:["Final Flash","Makankosappo","Kamehameha","Kienzan"],a:3},
-  {q:"Quem é o Deus da Destruição do Universo 7?",o:["Beerus","Whis","Zeno","Champa"],a:0},
-  {q:"Qual saga encerra o mangá original de Dragon Ball?",o:["Cell","Majin Boo","Freeza","Saiyajin"],a:1},
-  {q:"De onde vem o nome 'Vegeta'?",o:["De uma rocha","De um rei antigo","De 'vegetable' (legume)","De nada"],a:2},
-  {q:"Qual transformação foi introduzida em Dragon Ball GT?",o:["SSJ Blue","Super Saiyajin 4","Ultra Instinto","SSJ God"],a:1},
-  {q:"Quem treinou Goku no Outro Mundo na Saga Saiyajin?",o:["Whis","Mestre Kame","Kaioh do Norte","Piccolo"],a:2},
-  {q:"Qual é a série mais recente (2024)?",o:["Super","GT","Kai","Daima"],a:3}
-];
+const TIMELINE=[{y:"1984",t:"Nasce o mangá",d:"Akira Toriyama lança Dragon Ball na Weekly Shōnen Jump."},{y:"1986",t:"Estreia o anime",d:"A série Dragon Ball chega à TV e conquista o mundo."},{y:"1989",t:"Começa Dragon Ball Z",d:"A fase Z eleva o tom e nascem as batalhas que marcaram gerações."},{y:"1996",t:"Dragon Ball GT",d:"A primeira sequência original em anime, com o SSJ4."},{y:"2015",t:"Dragon Ball Super",d:"A franquia volta com deuses, universos e o Ultra Instinto."},{y:"2024",t:"Dragon Ball Daima",d:"A série mais recente, com roteiro do próprio Toriyama."}];
+const QUIZ=[{q:"Qual é o nome saiyajin de Goku?",o:["Kakarotto","Bardock","Turles","Raditz"],a:0},{q:"Quem foi o primeiro a alcançar o Super Saiyajin 2 no anime?",o:["Vegeta","Gohan","Goku","Trunks"],a:1},{q:"Quem criou o Kamehameha?",o:["Goku","Kaioh","Mestre Kame","Piccolo"],a:2},{q:"Qual técnica é o disco cortante do Kuririn?",o:["Final Flash","Makankosappo","Kamehameha","Kienzan"],a:3},{q:"Quem é o Deus da Destruição do Universo 7?",o:["Beerus","Whis","Zeno","Champa"],a:0},{q:"Qual saga encerra o mangá original de Dragon Ball?",o:["Cell","Majin Boo","Freeza","Saiyajin"],a:1},{q:"De onde vem o nome 'Vegeta'?",o:["De uma rocha","De um rei antigo","De 'vegetable' (legume)","De nada"],a:2},{q:"Qual transformação foi introduzida em Dragon Ball GT?",o:["SSJ Blue","Super Saiyajin 4","Ultra Instinto","SSJ God"],a:1},{q:"Quem treinou Goku no Outro Mundo na Saga Saiyajin?",o:["Whis","Mestre Kame","Kaioh do Norte","Piccolo"],a:2},{q:"Qual é a série mais recente (2024)?",o:["Super","GT","Kai","Daima"],a:3}];
 
-/* ============ HELPERS ============ */
 function orb(c){const p=PAL[c.race]||PAL.terraqueo;return `<div class="orb" style="--c1:${p[0]};--c2:${p[1]};--glow:${p[2]}">${esc((c.n||"?")[0])}</div>`;}
 function arenaMid(){return `<div class="arena-mid"><div><div class="t">Cansou de ler? Vai lutar. ⚔️</div><div class="s">A ZW Arena recria as regras de luta do clã — turnos, KI e transformações SSJ.</div></div><a class="btn" href="${ARENA_URL}">Jogar a Arena</a></div>`;}
+function interactBar(type,id){
+  const k=type+":"+id, liked=MY_LIKES.has(k), saved=MY_SAVES.has(k), n=LIKE_COUNTS[k]||0;
+  return `<div class="ibar"><button class="ibtn ${liked?'on':''}" onclick="toggleInter('${type}','${esc(id)}','like',event)">💎 <span>${n}</span></button><button class="ibtn save ${saved?'on':''}" onclick="toggleInter('${type}','${esc(id)}','save',event)">${saved?'★ Salvo':'☆ Salvar'}</button></div>`;
+}
 
 /* ============ VIEWS ============ */
 function viewInicio(){
-  const feat=CHARS[0]||{n:"Son Goku",bio:"",pw:99,series:[]};
-  return `
-  <div class="hero"><div class="aura"></div>
-    <h1>O PORTAL DO CLÃ Z WARRIORS</h1>
-    <p>O universo Dragon Ball num lugar só: séries, sagas, episódios, personagens, técnicas, curiosidades e quiz. E o jogo de luta do clã, a <b>ZW Arena</b>.</p>
-    <div class="ctas"><a class="btn" href="#/personagens">Explorar o portal</a><a class="btn ghost" href="${ARENA_URL}">⚔️ Jogar a Arena</a></div>
-  </div>
-
-  <div class="ghero">
-    <div class="gaura"></div><div class="gorbs"><span></span><span></span><span></span></div>
-    <div class="ghead"><span class="gicon">🐉</span><div><div class="gtitle">Pergunte ao Guardião Z</div><div class="gsub">O sábio do clã responde sobre todo o universo Dragon Ball — em PT-BR.</div></div></div>
-    <div class="gmsgs" id="ghMsgs"></div>
-    <form class="gform" id="ghForm"><input id="ghInput" class="ginput" autocomplete="off" maxlength="1000"><button class="gbtn" type="submit">Perguntar</button></form>
-    <div class="gchips">${GH_EXAMPLES.map(q=>`<button class="gchip" type="button" onclick="ghAsk(this.textContent)">${esc(q)}</button>`).join("")}</div>
-  </div>
-
+  const feat=CHARS[0]||{n:"Son Goku",bio:"",pw:99,series:[],id:"goku"};
+  return `<div class="hero"><div class="aura"></div><h1>O PORTAL DO CLÃ Z WARRIORS</h1><p>O universo Dragon Ball num lugar só: séries, sagas, episódios, personagens, técnicas, curiosidades e quiz. E o jogo de luta do clã, a <b>ZW Arena</b>.</p><div class="ctas"><a class="btn" href="#/personagens">Explorar o portal</a><a class="btn ghost" href="${ARENA_URL}">⚔️ Jogar a Arena</a></div></div>
+  <div class="ghero"><div class="gaura"></div><div class="gorbs"><span></span><span></span><span></span></div><div class="ghead"><span class="gicon">🐉</span><div><div class="gtitle">Pergunte ao Guardião Z</div><div class="gsub">O sábio do clã responde sobre todo o universo Dragon Ball — em PT-BR.</div></div></div><div class="gmsgs" id="ghMsgs"></div><form class="gform" id="ghForm"><input id="ghInput" class="ginput" autocomplete="off" maxlength="1000"><button class="gbtn" type="submit">Perguntar</button></form><div class="gchips">${GH_EXAMPLES.map(q=>`<button class="gchip" type="button" onclick="ghAsk(this.textContent)">${esc(q)}</button>`).join("")}</div></div>
   <div class="section-title">Em destaque<span class="more" onclick="location.hash='#/personagem/${esc(feat.id)}'">ver ficha →</span></div>
-  <div class="feature">
-    <div class="bigorb">${esc((feat.n||"?")[0])}</div>
-    <div><div class="meta">Personagem lendário</div><h2>${esc(feat.n)}</h2><p>${esc(feat.bio)}</p>
-      <div class="powerbar"><i style="width:${feat.pw||0}%"></i></div>
-      <span class="tagline">Aparece em ${(feat.series||[]).length} séries</span></div>
-  </div>
+  <div class="feature"><div class="bigorb">${esc((feat.n||"?")[0])}</div><div><div class="meta">Personagem lendário</div><h2>${esc(feat.n)}</h2><p>${esc(feat.bio)}</p><div class="powerbar"><i style="width:${feat.pw||0}%"></i></div><span class="tagline">Aparece em ${(feat.series||[]).length} séries</span></div></div>
   <div class="section-title">Séries<span class="more" onclick="location.hash='#/series'">todas →</span></div>
   <div class="grid g3">${SERIES.slice(0,6).map(s=>`<a class="card" href="#/serie/${s.id}" style="--ac:${s.ac}"><div class="accent"></div><div class="meta">${esc(s.year)} · ${esc(s.eps)}</div><h3>${esc(s.name)}</h3><p>${esc((s.blurb||"").slice(0,90))}…</p></a>`).join("")}</div>
   ${arenaMid()}
   <div class="section-title">Personagens<span class="more" onclick="location.hash='#/personagens'">glossário →</span></div>
   <div class="grid g4">${CHARS.slice(0,8).map(c=>`<a class="card" href="#/personagem/${c.id}"><div class="charrow">${orb(c)}<div><h3 style="margin:0;font-size:15px">${esc(c.n)}</h3><div class="meta">${RACE_LABEL[c.race]||c.race||""}</div></div></div></a>`).join("")}</div>
-  <div class="section-title">Sagas lendárias<span class="more" onclick="location.hash='#/sagas'">todas →</span></div>
-  <div class="grid g3">${SAGAS.slice(0,6).map(s=>{const se=SERIES.find(x=>x.id===s.s);return `<div class="card" style="--ac:${se?se.ac:'#ffce4d'}"><div class="accent"></div><div class="meta">${se?esc(se.name):''}</div><h3>${esc(s.n)}</h3><p>${esc(s.d)}</p></div>`;}).join("")}</div>
   <div class="section-title">Técnicas &amp; Transformações<span class="more" onclick="location.hash='#/tecnicas'">todas →</span></div>
   <div class="grid g3">${TECHS.filter(t=>t.tr).slice(0,3).map(t=>`<div class="card"><div class="meta">Transformação</div><h3>${esc(t.n)}</h3><p>${esc(t.d)}</p>${t.arena?`<span class="tagline">${esc(t.arena)}</span>`:""}</div>`).join("")}</div>
   <div class="section-title">Teste seus conhecimentos</div>
-  <div class="card" style="text-align:center;padding:24px"><h3 style="font-family:var(--display);font-size:22px">QUIZ DRAGON BALL</h3><p style="max-width:460px;margin:6px auto 14px">10 perguntas pra ver se você é digno do clã Z Warriors. Será que chega no SSJ4?</p><a class="btn" href="#/quiz">Começar o quiz</a></div>`;
+  <div class="card" style="text-align:center;padding:24px"><h3 style="font-family:var(--display);font-size:22px">QUIZ DRAGON BALL</h3><p style="max-width:460px;margin:6px auto 14px">10 perguntas pra ver se você é digno do clã Z Warriors.</p><a class="btn" href="#/quiz">Começar o quiz</a></div>`;
 }
-function viewSeries(){
-  return `<div class="section-title">Séries &amp; Temporadas</div>
-  <p class="lead">As séries do universo Dragon Ball. Clique numa série pra ver os episódios.</p>
-  <div class="grid g2">${SERIES.map(s=>`<a class="card" href="#/serie/${s.id}" style="--ac:${s.ac}"><div class="accent"></div><div class="meta">${esc(s.year)} · ${esc(s.eps)}</div><h3>${esc(s.name)}</h3><p>${esc(s.blurb)}</p></a>`).join("")}</div>${arenaMid()}`;
-}
+function viewSeries(){ return `<div class="section-title">Séries &amp; Temporadas</div><p class="lead">As séries do universo Dragon Ball. Clique numa série pra ver os episódios.</p><div class="grid g2">${SERIES.map(s=>`<a class="card" href="#/serie/${s.id}" style="--ac:${s.ac}"><div class="accent"></div><div class="meta">${esc(s.year)} · ${esc(s.eps)}</div><h3>${esc(s.name)}</h3><p>${esc(s.blurb)}</p></a>`).join("")}</div>${arenaMid()}`; }
 function viewSerie(id){
   const s=SERIES.find(x=>x.id===id); if(!s) return viewSeries();
+  trackRead("series",id);
   const eps=EPISODES.filter(e=>e.series_id===id);
   let epsHtml;
-  if(eps.length){
-    const bySaga={}; eps.forEach(e=>{const k=e.saga||"Episódios";(bySaga[k]=bySaga[k]||[]).push(e);});
-    epsHtml=Object.entries(bySaga).map(([saga,list])=>`<div class="section-title">${esc(saga)}</div>${list.map(e=>`<div class="ep"><div class="n">${esc(e.n)}</div><div><h4>${esc(e.t)}</h4><p>${esc(e.s)}</p></div></div>`).join("")}`).join("");
-  } else { epsHtml=`<div class="card" style="margin-top:16px"><p>Episódios desta série em breve.</p></div>`; }
+  if(eps.length){ const bySaga={}; eps.forEach(e=>{const k=e.saga||"Episódios";(bySaga[k]=bySaga[k]||[]).push(e);}); epsHtml=Object.entries(bySaga).map(([saga,list])=>`<div class="section-title">${esc(saga)}</div>${list.map(e=>`<div class="ep"><div class="n">${esc(e.n)}</div><div class="epbody"><h4>${esc(e.t)}</h4><p>${esc(e.s)}</p>${interactBar("episode",e.id)}</div></div>`).join("")}`).join(""); }
+  else epsHtml=`<div class="card" style="margin-top:16px"><p>Episódios desta série em breve.</p></div>`;
   return `<span class="back" onclick="location.hash='#/series'">← Séries</span><div class="section-title">${esc(s.name)}</div><div class="meta" style="margin:-6px 0 8px">${esc(s.year)} · ${esc(s.eps)}</div><p class="lead">${esc(s.blurb)}</p>${epsHtml}${arenaMid()}`;
 }
 let charFilter="todos",charQuery="";
 function viewPersonagens(){
   const races=["todos",...Object.keys(RACE_LABEL)];
   const list=CHARS.filter(c=>(charFilter==="todos"||c.race===charFilter)&&(c.n||"").toLowerCase().includes(charQuery.toLowerCase()));
-  return `<div class="section-title">Glossário de Personagens</div>
-  <p class="lead">${CHARS.length} fichas. Biografias originais.</p>
-  <input class="search" id="charSearch" placeholder="Buscar personagem…" value="${esc(charQuery)}">
-  <div class="filters">${races.map(r=>`<button class="${charFilter===r?'on':''}" onclick="setCharFilter('${r}')">${r==="todos"?"Todos":RACE_LABEL[r]}</button>`).join("")}</div>
-  <div class="grid g2">${list.map(c=>`<a class="card" href="#/personagem/${c.id}"><div class="charrow">${orb(c)}<div><h3 style="margin:0 0 2px;font-size:16px">${esc(c.n)}</h3><div class="meta">${RACE_LABEL[c.race]||c.race||""}</div></div></div><p>${esc((c.bio||"").slice(0,110))}…</p></a>`).join("")||`<p class="lead">Nenhum encontrado.</p>`}</div>`;
+  return `<div class="section-title">Glossário de Personagens</div><p class="lead">${CHARS.length} fichas. Biografias originais.</p><input class="search" id="charSearch" placeholder="Buscar personagem…" value="${esc(charQuery)}"><div class="filters">${races.map(r=>`<button class="${charFilter===r?'on':''}" onclick="setCharFilter('${r}')">${r==="todos"?"Todos":RACE_LABEL[r]}</button>`).join("")}</div><div class="grid g2">${list.map(c=>`<a class="card" href="#/personagem/${c.id}"><div class="charrow">${orb(c)}<div><h3 style="margin:0 0 2px;font-size:16px">${esc(c.n)}</h3><div class="meta">${RACE_LABEL[c.race]||c.race||""}</div></div></div><p>${esc((c.bio||"").slice(0,110))}…</p></a>`).join("")||`<p class="lead">Nenhum encontrado.</p>`}</div>`;
 }
 function setCharFilter(r){charFilter=r;render();}
 function viewPersonagem(id){
   const c=CHARS.find(x=>x.id===id); if(!c) return viewPersonagens();
-  return `<span class="back" onclick="location.hash='#/personagens'">← Personagens</span>
-  <div class="card"><div class="charrow" style="align-items:flex-start">${orb(c)}<div><h2 style="margin:0 0 4px;font-family:var(--display);letter-spacing:.5px">${esc(c.n)}</h2><div class="meta">${RACE_LABEL[c.race]||c.race||""}</div><div style="margin-top:6px">${(c.series||[]).map(sid=>{const s=SERIES.find(x=>x.id===sid);return s?`<span class="chip">${esc(s.name)}</span>`:"";}).join("")}</div></div></div>
-  <p style="margin-top:14px;color:#d6dcea">${esc(c.bio)}</p>
-  <div class="meta" style="margin-top:10px">Poder (referência lúdica)</div><div class="powerbar"><i style="width:${c.pw||0}%"></i></div></div>${arenaMid()}`;
+  trackRead("character",id);
+  return `<span class="back" onclick="location.hash='#/personagens'">← Personagens</span><div class="card"><div class="charrow" style="align-items:flex-start">${orb(c)}<div><h2 style="margin:0 0 4px;font-family:var(--display);letter-spacing:.5px">${esc(c.n)}</h2><div class="meta">${RACE_LABEL[c.race]||c.race||""}</div><div style="margin-top:6px">${(c.series||[]).map(sid=>{const s=SERIES.find(x=>x.id===sid);return s?`<span class="chip">${esc(s.name)}</span>`:"";}).join("")}</div></div></div><p style="margin-top:14px;color:#d6dcea">${esc(c.bio)}</p><div class="meta" style="margin-top:10px">Poder (referência lúdica)</div><div class="powerbar"><i style="width:${c.pw||0}%"></i></div>${interactBar("character",c.id)}</div>${arenaMid()}`;
 }
-function viewSagas(){
-  return `<div class="section-title">Sagas &amp; Arcos</div><p class="lead">As grandes sagas do universo Dragon Ball, do Pilaf ao Torneio do Poder.</p>
-  <div class="grid g2">${SAGAS.map(s=>{const se=SERIES.find(x=>x.id===s.s);return `<div class="card" style="--ac:${se?se.ac:'#ffce4d'}"><div class="accent"></div><div class="meta">${se?esc(se.name):''}</div><h3>${esc(s.n)}</h3><p>${esc(s.d)}</p></div>`;}).join("")}</div>${arenaMid()}`;
-}
-function viewTecnicas(){
-  return `<div class="section-title">Técnicas &amp; Transformações</div><p class="lead">As técnicas que definem o universo — e que inspiram a <b>ZW Arena</b>.</p>
-  <div class="grid g2">${TECHS.map(t=>`<div class="card" style="--ac:${t.tr?'#ffce4d':'#4ec3ff'}"><div class="accent"></div><div class="meta">${t.tr?'Transformação':'Técnica'}</div><h3>${esc(t.n)}</h3><p>${esc(t.d)}</p>${t.arena?`<span class="tagline">${esc(t.arena)}</span>`:""}</div>`).join("")}</div>${arenaMid()}`;
-}
-function viewCuriosidades(){
-  return `<div class="section-title">Curiosidades</div><p class="lead">Você sabia? Fatos e bastidores do universo Dragon Ball.</p>
-  ${CURIOSIDADES.map(c=>`<div class="curio"><b>Você sabia?</b> ${esc(c)}</div>`).join("")}${arenaMid()}`;
-}
-function viewTimeline(){
-  return `<div class="section-title">Linha do tempo</div><p class="lead">Os marcos da franquia, do mangá ao presente.</p>${TIMELINE.map(e=>`<div class="ep"><div class="n">${e.y}</div><div><h4>${esc(e.t)}</h4><p>${esc(e.d)}</p></div></div>`).join("")}${arenaMid()}`;
-}
+function viewSagas(){ return `<div class="section-title">Sagas &amp; Arcos</div><p class="lead">As grandes sagas do universo Dragon Ball, do Pilaf ao Torneio do Poder.</p><div class="grid g2">${SAGAS.map(s=>{const se=SERIES.find(x=>x.id===s.s);return `<div class="card" style="--ac:${se?se.ac:'#ffce4d'}"><div class="accent"></div><div class="meta">${se?esc(se.name):''}</div><h3>${esc(s.n)}</h3><p>${esc(s.d)}</p>${interactBar("saga",s.id)}</div>`;}).join("")}</div>${arenaMid()}`; }
+function viewTecnicas(){ return `<div class="section-title">Técnicas &amp; Transformações</div><p class="lead">As técnicas que definem o universo — e que inspiram a <b>ZW Arena</b>.</p><div class="grid g2">${TECHS.map(t=>`<div class="card" style="--ac:${t.tr?'#ffce4d':'#4ec3ff'}"><div class="accent"></div><div class="meta">${t.tr?'Transformação':'Técnica'}</div><h3>${esc(t.n)}</h3><p>${esc(t.d)}</p>${t.arena?`<span class="tagline">${esc(t.arena)}</span>`:""}${interactBar("technique",t.id)}</div>`).join("")}</div>${arenaMid()}`; }
+function viewCuriosidades(){ return `<div class="section-title">Curiosidades</div><p class="lead">Você sabia? Fatos e bastidores do universo Dragon Ball.</p>${CURIOSIDADES.map(c=>`<div class="curio"><b>Você sabia?</b> ${esc(c.body)}${interactBar("curiosity",c.id)}</div>`).join("")}${arenaMid()}`; }
+function viewTimeline(){ return `<div class="section-title">Linha do tempo</div><p class="lead">Os marcos da franquia, do mangá ao presente.</p>${TIMELINE.map(e=>`<div class="ep"><div class="n">${e.y}</div><div class="epbody"><h4>${esc(e.t)}</h4><p>${esc(e.d)}</p></div></div>`).join("")}${arenaMid()}`; }
 let quizI=0,quizScore=0,quizLock=false;
 function viewQuiz(){ quizI=0;quizScore=0;quizLock=false; return `<div class="section-title">Quiz Dragon Ball</div><div id="quizBox" class="quizbox"></div>`; }
 function renderQuiz(){
   const box=$("#quizBox"); if(!box) return;
-  if(quizI>=QUIZ.length){
-    const lvl=quizScore>=9?"SSJ4 — lenda do clã! 🌟":quizScore>=7?"SSJ3 — guerreiro de elite 💥":quizScore>=5?"SSJ — promissor ⚡":"Saiyajin base — treina mais 🥋";
-    box.innerHTML=`<div class="scorebig">${quizScore}/${QUIZ.length}</div><p style="text-align:center;font-weight:700;font-size:18px">${lvl}</p><div style="text-align:center;margin-top:14px"><button class="btn" onclick="location.hash='#/quiz';render()">Jogar de novo</button> <a class="btn ghost" href="${ARENA_URL}">Ir pra Arena</a></div>`;
-    return;
-  }
+  if(quizI>=QUIZ.length){ const lvl=quizScore>=9?"SSJ4 — lenda do clã! 🌟":quizScore>=7?"SSJ3 — guerreiro de elite 💥":quizScore>=5?"SSJ — promissor ⚡":"Saiyajin base — treina mais 🥋"; box.innerHTML=`<div class="scorebig">${quizScore}/${QUIZ.length}</div><p style="text-align:center;font-weight:700;font-size:18px">${lvl}</p><div style="text-align:center;margin-top:14px"><button class="btn" onclick="location.hash='#/quiz';render()">Jogar de novo</button> <a class="btn ghost" href="${ARENA_URL}">Ir pra Arena</a></div>`; return; }
   const q=QUIZ[quizI]; quizLock=false;
   box.innerHTML=`<div class="quizprog">Pergunta ${quizI+1} de ${QUIZ.length} · acertos: ${quizScore}</div><div class="quizq">${esc(q.q)}</div>${q.o.map((op,i)=>`<button class="quizopt" data-i="${i}">${esc(op)}</button>`).join("")}`;
-  box.querySelectorAll(".quizopt").forEach(b=>b.onclick=()=>{
-    if(quizLock) return; quizLock=true;
-    const i=+b.dataset.i, opts=box.querySelectorAll(".quizopt");
-    opts[q.a].classList.add("right");
-    if(i===q.a) quizScore++; else b.classList.add("wrong");
-    setTimeout(()=>{ quizI++; renderQuiz(); },900);
-  });
+  box.querySelectorAll(".quizopt").forEach(b=>b.onclick=()=>{ if(quizLock) return; quizLock=true; const i=+b.dataset.i, opts=box.querySelectorAll(".quizopt"); opts[q.a].classList.add("right"); if(i===q.a) quizScore++; else b.classList.add("wrong"); setTimeout(()=>{ quizI++; renderQuiz(); },900); });
+}
+/* ---- perfil ---- */
+let PROFILE_STATS=null;
+function viewPerfil(){
+  if(!ME) return `<div class="section-title">Meu perfil</div><div class="card"><p>Entre no clã pra ver seu perfil, badges, zenny e referidos.</p><button class="btn" onclick="openAuth('login')">Entrar</button></div>`;
+  const p=MYPROFILE||{}, st=PROFILE_STATS||{totalReads:0,totalDays:0,streak:0,likes:0,saves:0,refs:0};
+  const code=p.referral_code||"—"; const link=location.origin+"/?ref="+code;
+  const earned=new Set((p._badges||[]).map(b=>b.badge_code));
+  const badgeHtml=BADGES.map(b=>`<div class="badge ${earned.has(b.code)?'on':''}" title="${esc(b.description||b.name)}"><div class="bi">${b.icon||"🏅"}</div><div class="bn">${esc(b.name)}</div></div>`).join("");
+  return `<div class="section-title">Meu perfil</div>
+  <div class="feature"><div class="bigorb">${esc((p.nick||"Z")[0].toUpperCase())}</div><div><div class="meta">${TIER[p.level||0]||"Base"} · ${p.wins||0}V / ${p.losses||0}D na Arena</div><h2>${esc(p.nick||"Guerreiro")}</h2><div style="margin-top:6px;color:var(--gold);font-weight:800;font-size:18px">💰 ${p.zenny||0} zenny</div></div></div>
+  <div class="pgrid">
+    <div class="ptile"><div class="v">${st.totalDays}</div><div class="l">Dias de uso</div></div>
+    <div class="ptile"><div class="v">${st.streak}🔥</div><div class="l">Streak</div></div>
+    <div class="ptile"><div class="v">${st.totalReads}</div><div class="l">Leituras</div></div>
+    <div class="ptile"><div class="v">${st.likes}💎</div><div class="l">Joias</div></div>
+    <div class="ptile"><div class="v">${st.saves}★</div><div class="l">Salvos</div></div>
+    <div class="ptile"><div class="v">${st.refs}🤝</div><div class="l">Referidos</div></div>
+  </div>
+  <div class="section-title" style="font-size:20px">Badges</div><div class="badgegrid">${badgeHtml||'<p class="lead">Sem catálogo.</p>'}</div>
+  <div class="section-title" style="font-size:20px">Convide e ganhe zenny</div>
+  <div class="card"><p style="margin:0 0 8px">Cada amigo que entrar com seu link te dá <b style="color:var(--gold)">+100 zenny</b> (e ele ganha +50). Seu código: <b style="color:var(--gold)">${esc(code)}</b></p><div class="refbox"><input id="refLink" readonly value="${esc(link)}"><button class="btn" onclick="copyRef()">Copiar link</button></div></div>
+  ${arenaMid()}`;
 }
 
 function render(){
   const view=$("#view");
   if(!DATA_READY){ view.innerHTML=`<div class="spinner"></div>`; return; }
-  if(DATA_ERR && SERIES.length===0){ view.innerHTML=`<div class="card"><h3>Ops, o KI oscilou.</h3><p>Não consegui carregar o conteúdo agora (${esc(DATA_ERR)}). Tenta recarregar a página.</p></div>`; return; }
-  const h=(location.hash||"#/inicio").replace(/^#\//,"");
-  const [route,arg]=h.split("/");
+  if(DATA_ERR && SERIES.length===0){ view.innerHTML=`<div class="card"><h3>Ops, o KI oscilou.</h3><p>Não consegui carregar o conteúdo (${esc(DATA_ERR)}). Recarrega a página.</p></div>`; return; }
+  const h=(location.hash||"#/inicio").replace(/^#\//,""); const [route,arg]=h.split("/");
   let html;
   if(route==="serie"&&arg) html=viewSerie(arg);
   else if(route==="series") html=viewSeries();
@@ -432,73 +400,123 @@ function render(){
   else if(route==="curiosidades") html=viewCuriosidades();
   else if(route==="linha-do-tempo") html=viewTimeline();
   else if(route==="quiz") html=viewQuiz();
+  else if(route==="perfil"){ html=viewPerfil(); if(ME) loadProfileStats(); }
   else html=viewInicio();
   view.innerHTML=html;
   if(route==="quiz") renderQuiz();
   if($("#ghForm")) initFeaturedChat();
-  document.querySelectorAll("#nav a").forEach(a=>{const t=a.getAttribute("href");a.classList.toggle("active",t==="#/"+route||(route===""&&t==="#/inicio"));});
-  const cs=$("#charSearch"); if(cs){ cs.oninput=()=>{ charQuery=cs.value; $("#view").innerHTML=viewPersonagens(); const c2=$("#charSearch"); if(c2){ c2.focus(); c2.setSelectionRange(c2.value.length,c2.value.length); } cs.oninput && bindSearch(); }; }
+  document.querySelectorAll("#nav a[href]").forEach(a=>{const t=a.getAttribute("href");a.classList.toggle("active",t==="#/"+route||(route===""&&t==="#/inicio"));});
+  const cs=$("#charSearch"); if(cs) bindSearch();
   window.scrollTo(0,0);
 }
 function bindSearch(){ const cs=$("#charSearch"); if(cs) cs.oninput=()=>{ charQuery=cs.value; $("#view").innerHTML=viewPersonagens(); const c2=$("#charSearch"); if(c2){ c2.focus(); c2.setSelectionRange(c2.value.length,c2.value.length); } bindSearch(); }; }
+function fillSidebar(){ if(!CHARS.length) return; const pod=CHARS[Math.floor(Math.random()*CHARS.length)]; const pp=$("#podPanel"); if(pp) pp.innerHTML=`<div class="ttl">Personagem do dia</div><a class="charrow" style="color:inherit" href="#/personagem/${pod.id}">${orb(pod)}<div><div style="font-weight:700">${esc(pod.n)}</div><div class="meta">${RACE_LABEL[pod.race]||pod.race||""}</div></div></a>`; const cd=$("#curioDia"); if(cd&&CURIOSIDADES.length) cd.textContent=CURIOSIDADES[Math.floor(Math.random()*CURIOSIDADES.length)].body; }
 
-function fillSidebar(){
-  if(!CHARS.length) return;
-  const pod=CHARS[Math.floor(Math.random()*CHARS.length)];
-  const pp=$("#podPanel"); if(pp) pp.innerHTML=`<div class="ttl">Personagem do dia</div><a class="charrow" style="color:inherit" href="#/personagem/${pod.id}">${orb(pod)}<div><div style="font-weight:700">${esc(pod.n)}</div><div class="meta">${RACE_LABEL[pod.race]||pod.race||""}</div></div></a>`;
-  const cd=$("#curioDia"); if(cd&&CURIOSIDADES.length) cd.textContent=CURIOSIDADES[Math.floor(Math.random()*CURIOSIDADES.length)];
+/* ============ AUTH + GAMIFICAÇÃO ============ */
+function authHeaders(){ return {apikey:ANON,Authorization:`Bearer ${ACCESS_TOKEN}`,"Content-Type":"application/json"}; }
+function genCode(){ const c="ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; let s=""; for(let i=0;i<8;i++) s+=c[Math.floor(Math.random()*c.length)]; return s; }
+async function initAuth(){ const s=await sb(); const {data:{session}}=await s.auth.getSession(); await setSession(session); s.auth.onAuthStateChange((_e,sess)=>setSession(sess)); }
+async function setSession(session){
+  ME=session?.user||null; ACCESS_TOKEN=session?.access_token||null;
+  if(ME){ await loadProfile(); await loadInteractions(); await applyReferral(); gamifyPing("visit"); }
+  else { MYPROFILE=null; MY_LIKES=new Set(); MY_SAVES=new Set(); }
+  renderAuth(); render();
 }
-
-/* ============ CHAT WIDGET (Guardião Z) ============ */
-function chatSession(){ let s=localStorage.getItem("zw_chat_session"); if(!s){ s=(crypto.randomUUID&&crypto.randomUUID())||String(Date.now()+Math.random()); localStorage.setItem("zw_chat_session",s);} return s; }
-function toggleChat(open){ const p=$("#chatPanel"); const want=open===undefined?!p.classList.contains("open"):open; p.classList.toggle("open",want); if(want){ if(!$("#chatMsgs").children.length) addMsg("bot","Saudações, guerreiro! 🐉 Sou o Guardião do Saber do clã Z Warriors. Pergunte sobre personagens, sagas, técnicas, transformações…"); $("#chatInput").focus(); } }
-function addMsg(who,txt){ const d=document.createElement("div"); d.className="cmsg "+who; d.textContent=txt; $("#chatMsgs").appendChild(d); $("#chatMsgs").scrollTop=$("#chatMsgs").scrollHeight; return d; }
-async function sendChat(q){
-  addMsg("me",q);
-  const typing=addMsg("bot","…");
+async function loadProfile(){
+  const s=await sb();
+  let {data}=await s.from("profiles").select("*").eq("id",ME.id).maybeSingle();
+  if(!data){ const nick=(ME.user_metadata&&ME.user_metadata.nick)||(ME.email||"").split("@")[0]||"Guerreiro"; await s.from("profiles").insert({id:ME.id,nick,referral_code:genCode()}); ({data}=await s.from("profiles").select("*").eq("id",ME.id).maybeSingle()); }
+  MYPROFILE=data||null;
+}
+async function loadInteractions(){
+  const s=await sb(); MY_LIKES=new Set(); MY_SAVES=new Set();
+  const {data}=await s.from("content_interactions").select("source_type,source_id,kind").eq("user_id",ME.id);
+  (data||[]).forEach(r=>{const k=r.source_type+":"+r.source_id;(r.kind==="like"?MY_LIKES:MY_SAVES).add(k);});
+}
+async function gamifyPing(action){ if(!ME||!ACCESS_TOKEN) return; try{ await fetch(`${SUPA}/functions/v1/gamify`,{method:"POST",headers:authHeaders(),body:JSON.stringify({action})}); }catch(e){} }
+async function applyReferral(){
+  const code=localStorage.getItem("zw_ref"); if(!code||!ME||(MYPROFILE&&MYPROFILE.referred_by)) return;
+  try{ const r=await fetch(`${SUPA}/functions/v1/referral`,{method:"POST",headers:authHeaders(),body:JSON.stringify({code})}); const d=await r.json().catch(()=>({})); if(d.ok||["already","self","invalid_code","no_code"].includes(d.reason)){ localStorage.removeItem("zw_ref"); } if(d.ok) await loadProfile(); }catch(e){}
+}
+async function loadProfileStats(){
+  if(!ME) return;
   try{
-    const r=await fetch(`${SUPA}/functions/v1/chat`,{method:"POST",headers:{apikey:ANON,Authorization:`Bearer ${ANON}`,"Content-Type":"application/json"},body:JSON.stringify({question:q,session_id:chatSession()})});
-    const data=await r.json().catch(()=>({}));
-    typing.textContent=data.answer || data.error || "Não consegui responder agora. Tenta de novo daqui a pouco, guerreiro.";
-  }catch(e){ typing.textContent="O Guardião está meditando (chat ainda não publicado). Tenta mais tarde."; }
+    const r=await fetch(`${SUPA}/functions/v1/gamify`,{method:"POST",headers:authHeaders(),body:JSON.stringify({action:"sync"})});
+    const d=await r.json().catch(()=>({})); if(d.stats) PROFILE_STATS=d.stats;
+  }catch(e){}
+  try{ const s=await sb(); const {data:badges}=await s.from("user_badges").select("badge_code").eq("user_id",ME.id); if(MYPROFILE) MYPROFILE._badges=badges||[]; const {data:fresh}=await s.from("profiles").select("*").eq("id",ME.id).maybeSingle(); if(fresh){ fresh._badges=badges||[]; MYPROFILE=fresh; } }catch(e){}
+  if((location.hash||"").includes("perfil")) { const v=$("#view"); if(v) v.innerHTML=viewPerfil(); }
 }
-$("#chatFab").onclick=()=>toggleChat();
-$("#chatForm").addEventListener("submit",e=>{ e.preventDefault(); const i=$("#chatInput"); const q=(i.value||"").trim(); if(!q) return; i.value=""; sendChat(q); });
+function renderAuth(){
+  const slot=$("#authSlot"); if(!slot) return;
+  if(!ME){ slot.innerHTML=`<button class="loginbtn" onclick="openAuth('login')">Entrar</button>`; return; }
+  const nick=(MYPROFILE&&MYPROFILE.nick)||(ME.email||"Z").split("@")[0]; const z=(MYPROFILE&&MYPROFILE.zenny)||0;
+  slot.innerHTML=`<div class="usermenu"><div class="userbtn" onclick="document.getElementById('udrop').classList.toggle('open')"><span class="ua">${esc(nick[0].toUpperCase())}</span><span>${esc(nick)}</span><span class="uz">💰${z}</span></div><div class="udrop" id="udrop"><a onclick="location.hash='#/perfil';document.getElementById('udrop').classList.remove('open')">Meu perfil</a><a onclick="logout()">Sair</a></div></div>`;
+}
+let authMode="login";
+function openAuth(mode){ authMode=mode||"login"; setAuthMode(); $("#authModal").classList.add("open"); }
+function closeAuth(){ $("#authModal").classList.remove("open"); $("#amErr").textContent=""; }
+function setAuthMode(){
+  const signup=authMode==="signup";
+  $("#amTitle").textContent=signup?"Criar conta no clã":"Entrar no clã";
+  $("#nickWrap").style.display=signup?"block":"none";
+  $("#amSubmit").textContent=signup?"Criar conta":"Entrar";
+  $("#amSwap").innerHTML=signup?`Já tem conta? <a onclick="openAuth('login')">Entrar</a>`:`Novo por aqui? <a onclick="openAuth('signup')">Criar conta</a>`;
+  $("#amErr").textContent="";
+}
+async function logout(){ const s=await sb(); await s.auth.signOut(); document.getElementById('udrop')?.classList.remove('open'); }
+async function copyRef(){ const i=$("#refLink"); if(!i) return; try{ await navigator.clipboard.writeText(i.value);}catch(e){ i.select(); document.execCommand&&document.execCommand("copy"); } const b=event&&event.target; if(b){ const t=b.textContent; b.textContent="Copiado! ✓"; setTimeout(()=>b.textContent=t,1500);} }
 
-/* ============ CHAT EM DESTAQUE (home) ============ */
+async function toggleInter(type,id,kind,ev){
+  if(ev) ev.preventDefault();
+  if(!ME){ openAuth("login"); return; }
+  const s=await sb(); const k=type+":"+id; const set=kind==="like"?MY_LIKES:MY_SAVES;
+  if(set.has(k)){
+    await s.from("content_interactions").delete().match({user_id:ME.id,source_type:type,source_id:String(id),kind});
+    set.delete(k); if(kind==="like") LIKE_COUNTS[k]=Math.max(0,(LIKE_COUNTS[k]||1)-1);
+  } else {
+    await s.from("content_interactions").insert({user_id:ME.id,source_type:type,source_id:String(id),kind});
+    set.add(k); if(kind==="like") LIKE_COUNTS[k]=(LIKE_COUNTS[k]||0)+1;
+    gamifyPing("sync");
+  }
+  render();
+}
+const SEEN_KEY="zw_read_seen";
+function trackRead(type,id){
+  if(!ME) return; const k=type+":"+id; if(READ_SEEN.has(k)) return; READ_SEEN.add(k); gamifyPing("read");
+}
+
+/* ---- chat em destaque + widget ---- */
 let ghTimer=null, ghBusy=false;
+function chatSession(){ let s=localStorage.getItem("zw_chat_session"); if(!s){ s=(crypto.randomUUID&&crypto.randomUUID())||String(Date.now()+Math.random()); localStorage.setItem("zw_chat_session",s);} return s; }
 function initFeaturedChat(){
   const input=$("#ghInput"), form=$("#ghForm"); if(!input||!form) return;
-  if(ghTimer){ clearInterval(ghTimer); ghTimer=null; }
-  let qi=0;
-  function typePlaceholder(){
-    if(document.activeElement===input || input.value) return;
-    const q=GH_EXAMPLES[qi%GH_EXAMPLES.length]; qi++; let i=0; input.setAttribute("placeholder","");
-    const typer=setInterval(()=>{
-      if(document.activeElement===input||input.value){ clearInterval(typer); return; }
-      input.setAttribute("placeholder", q.slice(0,++i)+" ?");
-      if(i>=q.length) clearInterval(typer);
-    },45);
-  }
-  typePlaceholder(); ghTimer=setInterval(typePlaceholder, 3400);
+  if(ghTimer){ clearInterval(ghTimer); ghTimer=null; } let qi=0;
+  function typeP(){ if(document.activeElement===input||input.value) return; const q=GH_EXAMPLES[qi%GH_EXAMPLES.length]; qi++; let i=0; input.setAttribute("placeholder",""); const t=setInterval(()=>{ if(document.activeElement===input||input.value){clearInterval(t);return;} input.setAttribute("placeholder",q.slice(0,++i)+" ?"); if(i>=q.length) clearInterval(t); },45); }
+  typeP(); ghTimer=setInterval(typeP,3400);
   form.onsubmit=(e)=>{ e.preventDefault(); const q=(input.value||"").trim(); if(!q) return; input.value=""; ghAsk(q); };
 }
-function ghAsk(q){
-  q=(q||"").trim(); if(!q||ghBusy) return;
-  const box=$("#ghMsgs"); if(!box) return;
-  ghBusy=true;
-  const me=document.createElement("div"); me.className="cmsg me"; me.textContent=q; box.appendChild(me);
-  const bot=document.createElement("div"); bot.className="cmsg bot"; bot.textContent="…"; box.appendChild(bot);
-  box.scrollTop=box.scrollHeight;
-  fetch(`${SUPA}/functions/v1/chat`,{method:"POST",headers:{apikey:ANON,Authorization:`Bearer ${ANON}`,"Content-Type":"application/json"},body:JSON.stringify({question:q,session_id:chatSession()})})
-    .then(r=>r.json()).catch(()=>({}))
-    .then(d=>{ bot.textContent=d.answer||d.error||"O Guardião está meditando (chat ainda não publicado). Tenta mais tarde, guerreiro."; box.scrollTop=box.scrollHeight; })
-    .finally(()=>{ ghBusy=false; });
-}
+function ghAsk(q){ q=(q||"").trim(); if(!q||ghBusy) return; const box=$("#ghMsgs"); if(!box) return; ghBusy=true; const me=document.createElement("div"); me.className="cmsg me"; me.textContent=q; box.appendChild(me); const bot=document.createElement("div"); bot.className="cmsg bot"; bot.textContent="…"; box.appendChild(bot); box.scrollTop=box.scrollHeight; askChat(q).then(a=>{ bot.textContent=a; box.scrollTop=box.scrollHeight; }).finally(()=>ghBusy=false); }
+async function askChat(q){ try{ const r=await fetch(`${SUPA}/functions/v1/chat`,{method:"POST",headers:{apikey:ANON,Authorization:`Bearer ${ANON}`,"Content-Type":"application/json"},body:JSON.stringify({question:q,session_id:chatSession()})}); const d=await r.json().catch(()=>({})); return d.answer||d.error||"Não consegui responder agora, guerreiro."; }catch(e){ return "O Guardião está meditando. Tenta mais tarde."; } }
+function toggleChat(open){ const p=$("#chatPanel"); const want=open===undefined?!p.classList.contains("open"):open; p.classList.toggle("open",want); if(want){ if(!$("#chatMsgs").children.length){ const d=document.createElement("div"); d.className="cmsg bot"; d.textContent="Saudações, guerreiro! 🐉 Pergunte sobre personagens, sagas, técnicas, transformações…"; $("#chatMsgs").appendChild(d);} $("#chatInput").focus(); } }
+$("#chatFab").onclick=()=>toggleChat();
+$("#chatForm").addEventListener("submit",e=>{ e.preventDefault(); const i=$("#chatInput"); const q=(i.value||"").trim(); if(!q) return; i.value=""; const box=$("#chatMsgs"); const me=document.createElement("div"); me.className="cmsg me"; me.textContent=q; box.appendChild(me); const bot=document.createElement("div"); bot.className="cmsg bot"; bot.textContent="…"; box.appendChild(bot); box.scrollTop=box.scrollHeight; askChat(q).then(a=>{ bot.textContent=a; box.scrollTop=box.scrollHeight; }); });
+$("#authForm").addEventListener("submit",async e=>{
+  e.preventDefault(); const s=await sb(); const email=$("#amEmail").value.trim(), pass=$("#amPass").value, err=$("#amErr"); err.textContent="";
+  try{
+    if(authMode==="signup"){ const nick=$("#amNick").value.trim()||email.split("@")[0]; const {data,error}=await s.auth.signUp({email,password:pass,options:{data:{nick}}}); if(error) throw error; if(!data.session){ err.style.color="var(--hp)"; err.textContent="Conta criada! Confirme pelo email pra entrar."; return; } }
+    else { const {error}=await s.auth.signInWithPassword({email,password:pass}); if(error) throw error; }
+    closeAuth();
+  }catch(ex){ err.style.color="var(--red)"; err.textContent=ex.message||"Não rolou. Confere email e senha."; }
+});
+
+/* referral capture (?ref=) */
+(function(){ const m=location.search.match(/[?&]ref=([A-Za-z0-9]+)/); if(m) localStorage.setItem("zw_ref",m[1].toUpperCase()); })();
 
 window.addEventListener("hashchange", render);
 render();
-loadData().then(()=>{ render(); fillSidebar(); });
+loadData().then(()=>loadLikeCounts()).then(()=>{ render(); fillSidebar(); });
+initAuth();
 </script>
 </body>
 </html>
