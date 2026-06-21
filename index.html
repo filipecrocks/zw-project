@@ -192,6 +192,10 @@
   .coach .ctitle{font-weight:800;color:var(--gold);font-size:13px;margin-bottom:3px;text-transform:uppercase;letter-spacing:.5px}
   .coach .cbody{font-size:14px;line-height:1.5}
   .coach button{margin-top:10px;padding:8px 16px}
+  .acctbar{background:#0c0f17;border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:14px}
+  .rankrow{display:flex;justify-content:space-between;padding:7px 10px;border-radius:8px;background:#0c0f17;border:1px solid var(--line);margin-bottom:6px;font-size:14px}
+  .rankrow b{color:var(--gold)}
+  .rankrow .lvl{color:var(--muted);font-size:12px}
 </style>
 </head>
 <body>
@@ -207,6 +211,14 @@
   <div id="home" class="card">
     <!-- entrada -->
     <div id="entry">
+      <div id="accountBar" class="acctbar">
+        <div id="accountLine" class="hint" style="margin:0">Carregando…</div>
+        <div class="row" style="margin-top:8px;gap:8px">
+          <button id="btnGoogle" class="ghost" style="flex:1">Entrar com Google</button>
+          <button id="btnRank" class="ghost" style="flex:0 0 auto">Ranking</button>
+        </div>
+      </div>
+      <div id="rankPane" class="hidden" style="margin:12px 0"></div>
       <label>Seu nick de guerreiro</label>
       <input id="nick" placeholder="ex.: Goku ZW" maxlength="20" />
       <div class="row" style="margin-top:14px">
@@ -309,7 +321,7 @@
     </div>
   </div>
 
-  <div class="tag center" style="margin-top:10px">Projeto de fã, sem fins comerciais — Filipe, Rafael &amp; Clebler · regras © clã Z Warriors</div>
+  <div class="tag center" style="margin-top:10px">Projeto de fã, sem fins comerciais — Filipe, Rafael &amp; Clebler · regras © clã Z Warriors · <b style="color:var(--gold)">chupa!!!</b></div>
 </div>
 <div id="reveal" class="reveal hidden"></div>
 
@@ -976,6 +988,7 @@ function endGame(){
   $("#phaseLabel").textContent="fim de luta";
   playSfx("ko");
   ["p1","p2"].forEach(seat=>{ if(state[seat].hp<=0){ const c=document.querySelector(`#arena .fighter[data-seat="${seat}"]`); if(c) koBurst(c); }});
+  if(MODE!=="tutorial" && state.winner!=="empate"){ recordResult(state.winner===ME.seat).catch(()=>{}); }
 }
 
 /* ---- LOG ---- */
@@ -1033,10 +1046,93 @@ function runTimer(seconds, numEl, barEl, onExpire){
 }
 function waitHtml(title, sub){ return `<div class="waitbox"><div class="waitorb"></div><div class="waittext">${title}<small>${sub||""}</small></div></div>`; }
 
+/* ---- CONTA (Google) + PERFIL + CACHE + RANKING ---- */
+let supa=null, session=null, profile=null;
+const cache={ leaderboard:null, leaderboardAt:0 };
+function levelFromWins(w){ return w>=200?4 : w>=150?3 : w>=100?2 : w>=25?1 : 0; } // 25→nv1,100→nv2,150→nv3,200→nv4
+function levelLabel(l){ return ["Nível 0 / Saiyajin","Nível 1 / SSJ","Nível 2 / SSJ2","Nível 3 / SSJ3","Nível 4 / SSJ4"][l]||("Nível "+l); }
+
+async function initAuth(){
+  renderAccount();
+  if(!ONLINE) return;
+  try{
+    supa=await getSupabase();
+    const { data } = await supa.auth.getSession();
+    session=data?.session||null;
+    supa.auth.onAuthStateChange((_e,s)=>{ session=s; afterAuth(); });
+    await afterAuth();
+  }catch(e){ console.error("auth init:",e); renderAccount(); }
+}
+async function afterAuth(){ if(session?.user) await loadProfile(); else profile=null; renderAccount(); }
+async function loginGoogle(){
+  if(!supa){ alert("Login indisponível neste ambiente. Rode o site publicado (zwarriors.xyz) com o provedor Google ativado no Supabase."); return; }
+  await supa.auth.signInWithOAuth({ provider:"google", options:{ redirectTo: location.origin+location.pathname } });
+}
+async function logout(){ try{ if(supa) await supa.auth.signOut(); }catch(e){} session=null; profile=null; renderAccount(); }
+async function loadProfile(){
+  if(!supa||!session) return;
+  const uid=session.user.id;
+  const meta=session.user.user_metadata||{};
+  const fallback=(meta.full_name||meta.name||("Guerreiro "+uid.slice(0,4)));
+  try{
+    let { data } = await supa.from("profiles").select("*").eq("id",uid).maybeSingle();
+    if(!data){ const ins=await supa.from("profiles").insert({ id:uid, nick:fallback }).select().maybeSingle(); data=ins.data; }
+    profile=data;
+    if(profile?.nick){ ME.nick=profile.nick; const ni=$("#nick"); if(ni) ni.value=profile.nick; }
+  }catch(e){ console.error("perfil:",e); }
+}
+async function recordResult(iWon){
+  if(!supa||!session||!profile) return;
+  try{
+    if(iWon){
+      const wins=(profile.wins||0)+1, lvl=levelFromWins(wins);
+      await supa.from("profiles").update({ wins, level:lvl, updated_at:new Date().toISOString() }).eq("id",session.user.id);
+      profile.wins=wins; profile.level=lvl;
+      await supa.from("matches").insert({ room, winner_nick:ME.nick, loser_nick:(peer.nick||"?"), turns:state?.turn||0 });
+    } else {
+      const losses=(profile.losses||0)+1;
+      await supa.from("profiles").update({ losses, updated_at:new Date().toISOString() }).eq("id",session.user.id);
+      profile.losses=losses;
+    }
+    cache.leaderboard=null; // invalida cache
+  }catch(e){ console.error("registrar resultado:",e); }
+}
+async function getLeaderboard(){
+  if(!supa) return [];
+  if(cache.leaderboard && Date.now()-cache.leaderboardAt<30000) return cache.leaderboard;
+  try{
+    const { data } = await supa.from("profiles").select("nick,wins,level").order("wins",{ascending:false}).limit(10);
+    cache.leaderboard=data||[]; cache.leaderboardAt=Date.now(); return cache.leaderboard;
+  }catch(e){ console.error("ranking:",e); return []; }
+}
+function renderAccount(){
+  const line=$("#accountLine"), gb=$("#btnGoogle");
+  if(!line) return;
+  if(session?.user){
+    const w=profile?.wins||0, l=profile?.level||0;
+    line.innerHTML = `Logado como <b>${esc(profile?.nick||ME.nick||"?")}</b> · ${esc(levelLabel(l))} · ${w} vitória(s)`;
+    if(gb){ gb.textContent="Sair"; gb.onclick=logout; }
+  } else {
+    line.innerHTML = ONLINE ? "Jogando como convidado — entre com o Google pra salvar vitórias e subir no ranking." : "Modo local. Publique com Supabase pra ativar login e ranking.";
+    if(gb){ gb.textContent="Entrar com Google"; gb.onclick=loginGoogle; }
+  }
+}
+async function toggleRank(){
+  const pane=$("#rankPane"); if(!pane) return;
+  if(!pane.classList.contains("hidden")){ pane.classList.add("hidden"); return; }
+  pane.classList.remove("hidden");
+  pane.innerHTML='<div class="hint">Carregando ranking…</div>';
+  const list=await getLeaderboard();
+  if(!list.length){ pane.innerHTML='<div class="hint">Ranking vazio (ou Supabase não configurado ainda). Os primeiros a logar e vencer aparecem aqui!</div>'; return; }
+  pane.innerHTML='<div class="collabel">Top guerreiros</div>'+list.map((p,i)=>`<div class="rankrow"><span><b>${i+1}.</b> ${esc(p.nick)} <span class="lvl">· ${esc(levelLabel(p.level||0))}</span></span><span>${p.wins||0} V</span></div>`).join("");
+}
+const _rankBtn=$("#btnRank"); if(_rankBtn) _rankBtn.onclick=toggleRank;
+
 const _sfxBtn=document.querySelector("#btnSfx");
 if(_sfxBtn) _sfxBtn.onclick=()=>{ sfxOn=!sfxOn; _sfxBtn.textContent="som: "+(sfxOn?"on":"off"); if(sfxOn) playSfx("charge"); };
 
 show("home");
+initAuth();
 </script>
 </body>
 </html>
