@@ -240,6 +240,36 @@
   .feat-k{ display:block; font-weight:800; color:var(--gold); font-size:12px; text-transform:uppercase; letter-spacing:.6px; margin-bottom:4px }
   .feat-d{ display:block; color:#aeb6c7; font-size:13px; line-height:1.45 }
   @media(max-width:560px){ .features{ grid-template-columns:1fr } }
+  /* ---- perfil / progressão ---- */
+  .prof-head{ text-align:center; margin-bottom:18px }
+  .prof-orb{ width:92px; height:92px; border-radius:50%; margin:0 auto 10px;
+    background:radial-gradient(circle at 35% 30%,#fff8,transparent 45%),radial-gradient(circle at 60% 65%,var(--gold),#5a3c00 82%);
+    box-shadow:0 0 28px 6px rgba(255,206,77,.45); display:grid; place-items:center;
+    font-family:"Anton",Impact,sans-serif; font-size:26px; color:#3a2600 }
+  .prof-name{ font-size:22px; font-weight:900 }
+  .prof-tier{ color:var(--gold); font-weight:800; font-size:14px; letter-spacing:.5px }
+  .prof-stats{ display:flex; justify-content:center; gap:18px; margin-top:10px; color:var(--muted); font-size:13px }
+  .prof-stats b{ color:var(--txt); font-size:17px; display:block }
+  .next-card{ background:#0c0f17; border:1px solid rgba(255,206,77,.3); border-radius:12px; padding:14px; margin:6px 0 18px }
+  .next-card .nl{ font-size:13px; color:var(--muted); margin-bottom:8px }
+  .next-card .nl b{ color:var(--gold) }
+  .pbar{ height:12px; background:#1a1f2c; border-radius:99px; overflow:hidden; border:1px solid var(--line) }
+  .pbar i{ display:block; height:100%; background:linear-gradient(90deg,var(--gold),var(--gold-2)); border-radius:99px }
+  .ladder{ display:flex; flex-direction:column; gap:8px }
+  .tier{ display:flex; align-items:center; gap:12px; padding:11px 13px; border-radius:12px;
+    background:#0c0f17; border:1px solid var(--line) }
+  .tier.done{ border-color:rgba(70,224,138,.45) }
+  .tier.now{ border-color:var(--gold); box-shadow:0 0 0 1px rgba(255,206,77,.4),0 0 18px rgba(255,157,46,.22) }
+  .tier.locked{ opacity:.55 }
+  .tier .tb{ width:40px; height:40px; border-radius:50%; flex:0 0 auto; display:grid; place-items:center; font-size:18px;
+    background:radial-gradient(circle at 60% 60%,var(--gold),#4a3200 85%); box-shadow:0 0 12px rgba(255,206,77,.4) }
+  .tier.locked .tb{ background:#222838; box-shadow:none; filter:grayscale(1) }
+  .tier .tt{ flex:1 }
+  .tier .tn{ font-weight:800 }
+  .tier .ts{ font-size:12px; color:var(--muted) }
+  .tier .tstate{ font-size:12px; font-weight:800 }
+  .tier.done .tstate{ color:var(--hp) }
+  .tier.now .tstate{ color:var(--gold) }
   .rankrow{display:flex;justify-content:space-between;padding:7px 10px;border-radius:8px;background:#0c0f17;border:1px solid var(--line);margin-bottom:6px;font-size:14px}
   .rankrow b{color:var(--gold)}
   .rankrow .lvl{color:var(--muted);font-size:12px}
@@ -278,6 +308,7 @@
           <button id="btnLogout" class="ghost hidden">Sair</button>
         </div>
         <button id="btnRank" class="linklike">Ver ranking do clã</button>
+        <button id="btnProfile" class="linklike">Meu perfil &amp; progressão</button>
         <div id="rankPane" class="hidden" style="margin:12px auto;max-width:520px"></div>
         <div class="features">
           <div class="feat"><span class="feat-k">Turnos secretos</span><span class="feat-d">Os dois jogam ao mesmo tempo, escondido. Quem disser a velocidade maior age primeiro.</span></div>
@@ -315,6 +346,12 @@
         <button id="btnZW" style="width:100%;margin-top:10px;background:linear-gradient(135deg,#4ec3ff,#7c5cff);color:#04121f">Entrar na Sala ZW (todo mundo aqui)</button>
         <div class="hint" id="netStatus">No tutorial você treina contra um boneco. Pra jogar com os amigos agora, todos entram na <b>Sala ZW</b>.</div>
         <button id="btnPlayBack" class="linklike">← voltar</button>
+      </div>
+
+      <!-- PERFIL / PROGRESSÃO -->
+      <div id="profileView" class="hidden">
+        <div id="profileBody"></div>
+        <button id="btnProfileBack" class="linklike">← voltar</button>
       </div>
     </div>
     <!-- saguão -->
@@ -415,7 +452,11 @@
         <!-- result / ko -->
         <div id="koPane" class="hidden">
           <div class="kobanner" id="koText"></div>
-          <div class="row" style="margin-top:14px"><button class="ghost" onclick="location.reload()">Nova luta</button></div>
+          <div class="row" style="margin-top:14px">
+            <button id="btnRematch">Revanche</button>
+            <button class="ghost" id="btnKoProfile">Meu perfil</button>
+            <button class="ghost" onclick="location.reload()">Início</button>
+          </div>
         </div>
 
         <!-- aguardando (fora dos painéis pra nunca sumir) -->
@@ -1279,7 +1320,7 @@ async function initAuth(){
 async function afterAuth(){ if(session?.user) await loadProfile(); else profile=null; renderAccount(); }
 
 let authMode="signup";
-function entryShow(which){ ["landingView","authView","playView"].forEach(id=>{ const e=$("#"+id); if(e) e.classList.toggle("hidden", id!==which); }); }
+function entryShow(which){ ["landingView","authView","playView","profileView"].forEach(id=>{ const e=$("#"+id); if(e) e.classList.toggle("hidden", id!==which); }); }
 function openAuthUI(mode){
   authMode=mode; entryShow("authView");
   $("#authTitle").textContent = mode==="signup"?"Criar conta":"Entrar";
@@ -1365,6 +1406,49 @@ async function getLeaderboard(){
   }catch(e){ console.error("ranking:",e); return []; }
 }
 function toggleHidden(sel,hide){ const e=$(sel); if(e) e.classList.toggle("hidden",!!hide); }
+
+/* ---- PERFIL / PROGRESSÃO (gamificação) ---- */
+const TIERS=[
+  {lvl:0, name:"Saiyajin", req:0,   icon:"🥋"},
+  {lvl:1, name:"SSJ",      req:25,  icon:"⚡"},
+  {lvl:2, name:"SSJ2",     req:100, icon:"🔥"},
+  {lvl:3, name:"SSJ3",     req:150, icon:"💥"},
+  {lvl:4, name:"SSJ4",     req:200, icon:"🌟"}
+];
+function ladderHtml(wins){
+  const cur=TIERS.filter(t=>wins>=t.req).pop();
+  return `<div class="collabel">Caminho do guerreiro</div><div class="ladder">`+TIERS.map(t=>{
+    let cls="locked", state=`🔒 faltam ${t.req-wins} V`;
+    if(wins>=t.req){ cls=(t===cur)?"now":"done"; state=(t===cur)?"você está aqui":"✓ desbloqueado"; }
+    return `<div class="tier ${cls}"><div class="tb">${t.icon}</div><div class="tt"><div class="tn">${t.name}</div><div class="ts">${t.req===0?"início":t.req+" vitórias"}</div></div><div class="tstate">${state}</div></div>`;
+  }).join("")+`</div>`;
+}
+function openProfile(){ entryShow("profileView"); renderProfile(); }
+function renderProfile(){
+  const body=$("#profileBody"); if(!body) return;
+  if(!(session&&session.user)){
+    body.innerHTML=`<div class="prof-head"><div class="prof-orb">ZW</div><div class="prof-name">Convidado</div><div class="prof-tier">sem progressão salva</div></div>
+      <div class="next-card"><div class="nl">Crie uma conta pra ter seu perfil, salvar vitórias e evoluir de <b>Saiyajin até SSJ4</b>.</div></div>
+      ${ladderHtml(0)}`;
+    return;
+  }
+  const wins=profile?.wins||0, losses=profile?.losses||0, total=wins+losses, wr=total?Math.round(wins/total*100):0;
+  const cur=TIERS.filter(t=>wins>=t.req).pop();
+  const next=TIERS.find(t=>t.req>wins);
+  let nextHtml;
+  if(next){
+    const span=next.req-cur.req, got=wins-cur.req, pct=Math.max(0,Math.min(100,Math.round(got/span*100)));
+    nextHtml=`<div class="next-card"><div class="nl">Faltam <b>${next.req-wins}</b> vitória(s) pra <b>${next.name}</b></div><div class="pbar"><i style="width:${pct}%"></i></div></div>`;
+  } else {
+    nextHtml=`<div class="next-card"><div class="nl">🌟 Nível máximo alcançado: <b>SSJ4</b>. Você é lenda do clã ZW.</div></div>`;
+  }
+  body.innerHTML=`<div class="prof-head">
+      <div class="prof-orb">${cur.icon}</div>
+      <div class="prof-name">${esc(profile?.nick||"?")}</div>
+      <div class="prof-tier">Nível ${cur.lvl} · ${cur.name}</div>
+      <div class="prof-stats"><span><b>${wins}</b>vitórias</span><span><b>${losses}</b>derrotas</span><span><b>${wr}%</b>aproveit.</span></div>
+    </div>${nextHtml}${ladderHtml(wins)}`;
+}
 function renderAccount(){
   const line=$("#accountLine");
   const logged=!!(session&&session.user);
@@ -1403,6 +1487,8 @@ async function toggleRank(){
   on("btnAuthBack", ()=>entryShow("landingView"));
   on("btnPlayBack", ()=>entryShow("landingView"));
   on("btnRank", toggleRank);
+  on("btnProfile", openProfile);
+  on("btnProfileBack", ()=>entryShow("landingView"));
   const pass=$("#auPass"); if(pass) pass.addEventListener("keydown",e=>{ if(e.key==="Enter") doAuth(); });
 })();
 
@@ -1410,6 +1496,15 @@ const _sfxBtn=document.querySelector("#btnSfx");
 if(_sfxBtn) _sfxBtn.onclick=()=>{ sfxOn=!sfxOn; _sfxBtn.textContent="som: "+(sfxOn?"on":"off"); if(sfxOn) playSfx("charge"); };
 const _musBtn=document.querySelector("#btnMusic");
 if(_musBtn) _musBtn.onclick=toggleMusic;
+
+function rematch(){
+  if(MODE==="tutorial"){ state=null; coachFlags={}; startTutorialBattle(); }
+  else { location.reload(); } // pvp: recomeça o handshake na Sala ZW
+}
+(function wireKo(){
+  const r=$("#btnRematch"); if(r) r.onclick=rematch;
+  const p=$("#btnKoProfile"); if(p) p.onclick=()=>{ stopMusic(); show("home"); $("#entry").classList.remove("hidden"); $("#lobby").classList.add("hidden"); openProfile(); };
+})();
 
 show("home");
 initAuth();
