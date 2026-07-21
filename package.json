@@ -1,0 +1,11 @@
+{
+  "name": "zw-project",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "ZW — portal Dragon Ball + Arena (motor de regras compartilhado) + RAG",
+  "scripts": {
+    "test": "node --test engine/engine.test.mjs",
+    "embed": "node scripts/embed-kb.mjs"
+  }
+}
